@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createPageUrl } from '@/pages/utils';
+import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import OtpInput from '../components/auth/OtpInput';

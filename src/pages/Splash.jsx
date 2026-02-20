@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { createPageUrl } from '@/pages/utils';
+import { createPageUrl } from '@/utils';
 
 export default function Splash() {
   useEffect(() => {
