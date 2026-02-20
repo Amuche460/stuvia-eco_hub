@@ -202,6 +202,36 @@ export default function StudentDashboard() {
               <p className="text-xs text-gray-500 mt-0.5">Update matric no.</p>
             </motion.div>
           </Link>
+
+          <Link to={createPageUrl('NesaCalendar')}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white border border-teal-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+            >
+              <div className="bg-teal-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-teal-100 transition-colors">
+                <Calendar className="w-5 h-5 text-teal-600" />
+              </div>
+              <h3 className="font-bold text-gray-900 text-sm">Calendar</h3>
+              <p className="text-xs text-gray-500 mt-0.5">NESA events</p>
+            </motion.div>
+          </Link>
+
+          <Link to={createPageUrl('PaymentHistory')}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-white border border-purple-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group col-span-2"
+            >
+              <div className="bg-purple-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-purple-100 transition-colors">
+                <Receipt className="w-5 h-5 text-purple-600" />
+              </div>
+              <h3 className="font-bold text-gray-900 text-sm">Payment History</h3>
+              <p className="text-xs text-gray-500 mt-0.5">All transactions & receipts</p>
+            </motion.div>
+          </Link>
         </div>
 
         {/* Payment History */}
