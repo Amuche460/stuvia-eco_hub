@@ -57,6 +57,8 @@ import Donate from './pages/Donate';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import Splash from './pages/Splash';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -70,9 +72,11 @@ export const PAGES = {
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
     "AdminDashboard": AdminDashboard,
+    "Splash": Splash,
 }
 
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };
