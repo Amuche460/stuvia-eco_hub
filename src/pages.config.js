@@ -56,6 +56,7 @@ import PayDues from './pages/PayDues';
 import Donate from './pages/Donate';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
+import AdminDashboard from './pages/AdminDashboard';
 
 
 export const PAGES = {
@@ -68,6 +69,7 @@ export const PAGES = {
     "Donate": Donate,
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
+    "AdminDashboard": AdminDashboard,
 }
 
 export const pagesConfig = {
