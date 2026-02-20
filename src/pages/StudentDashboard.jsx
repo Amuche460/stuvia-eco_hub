@@ -106,14 +106,20 @@ export default function StudentDashboard() {
           className="bg-gradient-to-r from-emerald-700 to-emerald-800 rounded-2xl p-6 text-white shadow-xl"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-bold">
-              {student.full_name?.charAt(0)}
+            <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/30 flex-shrink-0 bg-white/20 flex items-center justify-center text-2xl font-bold">
+              {student.profile_picture_url
+                ? <img src={student.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                : student.full_name?.charAt(0)
+              }
             </div>
             <div>
               <h2 className="text-xl font-bold">{student.full_name}</h2>
               <p className="text-emerald-200 text-sm">{student.level}L • {student.reg_no}</p>
+              {student.course_of_study && (
+                <p className="text-emerald-300 text-xs mt-0.5">{student.course_of_study}{student.year_of_entry ? ` • Entry ${student.year_of_entry}` : ''}</p>
+              )}
               {student.matric_no && (
-                <p className="text-emerald-300 text-xs mt-0.5">Matric: {student.matric_no}</p>
+                <p className="text-emerald-300 text-xs">Matric: {student.matric_no}</p>
               )}
             </div>
           </div>
