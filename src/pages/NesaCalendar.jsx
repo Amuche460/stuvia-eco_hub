@@ -267,6 +267,13 @@ export default function NesaCalendar() {
         </div>
       </div>
 
+      {/* Attendance Modal (Admin) */}
+      <AnimatePresence>
+        {attendanceEvent && (
+          <EventAttendanceModal event={attendanceEvent} onClose={() => setAttendanceEvent(null)} />
+        )}
+      </AnimatePresence>
+
       {/* Add Event Modal */}
       <AnimatePresence>
         {showForm && (
