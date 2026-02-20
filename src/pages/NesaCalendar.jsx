@@ -194,7 +194,17 @@ export default function NesaCalendar() {
                   ) : (
                     <div className="space-y-2">
                       {selectedDayEvents.map(e => (
-                        <EventCard key={e.id} event={e} isAdmin={isAdmin} onDelete={handleDelete} />
+                        <EventCard
+                          key={e.id}
+                          event={e}
+                          isAdmin={isAdmin}
+                          onDelete={handleDelete}
+                          isRegistered={registrations.some(r => r.event_id === e.id)}
+                          onRsvp={handleRsvp}
+                          rsvpLoading={rsvpLoading === e.id}
+                          studentId={studentId}
+                          onViewAttendance={() => setAttendanceEvent(e)}
+                        />
                       ))}
                     </div>
                   )}
