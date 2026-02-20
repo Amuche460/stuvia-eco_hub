@@ -320,6 +320,18 @@ export default function NesaCalendar() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="requires_rsvp"
+                    checked={form.requires_rsvp}
+                    onChange={e => setForm(f => ({ ...f, requires_rsvp: e.target.checked }))}
+                    className="w-4 h-4 accent-teal-700"
+                  />
+                  <Label htmlFor="requires_rsvp" className="text-sm text-gray-700 cursor-pointer">
+                    Requires RSVP / Registration
+                  </Label>
+                </div>
                 <div>
                   <Label className="text-sm text-gray-700">Color Tag</Label>
                   <div className="flex gap-2 mt-2">
