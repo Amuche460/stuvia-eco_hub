@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Calendar, MapPin, Clock, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, Clock, Trash2, X, ChevronLeft, ChevronRight, Users, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, parseISO, isToday } from 'date-fns';
+import EventAttendanceModal from '../components/calendar/EventAttendanceModal';
 
 const COLOR_CLASSES = {
   emerald: { bg: 'bg-emerald-500', light: 'bg-emerald-50 border-emerald-200 text-emerald-700', dot: 'bg-emerald-500' },
