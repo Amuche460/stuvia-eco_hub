@@ -39,8 +39,39 @@ export default function NesaCalendar() {
   useEffect(() => {
     const adminFlag = localStorage.getItem('nesa_is_admin');
     setIsAdmin(adminFlag === 'true');
+    const sid = localStorage.getItem('nesa_student_id');
+    if (sid) {
+      setStudentId(sid);
+      loadStudentAndRegistrations(sid);
+    }
     loadEvents();
   }, []);
+
+  const loadStudentAndRegistrations = async (sid) => {
+    const [students, regs] = await Promise.all([
+      base44.entities.Student.filter({ id: sid }),
+      base44.entities.EventRegistration.filter({ student_id: sid }),
+    ]);
+    if (students.length > 0) setStudentData(students[0]);
+    setRegistrations(regs);
+  };
+
+  const handleRsvp = async (event) => {
+    if (!studentId || !studentData) return;
+    const alreadyRegistered = registrations.some(r => r.event_id === event.id);
+    if (alreadyRegistered) return;
+    setRsvpLoading(event.id);
+    const reg = await base44.entities.EventRegistration.create({
+      event_id: event.id,
+      event_title: event.title,
+      student_id: studentId,
+      student_name: studentData.full_name,
+      student_reg_no: studentData.reg_no,
+      student_level: studentData.level,
+    });
+    setRegistrations(prev => [...prev, reg]);
+    setRsvpLoading(null);
+  };
 
   const loadEvents = async () => {
     const evts = await base44.entities.NesaEvent.list('event_date');
