@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   CreditCard, Heart, MessageSquare, LogOut, Receipt,
-  User, CheckCircle, Clock, XCircle, ChevronRight
+  User, CheckCircle, Clock, XCircle, ChevronRight, Calendar
 } from 'lucide-react';
+import NotificationBell from '../components/dashboard/NotificationBell';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
