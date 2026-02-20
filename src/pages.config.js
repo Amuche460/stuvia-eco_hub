@@ -50,12 +50,24 @@
 import Home from './pages/Home';
 import Register from './pages/Register';
 import VerifyOtp from './pages/VerifyOtp';
+import SignIn from './pages/SignIn';
+import StudentDashboard from './pages/StudentDashboard';
+import PayDues from './pages/PayDues';
+import Donate from './pages/Donate';
+import Suggestions from './pages/Suggestions';
+import UpdateProfile from './pages/UpdateProfile';
 
 
 export const PAGES = {
     "Home": Home,
     "Register": Register,
     "VerifyOtp": VerifyOtp,
+    "SignIn": SignIn,
+    "StudentDashboard": StudentDashboard,
+    "PayDues": PayDues,
+    "Donate": Donate,
+    "Suggestions": Suggestions,
+    "UpdateProfile": UpdateProfile,
 }
 
 export const pagesConfig = {
