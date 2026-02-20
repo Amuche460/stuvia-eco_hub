@@ -47,40 +47,40 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Home from './pages/Home';
-import Register from './pages/Register';
-import VerifyOtp from './pages/VerifyOtp';
-import SignIn from './pages/SignIn';
-import StudentDashboard from './pages/StudentDashboard';
-import PayDues from './pages/PayDues';
+import AdminDashboard from './pages/AdminDashboard';
 import Donate from './pages/Donate';
+import Home from './pages/Home';
+import NesaCalendar from './pages/NesaCalendar';
+import PayDues from './pages/PayDues';
+import PaymentHistory from './pages/PaymentHistory';
+import Register from './pages/Register';
+import SignIn from './pages/SignIn';
+import Splash from './pages/Splash';
+import StudentDashboard from './pages/StudentDashboard';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
-import AdminDashboard from './pages/AdminDashboard';
-import Splash from './pages/Splash';
-import NesaCalendar from './pages/NesaCalendar';
-import PaymentHistory from './pages/PaymentHistory';
+import VerifyOtp from './pages/VerifyOtp';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Register": Register,
-    "VerifyOtp": VerifyOtp,
-    "SignIn": SignIn,
-    "StudentDashboard": StudentDashboard,
-    "PayDues": PayDues,
+    "AdminDashboard": AdminDashboard,
     "Donate": Donate,
+    "Home": Home,
+    "NesaCalendar": NesaCalendar,
+    "PayDues": PayDues,
+    "PaymentHistory": PaymentHistory,
+    "Register": Register,
+    "SignIn": SignIn,
+    "Splash": Splash,
+    "StudentDashboard": StudentDashboard,
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
-    "AdminDashboard": AdminDashboard,
-    "Splash": Splash,
-    "NesaCalendar": NesaCalendar,
-    "PaymentHistory": PaymentHistory,
+    "VerifyOtp": VerifyOtp,
 }
 
 export const pagesConfig = {
-    mainPage: "Home",
+    mainPage: "AdminDashboard",
     Pages: PAGES,
     Layout: __Layout,
 };
