@@ -92,10 +92,13 @@ export default function StudentDashboard() {
       <header className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-emerald-100 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <NesaLogo size="sm" />
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
-            <LogOut className="w-4 h-4 mr-1" />
-            Sign out
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationBell studentId={student?.id} />
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
+              <LogOut className="w-4 h-4 mr-1" />
+              Sign out
+            </Button>
+          </div>
         </div>
       </header>
 
