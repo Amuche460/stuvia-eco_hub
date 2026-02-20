@@ -29,7 +29,12 @@ export default function NesaCalendar() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', event_date: '', event_time: '', location: '', team: 'General NESA', color: 'emerald' });
+  const [form, setForm] = useState({ title: '', description: '', event_date: '', event_time: '', location: '', team: 'General NESA', color: 'emerald', requires_rsvp: false });
+  const [studentId, setStudentId] = useState(null);
+  const [studentData, setStudentData] = useState(null);
+  const [registrations, setRegistrations] = useState([]); // current student's registrations
+  const [rsvpLoading, setRsvpLoading] = useState(null); // event id being rsvp'd
+  const [attendanceEvent, setAttendanceEvent] = useState(null); // admin attendance modal
 
   useEffect(() => {
     const adminFlag = localStorage.getItem('nesa_is_admin');
