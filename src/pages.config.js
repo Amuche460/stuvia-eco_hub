@@ -58,6 +58,8 @@ import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import Splash from './pages/Splash';
+import NesaCalendar from './pages/NesaCalendar';
+import PaymentHistory from './pages/PaymentHistory';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +75,8 @@ export const PAGES = {
     "UpdateProfile": UpdateProfile,
     "AdminDashboard": AdminDashboard,
     "Splash": Splash,
+    "NesaCalendar": NesaCalendar,
+    "PaymentHistory": PaymentHistory,
 }
 
 export const pagesConfig = {
