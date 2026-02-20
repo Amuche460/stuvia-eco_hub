@@ -356,27 +356,56 @@ export default function NesaCalendar() {
   );
 }
 
-function EventCard({ event, isAdmin, onDelete }) {
+function EventCard({ event, isAdmin, onDelete, isRegistered, onRsvp, rsvpLoading, studentId, onViewAttendance }) {
   const color = COLOR_CLASSES[event.color] || COLOR_CLASSES.emerald;
   return (
-    <div className={`rounded-xl border p-3 ${color.light} flex items-start justify-between gap-2`}>
-      <div>
-        <p className="font-semibold text-sm">{event.title}</p>
-        {event.description && <p className="text-xs opacity-70 mt-0.5">{event.description}</p>}
-        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-          {event.event_time && (
-            <span className="flex items-center gap-1 text-xs opacity-60"><Clock className="w-3 h-3" />{event.event_time}</span>
+    <div className={`rounded-xl border p-3 ${color.light}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm">{event.title}</p>
+          {event.description && <p className="text-xs opacity-70 mt-0.5">{event.description}</p>}
+          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+            {event.event_time && (
+              <span className="flex items-center gap-1 text-xs opacity-60"><Clock className="w-3 h-3" />{event.event_time}</span>
+            )}
+            {event.location && (
+              <span className="flex items-center gap-1 text-xs opacity-60"><MapPin className="w-3 h-3" />{event.location}</span>
+            )}
+          </div>
+          <span className="text-xs opacity-50 mt-0.5 block">{event.team}</span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {isAdmin && (
+            <button onClick={onViewAttendance} className="text-teal-600 hover:text-teal-800 p-1 rounded-lg hover:bg-teal-100/60 transition-colors" title="View attendance">
+              <Users className="w-4 h-4" />
+            </button>
           )}
-          {event.location && (
-            <span className="flex items-center gap-1 text-xs opacity-60"><MapPin className="w-3 h-3" />{event.location}</span>
+          {isAdmin && (
+            <button onClick={() => onDelete(event.id)} className="text-red-400 hover:text-red-600 p-1">
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
         </div>
-        <span className="text-xs opacity-50 mt-0.5 block">{event.team}</span>
       </div>
-      {isAdmin && (
-        <button onClick={() => onDelete(event.id)} className="text-red-400 hover:text-red-600 flex-shrink-0 mt-0.5">
-          <Trash2 className="w-4 h-4" />
-        </button>
+
+      {event.requires_rsvp && studentId && !isAdmin && (
+        <div className="mt-2.5 pt-2.5 border-t border-current/10">
+          {isRegistered ? (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              You're registered for this event
+            </div>
+          ) : (
+            <button
+              onClick={() => onRsvp(event)}
+              disabled={rsvpLoading}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/70 hover:bg-white border border-current/20 transition-all flex items-center gap-1.5 disabled:opacity-60"
+            >
+              {rsvpLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+              {rsvpLoading ? 'Registering...' : 'RSVP / Register'}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
