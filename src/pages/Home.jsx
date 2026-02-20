@@ -50,7 +50,7 @@ export default function Home() {
               </Link>
             ) : (
               <>
-                <Link to={createPageUrl('Login')}>
+                <Link to={createPageUrl('SignIn')}>
                   <Button variant="ghost" size="sm" className="text-emerald-700">Sign In</Button>
                 </Link>
                 <Link to={createPageUrl('Register')}>
@@ -89,7 +89,7 @@ export default function Home() {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Link to={createPageUrl('Login')}>
+            <Link to={createPageUrl('SignIn')}>
               <Button variant="outline" size="lg" className="rounded-xl h-13 px-8 text-base border-emerald-200 text-emerald-700 hover:bg-emerald-50">
                 Already registered? Sign in
               </Button>
