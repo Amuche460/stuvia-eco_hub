@@ -16,6 +16,7 @@ export default function PayDues() {
   const [proofFile, setProofFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [validationWarning, setValidationWarning] = useState(false);
 
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
@@ -43,6 +44,9 @@ export default function PayDues() {
 
     const receiptNumber = `NESA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
+    // Flag for admin review if student acknowledged the warning
+    const flagged = validationWarning;
+
     await base44.entities.Payment.create({
       student_id: student.id,
       student_name: student.full_name,
@@ -55,6 +59,7 @@ export default function PayDues() {
       proof_url: proofUrl,
       status: 'pending',
       receipt_number: receiptNumber,
+      rejection_reason: flagged ? 'Flagged: student could not confirm receipt description format — admin review required' : '',
     });
 
     setSubmitted(true);
