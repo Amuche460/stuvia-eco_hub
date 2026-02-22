@@ -121,6 +121,18 @@ export default function NesaCalendar() {
     .filter(e => { try { return parseISO(e.event_date) >= new Date(); } catch { return false; } })
     .slice(0, 5);
 
+  // Filtered events for search results view
+  const hasActiveFilter = searchQuery || filterTeam !== 'all' || filterColor !== 'all' || filterDateFrom || filterDateTo;
+  const filteredEvents = hasActiveFilter ? events.filter(e => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !q || e.title?.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q);
+    const matchTeam = filterTeam === 'all' || e.team === filterTeam;
+    const matchColor = filterColor === 'all' || e.color === filterColor;
+    const matchFrom = !filterDateFrom || e.event_date >= filterDateFrom;
+    const matchTo = !filterDateTo || e.event_date <= filterDateTo;
+    return matchSearch && matchTeam && matchColor && matchFrom && matchTo;
+  }) : [];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-white">
       <header className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-gray-100 z-50">
