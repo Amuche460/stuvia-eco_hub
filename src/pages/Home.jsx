@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
-import { ArrowRight, Shield, Receipt, Heart, MessageSquare, Users, ChevronRight } from 'lucide-react';
+import { ArrowRight, Shield, Receipt, Heart, MessageSquare, Users, ChevronRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -82,17 +82,32 @@ export default function Home() {
           <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
             Pay your NESA dues, donate to the Love Foundation, and share feedback — all in one secure portal.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <Link to={createPageUrl('Register')}>
-              <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 rounded-xl h-13 px-8 text-base shadow-lg shadow-emerald-200">
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
+              <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 rounded-xl px-6 text-base shadow-lg shadow-emerald-200">
+                <Users className="w-5 h-5 mr-2" /> Register as Student
               </Button>
             </Link>
-            <Link to={createPageUrl('SignIn')}>
-              <Button variant="outline" size="lg" className="rounded-xl h-13 px-8 text-base border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-                Already registered? Sign in
+            <Link to={createPageUrl('RegisterExecutive')}>
+              <Button size="lg" className="bg-purple-700 hover:bg-purple-800 rounded-xl px-6 text-base shadow-lg shadow-purple-200">
+                <Shield className="w-5 h-5 mr-2" /> Register as Executive
               </Button>
+            </Link>
+            <Link to={createPageUrl('RegisterStaff')}>
+              <Button size="lg" variant="outline" className="rounded-xl px-6 text-base border-blue-200 text-blue-700 hover:bg-blue-50">
+                <BookOpen className="w-5 h-5 mr-2" /> Register as Staff
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3">
+            <Link to={createPageUrl('SignIn')}>
+              <Button variant="ghost" size="sm" className="text-emerald-700 text-sm">Student Sign In</Button>
+            </Link>
+            <Link to={createPageUrl('ExecutiveSignIn')}>
+              <Button variant="ghost" size="sm" className="text-purple-700 text-sm">Executive Sign In</Button>
+            </Link>
+            <Link to={createPageUrl('StaffSignIn')}>
+              <Button variant="ghost" size="sm" className="text-blue-700 text-sm">Staff Sign In</Button>
             </Link>
           </div>
         </motion.div>
