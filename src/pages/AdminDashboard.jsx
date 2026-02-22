@@ -95,6 +95,11 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link to={createPageUrl('StudentProfiles')}>
+              <span className="text-sm text-emerald-600 hover:text-emerald-800 flex items-center gap-1 font-medium">
+                <UserCircle className="w-4 h-4" /> Students
+              </span>
+            </Link>
             <Link to={createPageUrl('NesaCalendar')} onClick={() => localStorage.setItem('nesa_is_admin', 'true')}>
               <span className="text-sm text-teal-600 hover:text-teal-800 flex items-center gap-1 font-medium">
                 <Calendar className="w-4 h-4" /> Calendar
