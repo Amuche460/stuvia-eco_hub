@@ -152,9 +152,102 @@ export default function NesaCalendar() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">NESA Calendar</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">NESA Calendar</h1>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Search & Filter Bar */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search events by title, description, or location..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilters(f => !f)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${showFilters || filterTeam !== 'all' || filterColor !== 'all' || filterDateFrom || filterDateTo ? 'bg-teal-700 text-white border-teal-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </button>
+          </div>
+
+          {showFilters && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <Select value={filterTeam} onValueChange={setFilterTeam}>
+                <SelectTrigger className="rounded-xl h-9 text-xs"><SelectValue placeholder="Team" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Teams</SelectItem>
+                  {['General NESA','Welfare','Social','Sports','Financial','Community Development','Academic'].map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterColor} onValueChange={setFilterColor}>
+                <SelectTrigger className="rounded-xl h-9 text-xs"><SelectValue placeholder="Color" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Colors</SelectItem>
+                  {Object.keys(COLOR_CLASSES).map(c => (
+                    <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div>
+                <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300" placeholder="From date" />
+              </div>
+              <div>
+                <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300" placeholder="To date" />
+              </div>
+            </div>
+          )}
+
+          {hasActiveFilter && (
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold text-teal-700">{filteredEvents.length}</span> event{filteredEvents.length !== 1 ? 's' : ''} found
+              </p>
+              <button onClick={() => { setSearchQuery(''); setFilterTeam('all'); setFilterColor('all'); setFilterDateFrom(''); setFilterDateTo(''); }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline">Clear all</button>
+            </div>
+          )}
+        </div>
+
+        {/* Search results list */}
+        {hasActiveFilter && (
+          <div className="space-y-2">
+            {filteredEvents.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">No events match your search.</div>
+            ) : (
+              filteredEvents.map(e => (
+                <EventCard
+                  key={e.id}
+                  event={e}
+                  isAdmin={isAdmin}
+                  onDelete={handleDelete}
+                  isRegistered={registrations.some(r => r.event_id === e.id)}
+                  onRsvp={handleRsvp}
+                  rsvpLoading={rsvpLoading === e.id}
+                  studentId={studentId}
+                  onViewAttendance={() => setAttendanceEvent(e)}
+                />
+              ))
+            )}
+          </div>
+        )}
+
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${hasActiveFilter ? 'opacity-50 pointer-events-none' : ''}`}>
           {/* Calendar Grid */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             {/* Month navigation */}
