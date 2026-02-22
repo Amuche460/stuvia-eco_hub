@@ -130,46 +130,67 @@ export default function PayDues() {
             </div>
           </div>
 
+          {/* Receipt Format Instructions */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-2">
+            <p className="text-amber-800 font-semibold text-sm mb-1">⚠️ Receipt Description Requirement</p>
+            {student?.level === '100' ? (
+              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Reg No] Dues Payment</span><br/>e.g. <span className="font-mono">ECO/2026/001 Dues Payment</span></p>
+            ) : (
+              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Matric No] [Reg No] Dues Payment</span><br/>e.g. <span className="font-mono">20260001 ECO/2026/001 Dues Payment</span></p>
+            )}
+            <p className="text-amber-600 text-xs mt-1">Receipts that don't match will be flagged for admin review and may be rejected.</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-4">
-            <div>
-              <Label className="text-gray-700">Amount (₦) *</Label>
-              <Input
-                required
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount paid"
-                className="mt-1 rounded-xl h-11 border-gray-200"
+          <div>
+            <Label className="text-gray-700">Amount (₦) *</Label>
+            <Input
+              required
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount paid"
+              className="mt-1 rounded-xl h-11 border-gray-200"
+            />
+          </div>
+
+          <div>
+            <Label className="text-gray-700">Proof of Payment *</Label>
+            <div className="mt-1 border-2 border-dashed border-emerald-200 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer"
+              onClick={() => document.getElementById('proof-upload').click()}
+            >
+              <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">
+                {proofFile ? proofFile.name : 'Click to upload screenshot or receipt'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG, or PDF</p>
+              <input
+                id="proof-upload"
+                type="file"
+                accept="image/*,.pdf"
+                className="hidden"
+                onChange={(e) => setProofFile(e.target.files[0])}
               />
             </div>
+          </div>
 
-            <div>
-              <Label className="text-gray-700">Proof of Payment *</Label>
-              <div className="mt-1 border-2 border-dashed border-emerald-200 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer"
-                onClick={() => document.getElementById('proof-upload').click()}
-              >
-                <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">
-                  {proofFile ? proofFile.name : 'Click to upload screenshot or receipt'}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG, or PDF</p>
-                <input
-                  id="proof-upload"
-                  type="file"
-                  accept="image/*,.pdf"
-                  className="hidden"
-                  onChange={(e) => setProofFile(e.target.files[0])}
-                />
-              </div>
-            </div>
+          {/* Confirmation checkbox */}
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" checked={!validationWarning}
+              onChange={e => setValidationWarning(!e.target.checked)}
+              className="mt-0.5 accent-emerald-600" />
+            <span className="text-xs text-gray-600">
+              I confirm my bank transfer description contains my {student?.level === '100' ? 'Reg No' : 'Matric No and Reg No'} followed by "Dues Payment"
+            </span>
+          </label>
 
-            <Button
-              type="submit"
-              disabled={loading || !proofFile || !amount}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-12 text-base shadow-lg shadow-emerald-200"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
-            </Button>
+          <Button
+            type="submit"
+            disabled={loading || !proofFile || !amount}
+            className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-12 text-base shadow-lg shadow-emerald-200"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
+          </Button>
           </form>
         </motion.div>
       </div>
