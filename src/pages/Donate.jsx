@@ -128,17 +128,30 @@ export default function Donate() {
             </div>
           </div>
 
+          {/* Receipt Format Instructions */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-2">
+            <p className="text-amber-800 font-semibold text-sm mb-1">⚠️ Receipt Description Requirement</p>
+            {student?.level === '100' ? (
+              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Reg No] Love Foundation</span><br/>e.g. <span className="font-mono">ECO/2026/001 Love Foundation</span></p>
+            ) : (
+              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Matric No] [Reg No] Love Foundation</span><br/>e.g. <span className="font-mono">20260001 ECO/2026/001 Love Foundation</span></p>
+            )}
+            <p className="text-rose-700 font-semibold text-xs mt-1.5">Maximum donation: ₦5,000</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-rose-100 shadow-lg p-6 space-y-4">
             <div>
-              <Label className="text-gray-700">Donation Amount (₦) *</Label>
+              <Label className="text-gray-700">Donation Amount (₦) * <span className="text-rose-500 text-xs">(max ₦5,000)</span></Label>
               <Input
                 required
                 type="number"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => handleAmountChange(e.target.value)}
                 placeholder="Enter amount"
-                className="mt-1 rounded-xl h-11 border-gray-200"
+                max={5000}
+                className={`mt-1 rounded-xl h-11 border-gray-200 ${amountError ? 'border-red-400 focus:ring-red-300' : ''}`}
               />
+              {amountError && <p className="text-xs text-red-600 mt-1">{amountError}</p>}
               <div className="flex gap-2 mt-2">
                 {quickAmounts.map(qa => (
                   <Button
@@ -146,7 +159,7 @@ export default function Donate() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setAmount(String(qa))}
+                    onClick={() => handleAmountChange(String(qa))}
                     className={`rounded-lg text-xs flex-1 ${amount === String(qa) ? 'bg-rose-50 border-rose-300 text-rose-700' : ''}`}
                   >
                     ₦{qa.toLocaleString()}
@@ -175,9 +188,19 @@ export default function Donate() {
               </div>
             </div>
 
+            {/* Confirmation checkbox */}
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" checked={!validationWarning}
+                onChange={e => setValidationWarning(!e.target.checked)}
+                className="mt-0.5 accent-rose-600" />
+              <span className="text-xs text-gray-600">
+                I confirm my bank transfer description contains my {student?.level === '100' ? 'Reg No' : 'Matric No and Reg No'} followed by "Love Foundation"
+              </span>
+            </label>
+
             <Button
               type="submit"
-              disabled={loading || !proofFile || !amount}
+              disabled={loading || !proofFile || !amount || !!amountError}
               className="w-full bg-rose-600 hover:bg-rose-700 rounded-xl h-12 text-base shadow-lg shadow-rose-200"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
