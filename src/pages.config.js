@@ -68,6 +68,8 @@ import ExecutiveSignIn from './pages/ExecutiveSignIn';
 import ExecutiveVerifyOtp from './pages/ExecutiveVerifyOtp';
 import StaffSignIn from './pages/StaffSignIn';
 import StaffVerifyOtp from './pages/StaffVerifyOtp';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import StaffDashboard from './pages/StaffDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -93,6 +95,8 @@ export const PAGES = {
     "ExecutiveVerifyOtp": ExecutiveVerifyOtp,
     "StaffSignIn": StaffSignIn,
     "StaffVerifyOtp": StaffVerifyOtp,
+    "ExecutiveDashboard": ExecutiveDashboard,
+    "StaffDashboard": StaffDashboard,
 }
 
 export const pagesConfig = {
