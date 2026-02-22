@@ -15,6 +15,8 @@ export default function Donate() {
   const [proofFile, setProofFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [amountError, setAmountError] = useState('');
+  const [validationWarning, setValidationWarning] = useState(false);
 
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
@@ -31,8 +33,21 @@ export default function Donate() {
 
   const quickAmounts = [500, 1000, 2000, 5000];
 
+  const handleAmountChange = (val) => {
+    setAmount(val);
+    if (parseFloat(val) > 5000) {
+      setAmountError('Maximum donation amount is ₦5,000. We cannot accept more to ensure transparency.');
+    } else {
+      setAmountError('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (parseFloat(amount) > 5000) {
+      setAmountError('Maximum donation amount is ₦5,000.');
+      return;
+    }
     setLoading(true);
 
     let proofUrl = '';
