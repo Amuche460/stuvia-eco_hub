@@ -60,6 +60,8 @@ import StudentDashboard from './pages/StudentDashboard';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
 import VerifyOtp from './pages/VerifyOtp';
+import StudentProfiles from './pages/StudentProfiles';
+import StudentProfileDetail from './pages/StudentProfileDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +79,8 @@ export const PAGES = {
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
     "VerifyOtp": VerifyOtp,
+    "StudentProfiles": StudentProfiles,
+    "StudentProfileDetail": StudentProfileDetail,
 }
 
 export const pagesConfig = {
