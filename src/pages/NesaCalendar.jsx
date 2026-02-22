@@ -35,6 +35,13 @@ export default function NesaCalendar() {
   const [registrations, setRegistrations] = useState([]); // current student's registrations
   const [rsvpLoading, setRsvpLoading] = useState(null); // event id being rsvp'd
   const [attendanceEvent, setAttendanceEvent] = useState(null); // admin attendance modal
+  // Search & filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterTeam, setFilterTeam] = useState('all');
+  const [filterColor, setFilterColor] = useState('all');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const adminFlag = localStorage.getItem('nesa_is_admin');
