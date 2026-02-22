@@ -57,11 +57,17 @@ import Register from './pages/Register';
 import SignIn from './pages/SignIn';
 import Splash from './pages/Splash';
 import StudentDashboard from './pages/StudentDashboard';
+import StudentProfileDetail from './pages/StudentProfileDetail';
+import StudentProfiles from './pages/StudentProfiles';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
 import VerifyOtp from './pages/VerifyOtp';
-import StudentProfiles from './pages/StudentProfiles';
-import StudentProfileDetail from './pages/StudentProfileDetail';
+import RegisterExecutive from './pages/RegisterExecutive';
+import RegisterStaff from './pages/RegisterStaff';
+import ExecutiveSignIn from './pages/ExecutiveSignIn';
+import ExecutiveVerifyOtp from './pages/ExecutiveVerifyOtp';
+import StaffSignIn from './pages/StaffSignIn';
+import StaffVerifyOtp from './pages/StaffVerifyOtp';
 import __Layout from './Layout.jsx';
 
 
@@ -76,11 +82,17 @@ export const PAGES = {
     "SignIn": SignIn,
     "Splash": Splash,
     "StudentDashboard": StudentDashboard,
+    "StudentProfileDetail": StudentProfileDetail,
+    "StudentProfiles": StudentProfiles,
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
     "VerifyOtp": VerifyOtp,
-    "StudentProfiles": StudentProfiles,
-    "StudentProfileDetail": StudentProfileDetail,
+    "RegisterExecutive": RegisterExecutive,
+    "RegisterStaff": RegisterStaff,
+    "ExecutiveSignIn": ExecutiveSignIn,
+    "ExecutiveVerifyOtp": ExecutiveVerifyOtp,
+    "StaffSignIn": StaffSignIn,
+    "StaffVerifyOtp": StaffVerifyOtp,
 }
 
 export const pagesConfig = {
