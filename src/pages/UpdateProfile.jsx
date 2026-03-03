@@ -5,9 +5,10 @@ import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Save, Loader2, Camera, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Save, Loader2, Camera, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useState as useConfirmState } from 'react';
 
 export default function UpdateProfile() {
   const [student, setStudent] = useState(null);
