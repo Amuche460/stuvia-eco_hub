@@ -15,6 +15,8 @@ export default function UpdateProfile() {
   const [form, setForm] = useState({ matric_no: '', phone: '', email: '', course_of_study: '', year_of_entry: '', profile_picture_url: '' });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileRef = useRef();
 
   useEffect(() => {
