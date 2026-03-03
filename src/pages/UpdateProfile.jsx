@@ -48,6 +48,13 @@ export default function UpdateProfile() {
     toast.success('Photo uploaded!');
   };
 
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    await base44.entities.Student.delete(student.id);
+    localStorage.removeItem('nesa_student_id');
+    window.location.href = createPageUrl('Home');
+  };
+
   const handleSave = async () => {
     setLoading(true);
     await base44.entities.Student.update(student.id, {
