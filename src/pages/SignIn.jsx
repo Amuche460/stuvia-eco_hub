@@ -75,7 +75,7 @@ export default function SignIn() {
               <NesaLogo size="lg" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mt-4">Welcome Back</h1>
-            <p className="text-gray-500 mt-1">Sign in with your student email</p>
+            <p className="text-gray-500 mt-1">Sign in with your registration number</p>
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-4">
@@ -86,16 +86,14 @@ export default function SignIn() {
             )}
 
             <div>
-              <Label className="text-gray-700">Student Email</Label>
+              <Label className="text-gray-700">Registration Number</Label>
               <Input
                 required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. name@stu.cu.edu.ng"
+                value={regNo}
+                onChange={(e) => setRegNo(e.target.value)}
+                placeholder="e.g. 22CJ012345"
                 className="mt-1 rounded-xl h-12 border-gray-200 text-base"
               />
-              <p className="text-xs text-gray-400 mt-1">Must end with @stu.cu.edu.ng</p>
             </div>
 
             <Button
