@@ -168,6 +168,33 @@ export default function UpdateProfile() {
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4 mr-2" />Save Changes</>}
             </Button>
           </div>
+
+          {/* Delete Account */}
+          <div className="mt-6">
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full flex items-center justify-center gap-2 text-red-500 text-sm font-medium py-3 rounded-xl border border-red-200 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </button>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-3">
+                <p className="text-red-700 font-semibold text-sm text-center">Are you sure?</p>
+                <p className="text-red-500 text-xs text-center">This will permanently delete your account and all data.</p>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowDeleteConfirm(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Cancel
+                  </button>
+                  <button onClick={handleDeleteAccount} disabled={deleting}
+                    className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
+                    {deleting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Yes, Delete'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </motion.div>
       </div>
     </div>
