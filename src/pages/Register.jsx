@@ -22,6 +22,13 @@ export default function Register() {
     setError('');
     setLoading(true);
 
+    // Validate email domain
+    if (!form.email.trim().toLowerCase().endsWith('@stu.cu.edu.ng')) {
+      setError('Only @stu.cu.edu.ng email addresses are accepted for student registration.');
+      setLoading(false);
+      return;
+    }
+
     // Check if reg_no already exists
     const existing = await base44.entities.Student.filter({ reg_no: form.reg_no });
     if (existing.length > 0) {
