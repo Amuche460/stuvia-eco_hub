@@ -10,7 +10,7 @@ import { ArrowLeft, LogIn, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function SignIn() {
-  const [regNo, setRegNo] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,10 +19,16 @@ export default function SignIn() {
     setLoading(true);
     setError('');
 
-    const students = await base44.entities.Student.filter({ reg_no: regNo.trim() });
+    if (!email.trim().toLowerCase().endsWith('@stu.cu.edu.ng')) {
+      setError('Only @stu.cu.edu.ng email addresses are accepted for student sign in.');
+      setLoading(false);
+      return;
+    }
+
+    const students = await base44.entities.Student.filter({ email: email.trim().toLowerCase() });
 
     if (students.length === 0) {
-      setError('No account found with this registration number. Please register first.');
+      setError('No account found with this email. Please register first.');
       setLoading(false);
       return;
     }

@@ -49,54 +49,54 @@
  */
 import AdminDashboard from './pages/AdminDashboard';
 import Donate from './pages/Donate';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import ExecutiveSignIn from './pages/ExecutiveSignIn';
+import ExecutiveVerifyOtp from './pages/ExecutiveVerifyOtp';
 import Home from './pages/Home';
 import NesaCalendar from './pages/NesaCalendar';
 import PayDues from './pages/PayDues';
 import PaymentHistory from './pages/PaymentHistory';
 import Register from './pages/Register';
+import RegisterExecutive from './pages/RegisterExecutive';
+import RegisterStaff from './pages/RegisterStaff';
 import SignIn from './pages/SignIn';
 import Splash from './pages/Splash';
+import StaffDashboard from './pages/StaffDashboard';
+import StaffSignIn from './pages/StaffSignIn';
+import StaffVerifyOtp from './pages/StaffVerifyOtp';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentProfileDetail from './pages/StudentProfileDetail';
 import StudentProfiles from './pages/StudentProfiles';
 import Suggestions from './pages/Suggestions';
 import UpdateProfile from './pages/UpdateProfile';
 import VerifyOtp from './pages/VerifyOtp';
-import RegisterExecutive from './pages/RegisterExecutive';
-import RegisterStaff from './pages/RegisterStaff';
-import ExecutiveSignIn from './pages/ExecutiveSignIn';
-import ExecutiveVerifyOtp from './pages/ExecutiveVerifyOtp';
-import StaffSignIn from './pages/StaffSignIn';
-import StaffVerifyOtp from './pages/StaffVerifyOtp';
-import ExecutiveDashboard from './pages/ExecutiveDashboard';
-import StaffDashboard from './pages/StaffDashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminDashboard": AdminDashboard,
     "Donate": Donate,
+    "ExecutiveDashboard": ExecutiveDashboard,
+    "ExecutiveSignIn": ExecutiveSignIn,
+    "ExecutiveVerifyOtp": ExecutiveVerifyOtp,
     "Home": Home,
     "NesaCalendar": NesaCalendar,
     "PayDues": PayDues,
     "PaymentHistory": PaymentHistory,
     "Register": Register,
+    "RegisterExecutive": RegisterExecutive,
+    "RegisterStaff": RegisterStaff,
     "SignIn": SignIn,
     "Splash": Splash,
+    "StaffDashboard": StaffDashboard,
+    "StaffSignIn": StaffSignIn,
+    "StaffVerifyOtp": StaffVerifyOtp,
     "StudentDashboard": StudentDashboard,
     "StudentProfileDetail": StudentProfileDetail,
     "StudentProfiles": StudentProfiles,
     "Suggestions": Suggestions,
     "UpdateProfile": UpdateProfile,
     "VerifyOtp": VerifyOtp,
-    "RegisterExecutive": RegisterExecutive,
-    "RegisterStaff": RegisterStaff,
-    "ExecutiveSignIn": ExecutiveSignIn,
-    "ExecutiveVerifyOtp": ExecutiveVerifyOtp,
-    "StaffSignIn": StaffSignIn,
-    "StaffVerifyOtp": StaffVerifyOtp,
-    "ExecutiveDashboard": ExecutiveDashboard,
-    "StaffDashboard": StaffDashboard,
 }
 
 export const pagesConfig = {
