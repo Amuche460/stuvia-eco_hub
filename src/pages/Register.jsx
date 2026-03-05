@@ -37,13 +37,36 @@ export default function Register() {
       return;
     }
 
+    // Generate OTP
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
     const student = await base44.entities.Student.create({
       ...form,
-      is_verified: true,
+      is_verified: false,
+      otp_code: otp,
+      otp_expiry: expiry,
     });
 
-    localStorage.setItem('nesa_student_id', student.id);
-    window.location.href = createPageUrl('StudentDashboard');
+    await base44.integrations.Core.SendEmail({
+      to: form.email,
+      subject: 'NESA - Email Verification Code',
+      body: `
+        <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; text-align: center;">
+          <h2 style="color: #059669;">Welcome to NESA!</h2>
+          <p>Hello ${form.full_name},</p>
+          <p>Your verification code is:</p>
+          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #059669;">${otp}</span>
+          </div>
+          <p style="color: #888; font-size: 14px;">This code expires in 10 minutes.</p>
+        </div>
+      `
+    });
+
+    localStorage.setItem('nesa_verify_student_id', student.id);
+    localStorage.setItem('nesa_verify_email', form.email);
+    window.location.href = createPageUrl('VerifyOtp');
   };
 
   return (
