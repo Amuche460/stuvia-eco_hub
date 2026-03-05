@@ -29,30 +29,8 @@ export default function SignIn() {
 
     const student = students[0];
 
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await base44.entities.Student.update(student.id, { otp_code: otp, otp_expiry: expiry });
-
-    await base44.integrations.Core.SendEmail({
-      to: student.email,
-      subject: 'NESA - Login Verification Code',
-      body: `
-        <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; text-align: center;">
-          <h2 style="color: #059669;">NESA Login</h2>
-          <p>Hello ${student.full_name},</p>
-          <p>Your login code is:</p>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #059669;">${otp}</span>
-          </div>
-          <p style="color: #888; font-size: 14px;">This code expires in 10 minutes.</p>
-        </div>
-      `
-    });
-
-    localStorage.setItem('nesa_verify_student_id', student.id);
-    localStorage.setItem('nesa_verify_email', student.email);
-    window.location.href = createPageUrl('VerifyOtp');
+    localStorage.setItem('nesa_student_id', student.id);
+    window.location.href = createPageUrl('StudentDashboard');
   };
 
   return (
