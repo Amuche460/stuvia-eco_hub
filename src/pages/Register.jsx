@@ -22,9 +22,9 @@ export default function Register() {
     setError('');
     setLoading(true);
 
-    // Validate email domain
-    if (!form.email.trim().toLowerCase().endsWith('@stu.cu.edu.ng')) {
-      setError('Only @stu.cu.edu.ng email addresses are accepted for student registration.');
+    // Validate matric number if provided
+    if (form.matric_no && form.matric_no.trim().toUpperCase().slice(2, 4) !== 'AF') {
+      setError('Invalid matric number. The 3rd and 4th characters must be "AF" (e.g. 22AF012345).');
       setLoading(false);
       return;
     }
