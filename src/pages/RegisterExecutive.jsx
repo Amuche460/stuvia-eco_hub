@@ -37,10 +37,6 @@ export default function RegisterExecutive() {
     e.preventDefault();
     setError('');
 
-    if (!form.email.endsWith('@stu.cu.edu.ng')) {
-      setError('Only student emails ending with @stu.cu.edu.ng are accepted.');
-      return;
-    }
     if (!form.term_end_date) {
       setError('Please set your term end date.');
       return;
@@ -146,9 +142,9 @@ export default function RegisterExecutive() {
             </div>
 
             <div>
-              <Label className="text-gray-700">Student Email * (@stu.cu.edu.ng)</Label>
+              <Label className="text-gray-700">Email *</Label>
               <Input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                placeholder="yourname@stu.cu.edu.ng" className="mt-1 rounded-xl h-11" />
+                placeholder="your@email.com" className="mt-1 rounded-xl h-11" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

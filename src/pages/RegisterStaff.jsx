@@ -19,11 +19,6 @@ export default function RegisterStaff() {
     e.preventDefault();
     setError('');
 
-    if (!form.email.endsWith('@cu.edu.ng')) {
-      setError('Only staff emails ending with @cu.edu.ng are accepted.');
-      return;
-    }
-
     setLoading(true);
 
     const existing = await base44.entities.Staff.filter({ email: form.email });
@@ -87,9 +82,9 @@ export default function RegisterStaff() {
                 placeholder="Dr. / Prof. / Mr. / Mrs." className="mt-1 rounded-xl h-11" />
             </div>
             <div>
-              <Label className="text-gray-700">Staff Email * (@cu.edu.ng)</Label>
+              <Label className="text-gray-700">Email *</Label>
               <Input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                placeholder="name@cu.edu.ng" className="mt-1 rounded-xl h-11" />
+                placeholder="your@email.com" className="mt-1 rounded-xl h-11" />
             </div>
             <div>
               <Label className="text-gray-700">Department</Label>
