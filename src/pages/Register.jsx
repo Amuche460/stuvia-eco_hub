@@ -131,10 +131,9 @@ export default function Register() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="name@stu.cu.edu.ng"
+                placeholder="your@email.com"
                 className="mt-1 rounded-xl h-11 border-gray-200"
               />
-              <p className="text-xs text-gray-400 mt-1">Must end with @stu.cu.edu.ng</p>
             </div>
 
             <div>
