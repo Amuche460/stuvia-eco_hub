@@ -18,11 +18,6 @@ export default function StaffSignIn() {
     e.preventDefault();
     setError('');
 
-    if (!email.endsWith('@cu.edu.ng')) {
-      setError('Only staff emails ending with @cu.edu.ng are accepted.');
-      return;
-    }
-
     setLoading(true);
     const staffList = await base44.entities.Staff.filter({ email, is_verified: true });
     if (!staffList.length) {
@@ -67,7 +62,7 @@ export default function StaffSignIn() {
           <div>
             <Label className="text-gray-700">Staff Email</Label>
             <Input required type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="name@cu.edu.ng" className="mt-1 rounded-xl h-11" />
+              placeholder="your@email.com" className="mt-1 rounded-xl h-11" />
           </div>
           <Button type="submit" disabled={loading}
             className="w-full bg-blue-700 hover:bg-blue-800 rounded-xl h-12 text-base">

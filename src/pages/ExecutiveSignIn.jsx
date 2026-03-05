@@ -18,11 +18,6 @@ export default function ExecutiveSignIn() {
     e.preventDefault();
     setError('');
 
-    if (!email.endsWith('@stu.cu.edu.ng')) {
-      setError('Please use your student email (@stu.cu.edu.ng).');
-      return;
-    }
-
     setLoading(true);
 
     const executives = await base44.entities.Executive.filter({ email, is_approved: true, is_active: true });
@@ -89,7 +84,7 @@ export default function ExecutiveSignIn() {
           <div>
             <Label className="text-gray-700">Student Email</Label>
             <Input required type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="yourname@stu.cu.edu.ng" className="mt-1 rounded-xl h-11" />
+              placeholder="your@email.com" className="mt-1 rounded-xl h-11" />
           </div>
           <Button type="submit" disabled={loading}
             className="w-full bg-purple-700 hover:bg-purple-800 rounded-xl h-12 text-base">
