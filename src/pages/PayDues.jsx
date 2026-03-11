@@ -34,6 +34,13 @@ export default function PayDues() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check matric_no requirement for 200+ levels
+    if (student.level !== '100' && !student.matric_no) {
+      toast.error('Matric number required for 200+ level students. Please update your profile first.');
+      return;
+    }
+    
     setLoading(true);
 
     let proofUrl = '';
@@ -130,6 +137,14 @@ export default function PayDues() {
             </div>
           </div>
 
+          {/* Matric No Requirement Notice */}
+          {student?.level !== '100' && !student?.matric_no && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+              <p className="text-red-800 font-semibold text-sm mb-1">⚠️ Matric Number Required</p>
+              <p className="text-red-700 text-xs">200+ level students must have a matric number to pay dues. Please update your profile with your matric number before proceeding.</p>
+            </div>
+          )}
+
           {/* Receipt Format Instructions */}
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-2">
             <p className="text-amber-800 font-semibold text-sm mb-1">⚠️ Receipt Description Requirement</p>
@@ -186,7 +201,7 @@ export default function PayDues() {
 
           <Button
             type="submit"
-            disabled={loading || !proofFile || !amount}
+            disabled={loading || !proofFile || !amount || (student?.level !== '100' && !student?.matric_no)}
             className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-12 text-base shadow-lg shadow-emerald-200"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
