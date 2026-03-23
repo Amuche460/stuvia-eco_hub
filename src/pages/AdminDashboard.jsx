@@ -187,6 +187,9 @@ export default function AdminDashboard() {
               Payments
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="rounded-lg">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Suggestions ({suggestions.length})
+            </TabsTrigger>
             <TabsTrigger value="autoverify" className="rounded-lg">
               <Zap className="w-4 h-4 mr-2" />
               Auto-Verify
