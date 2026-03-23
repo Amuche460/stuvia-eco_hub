@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import StatCard from '../components/dashboard/StatCard';
+import AutoVerifyPanel from '../components/admin/AutoVerifyPanel';
+import AnnouncementBoard from '../components/admin/AnnouncementBoard';
 import PaymentTable from '../components/admin/PaymentTable';
 import SuggestionsList from '../components/admin/SuggestionsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Wallet, Heart, Users, CreditCard, MessageSquare,
-  BarChart3, Receipt, ArrowLeft, Calendar, UserCircle
+  BarChart3, Receipt, ArrowLeft, Calendar, UserCircle, Zap, Megaphone
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -185,8 +187,13 @@ export default function AdminDashboard() {
               Payments
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="rounded-lg">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Suggestions ({suggestions.length})
+            <TabsTrigger value="autoverify" className="rounded-lg">
+              <Zap className="w-4 h-4 mr-2" />
+              Auto-Verify
+            </TabsTrigger>
+            <TabsTrigger value="announcements" className="rounded-lg">
+              <Megaphone className="w-4 h-4 mr-2" />
+              Announcements
             </TabsTrigger>
           </TabsList>
 
@@ -234,6 +241,18 @@ export default function AdminDashboard() {
 
           <TabsContent value="suggestions" className="mt-4">
             <SuggestionsList suggestions={suggestions} onRefresh={loadData} />
+          </TabsContent>
+
+          <TabsContent value="autoverify" className="mt-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <AutoVerifyPanel payments={payments} onRefresh={loadData} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="announcements" className="mt-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <AnnouncementBoard />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

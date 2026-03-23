@@ -11,6 +11,7 @@ import {
   User, CheckCircle, Clock, XCircle, ChevronRight, Calendar
 } from 'lucide-react';
 import NotificationBell from '../components/dashboard/NotificationBell';
+import AnnouncementFeed from '../components/dashboard/AnnouncementFeed';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
@@ -233,6 +234,9 @@ export default function StudentDashboard() {
             </motion.div>
           </Link>
         </div>
+
+        {/* Announcements */}
+        <AnnouncementFeed studentLevel={student.level} />
 
         {/* Payment History */}
         <motion.div
