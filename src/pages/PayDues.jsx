@@ -114,6 +114,24 @@ export default function PayDues() {
             </div>
           )}
 
+          {/* Bank Details */}
+          <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 rounded-2xl p-5 text-white mb-6 shadow-lg">
+            <p className="text-emerald-200 text-xs tracking-wider uppercase mb-2">NESA Bank Account</p>
+            <p className="font-bold text-base mb-3">Nigerian Economic Students Association</p>
+            <div className="flex items-center justify-between bg-white/10 rounded-xl p-3">
+              <div>
+                <p className="text-emerald-200 text-xs">Covenant MFB</p>
+                <p className="font-mono font-bold text-xl tracking-wider">0520003964</p>
+              </div>
+              <button
+                onClick={() => { navigator.clipboard.writeText('0520003964'); }}
+                className="text-white bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1.5 text-xs font-medium"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-5">
             {student && (
               <div className="bg-emerald-50 rounded-xl p-3 text-sm">
