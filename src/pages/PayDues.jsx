@@ -4,55 +4,31 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload, Loader2, CheckCircle, Copy, CreditCard } from 'lucide-react';
+import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import FlutterwaveButton from '../components/payments/FlutterwaveButton';
 
 export default function PayDues() {
   const [student, setStudent] = useState(null);
   const [amount, setAmount] = useState('');
-  const [proofFile, setProofFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [validationWarning, setValidationWarning] = useState(false);
+  const [receiptNo, setReceiptNo] = useState('');
 
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
     if (!sid) { window.location.href = createPageUrl('SignIn'); return; }
-
     base44.entities.Student.filter({ id: sid }).then(s => {
       if (s.length) setStudent(s[0]);
     });
   }, []);
 
-  const copyAccount = () => {
-    navigator.clipboard.writeText('0520003964');
-    toast.success('Account number copied!');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Check matric_no requirement for 200+ levels
-    if (student.level !== '100' && !student.matric_no) {
-      toast.error('Matric number required for 200+ level students. Please update your profile first.');
-      return;
-    }
-    
+  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
     setLoading(true);
-
-    let proofUrl = '';
-    if (proofFile) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile });
-      proofUrl = file_url;
-    }
-
-    const receiptNumber = `NESA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-
-    // Flag for admin review if student acknowledged the warning
-    const flagged = validationWarning;
+    const receiptNumber = `NESA-${txRef.split('-').slice(-2).join('-')}`;
 
     await base44.entities.Payment.create({
       student_id: student.id,
@@ -61,37 +37,52 @@ export default function PayDues() {
       student_reg_no: student.reg_no,
       student_matric_no: student.matric_no || '',
       type: 'dues',
-      amount: parseFloat(amount),
+      amount: paidAmount,
       payment_method: 'bank_transfer',
-      proof_url: proofUrl,
-      status: 'pending',
+      proof_url: '',
+      status: 'verified',
       receipt_number: receiptNumber,
-      rejection_reason: flagged ? 'Flagged: student could not confirm receipt description format — admin review required' : '',
+      verified_at: new Date().toISOString(),
+      verified_by: 'flutterwave',
     });
 
+    await base44.entities.Student.update(student.id, { dues_paid: true });
+
+    await base44.entities.NesaNotification.create({
+      title: 'Dues Payment Verified ✅',
+      message: `Your dues payment of ₦${paidAmount.toLocaleString()} has been verified. Receipt: ${receiptNumber}`,
+      type: 'payment',
+      is_read_by: [],
+    });
+
+    // Send receipt email
+    await base44.integrations.Core.SendEmail({
+      to: student.email,
+      subject: `NESA Dues Payment Receipt — ${receiptNumber}`,
+      body: `Dear ${student.full_name},\n\nYour NESA dues payment has been received and verified.\n\nReceipt No: ${receiptNumber}\nAmount: ₦${paidAmount.toLocaleString()}\nFlutterwave Ref: ${flwRef}\nDate: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}\n\nThank you!\nNESA FinTech Portal`,
+    });
+
+    setReceiptNo(receiptNumber);
     setSubmitted(true);
     setLoading(false);
+    toast.success('Payment verified! Receipt sent to your email.');
   };
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md"
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
           <div className="bg-emerald-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Submitted!</h2>
-          <p className="text-gray-500 mb-6">
-            Your proof of payment has been submitted for verification. You'll see the receipt once it's verified.
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Verified!</h2>
+          <p className="text-gray-500 mb-2">Your dues payment was successful and instantly verified.</p>
+          <p className="text-sm font-mono bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-emerald-700 mb-6">
+            Receipt: {receiptNo}
           </p>
+          <p className="text-xs text-gray-400 mb-6">A receipt has been sent to {student?.email}</p>
           <Link to={createPageUrl('StudentDashboard')}>
-            <Button className="bg-emerald-700 hover:bg-emerald-800 rounded-xl">
-              Back to Dashboard
-            </Button>
+            <Button className="bg-emerald-700 hover:bg-emerald-800 rounded-xl">Back to Dashboard</Button>
           </Link>
         </motion.div>
       </div>
@@ -102,8 +93,7 @@ export default function PayDues() {
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
       <header className="p-4">
         <Link to={createPageUrl('StudentDashboard')} className="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-800 text-sm font-medium">
-          <ArrowLeft className="w-4 h-4" />
-          Dashboard
+          <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>
       </header>
 
@@ -114,99 +104,48 @@ export default function PayDues() {
               <CreditCard className="w-6 h-6 text-emerald-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Pay Dues</h1>
-            <p className="text-gray-500 text-sm mt-1">Transfer to NESA account & upload proof</p>
+            <p className="text-gray-500 text-sm mt-1">Pay securely via card, bank transfer, or USSD</p>
           </div>
 
-          {/* Bank Details */}
-          <div className="bg-gradient-to-r from-emerald-700 to-emerald-800 rounded-2xl p-5 text-white mb-6 shadow-lg">
-            <p className="text-emerald-200 text-xs tracking-wider uppercase mb-2">Transfer To</p>
-            <p className="font-bold text-lg mb-3">Nigerian Economic Students Association</p>
-            <div className="flex items-center justify-between bg-white/10 rounded-xl p-3">
-              <div>
-                <p className="text-emerald-200 text-xs">Covenant MFB</p>
-                <p className="font-mono font-bold text-lg tracking-wider">0520003964</p>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={copyAccount}
-                className="text-white hover:bg-white/20"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Matric No Requirement Notice */}
           {student?.level !== '100' && !student?.matric_no && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
               <p className="text-red-800 font-semibold text-sm mb-1">⚠️ Matric Number Required</p>
-              <p className="text-red-700 text-xs">200+ level students must have a matric number to pay dues. Please update your profile with your matric number before proceeding.</p>
+              <p className="text-red-700 text-xs">200+ level students must have a matric number on their profile before paying dues.</p>
             </div>
           )}
 
-          {/* Receipt Format Instructions */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-2">
-            <p className="text-amber-800 font-semibold text-sm mb-1">⚠️ Receipt Description Requirement</p>
-            {student?.level === '100' ? (
-              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Reg No] Dues Payment</span><br/>e.g. <span className="font-mono">ECO/2026/001 Dues Payment</span></p>
-            ) : (
-              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Matric No] [Reg No] Dues Payment</span><br/>e.g. <span className="font-mono">20260001 ECO/2026/001 Dues Payment</span></p>
+          <div className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-5">
+            {student && (
+              <div className="bg-emerald-50 rounded-xl p-3 text-sm">
+                <p className="font-semibold text-gray-800">{student.full_name}</p>
+                <p className="text-gray-500 text-xs">{student.reg_no}{student.matric_no ? ` • ${student.matric_no}` : ''} • {student.level}L</p>
+              </div>
             )}
-            <p className="text-amber-600 text-xs mt-1">Receipts that don't match will be flagged for admin review and may be rejected.</p>
-          </div>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-4">
-          <div>
-            <Label className="text-gray-700">Amount (₦) *</Label>
-            <Input
-              required
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount paid"
-              className="mt-1 rounded-xl h-11 border-gray-200"
-            />
-          </div>
-
-          <div>
-            <Label className="text-gray-700">Proof of Payment *</Label>
-            <div className="mt-1 border-2 border-dashed border-emerald-200 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer"
-              onClick={() => document.getElementById('proof-upload').click()}
-            >
-              <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">
-                {proofFile ? proofFile.name : 'Click to upload screenshot or receipt'}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG, or PDF</p>
-              <input
-                id="proof-upload"
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => setProofFile(e.target.files[0])}
+            <div>
+              <Label className="text-gray-700">Amount (₦) *</Label>
+              <Input
+                type="number"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="mt-1 rounded-xl h-11 border-gray-200"
               />
             </div>
+
+            <FlutterwaveButton
+              amount={amount}
+              student={student || {}}
+              paymentType="dues"
+              onSuccess={handleSuccess}
+              loading={loading}
+              disabled={!student || !amount || (student?.level !== '100' && !student?.matric_no)}
+            />
+
+            <p className="text-center text-xs text-gray-400">
+              🔒 Secured by Flutterwave · Card, Bank Transfer, USSD
+            </p>
           </div>
-
-          {/* Confirmation checkbox */}
-          <label className="flex items-start gap-2 cursor-pointer">
-            <input type="checkbox" checked={!validationWarning}
-              onChange={e => setValidationWarning(!e.target.checked)}
-              className="mt-0.5 accent-emerald-600" />
-            <span className="text-xs text-gray-600">
-              I confirm my bank transfer description contains my {student?.level === '100' ? 'Reg No' : 'Matric No and Reg No'} followed by "Dues Payment"
-            </span>
-          </label>
-
-          <Button
-            type="submit"
-            disabled={loading || !proofFile || !amount || (student?.level !== '100' && !student?.matric_no)}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-12 text-base shadow-lg shadow-emerald-200"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Payment'}
-          </Button>
-          </form>
         </motion.div>
       </div>
     </div>

@@ -2,21 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload, Loader2, CheckCircle, Copy, Heart } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import FlutterwaveButton from '../components/payments/FlutterwaveButton';
 
 export default function Donate() {
   const [student, setStudent] = useState(null);
   const [amount, setAmount] = useState('');
-  const [proofFile, setProofFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [receiptNo, setReceiptNo] = useState('');
   const [amountError, setAmountError] = useState('');
-  const [validationWarning, setValidationWarning] = useState(false);
+
+  const quickAmounts = [500, 1000, 2000, 5000];
 
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
@@ -26,37 +28,14 @@ export default function Donate() {
     });
   }, []);
 
-  const copyAccount = () => {
-    navigator.clipboard.writeText('0520003964');
-    toast.success('Account number copied!');
-  };
-
-  const quickAmounts = [500, 1000, 2000, 5000];
-
   const handleAmountChange = (val) => {
     setAmount(val);
-    if (parseFloat(val) > 5000) {
-      setAmountError('Maximum donation amount is ₦5,000. We cannot accept more to ensure transparency.');
-    } else {
-      setAmountError('');
-    }
+    setAmountError(parseFloat(val) > 5000 ? 'Maximum donation amount is ₦5,000.' : '');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (parseFloat(amount) > 5000) {
-      setAmountError('Maximum donation amount is ₦5,000.');
-      return;
-    }
+  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
     setLoading(true);
-
-    let proofUrl = '';
-    if (proofFile) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: proofFile });
-      proofUrl = file_url;
-    }
-
-    const receiptNumber = `NESA-DON-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const receiptNumber = `NESA-DON-${txRef.split('-').slice(-2).join('-')}`;
 
     await base44.entities.Payment.create({
       student_id: student.id,
@@ -65,15 +44,37 @@ export default function Donate() {
       student_reg_no: student.reg_no,
       student_matric_no: student.matric_no || '',
       type: 'donation',
-      amount: parseFloat(amount),
+      amount: paidAmount,
       payment_method: 'bank_transfer',
-      proof_url: proofUrl,
-      status: 'pending',
+      proof_url: '',
+      status: 'verified',
       receipt_number: receiptNumber,
+      verified_at: new Date().toISOString(),
+      verified_by: 'flutterwave',
     });
 
+    await base44.entities.Student.update(student.id, {
+      total_donated: (student.total_donated || 0) + paidAmount,
+    });
+
+    await base44.entities.NesaNotification.create({
+      title: 'Donation Received 💛',
+      message: `Your donation of ₦${paidAmount.toLocaleString()} to the Love Foundation has been received. Receipt: ${receiptNumber}`,
+      type: 'payment',
+      is_read_by: [],
+    });
+
+    // Send receipt email
+    await base44.integrations.Core.SendEmail({
+      to: student.email,
+      subject: `NESA Love Foundation Donation Receipt — ${receiptNumber}`,
+      body: `Dear ${student.full_name},\n\nThank you for your generous donation to the NESA Love Foundation!\n\nReceipt No: ${receiptNumber}\nAmount: ₦${paidAmount.toLocaleString()}\nFlutterwave Ref: ${flwRef}\nDate: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}\n\nGod bless you!\nNESA FinTech Portal`,
+    });
+
+    setReceiptNo(receiptNumber);
     setSubmitted(true);
     setLoading(false);
+    toast.success('Donation received! Receipt sent to your email.');
   };
 
   if (submitted) {
@@ -84,9 +85,11 @@ export default function Donate() {
             <Heart className="w-10 h-10 text-rose-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You! 💛</h2>
-          <p className="text-gray-500 mb-6">
-            Your donation to the Love Foundation has been submitted. God bless you!
+          <p className="text-gray-500 mb-2">Your donation to the Love Foundation was received instantly.</p>
+          <p className="text-sm font-mono bg-rose-50 border border-rose-200 rounded-xl px-4 py-2 text-rose-700 mb-6">
+            Receipt: {receiptNo}
           </p>
+          <p className="text-xs text-gray-400 mb-6">A receipt has been sent to {student?.email}</p>
           <Link to={createPageUrl('StudentDashboard')}>
             <Button className="bg-emerald-700 hover:bg-emerald-800 rounded-xl">Back to Dashboard</Button>
           </Link>
@@ -113,43 +116,25 @@ export default function Donate() {
             <p className="text-gray-500 text-sm mt-1">Support NESA's welfare initiative</p>
           </div>
 
-          {/* Bank Details */}
-          <div className="bg-gradient-to-r from-rose-600 to-rose-700 rounded-2xl p-5 text-white mb-6 shadow-lg">
-            <p className="text-rose-200 text-xs tracking-wider uppercase mb-2">Donate To</p>
-            <p className="font-bold text-lg mb-3">Nigerian Economic Students Association</p>
-            <div className="flex items-center justify-between bg-white/10 rounded-xl p-3">
-              <div>
-                <p className="text-rose-200 text-xs">Covenant MFB</p>
-                <p className="font-mono font-bold text-lg tracking-wider">0520003964</p>
+          <div className="bg-white rounded-2xl border border-rose-100 shadow-lg p-6 space-y-5">
+            {student && (
+              <div className="bg-rose-50 rounded-xl p-3 text-sm">
+                <p className="font-semibold text-gray-800">{student.full_name}</p>
+                <p className="text-gray-500 text-xs">{student.reg_no} • {student.level}L</p>
               </div>
-              <Button size="sm" variant="ghost" onClick={copyAccount} className="text-white hover:bg-white/20">
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Receipt Format Instructions */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-2">
-            <p className="text-amber-800 font-semibold text-sm mb-1">⚠️ Receipt Description Requirement</p>
-            {student?.level === '100' ? (
-              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Reg No] Love Foundation</span><br/>e.g. <span className="font-mono">ECO/2026/001 Love Foundation</span></p>
-            ) : (
-              <p className="text-amber-700 text-xs">Your bank transfer description must include: <span className="font-mono font-bold">[Matric No] [Reg No] Love Foundation</span><br/>e.g. <span className="font-mono">20260001 ECO/2026/001 Love Foundation</span></p>
             )}
-            <p className="text-rose-700 font-semibold text-xs mt-1.5">Maximum donation: ₦5,000</p>
-          </div>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-rose-100 shadow-lg p-6 space-y-4">
             <div>
-              <Label className="text-gray-700">Donation Amount (₦) * <span className="text-rose-500 text-xs">(max ₦5,000)</span></Label>
+              <Label className="text-gray-700">
+                Donation Amount (₦) * <span className="text-rose-500 text-xs">(max ₦5,000)</span>
+              </Label>
               <Input
-                required
                 type="number"
                 value={amount}
-                onChange={(e) => handleAmountChange(e.target.value)}
+                onChange={e => handleAmountChange(e.target.value)}
                 placeholder="Enter amount"
                 max={5000}
-                className={`mt-1 rounded-xl h-11 border-gray-200 ${amountError ? 'border-red-400 focus:ring-red-300' : ''}`}
+                className={`mt-1 rounded-xl h-11 border-gray-200 ${amountError ? 'border-red-400' : ''}`}
               />
               {amountError && <p className="text-xs text-red-600 mt-1">{amountError}</p>}
               <div className="flex gap-2 mt-2">
@@ -168,49 +153,19 @@ export default function Donate() {
               </div>
             </div>
 
-            <div>
-              <Label className="text-gray-700">Proof of Payment *</Label>
-              <div
-                className="mt-1 border-2 border-dashed border-rose-200 rounded-xl p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
-                onClick={() => document.getElementById('donate-proof').click()}
-              >
-                <Upload className="w-8 h-8 text-rose-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">
-                  {proofFile ? proofFile.name : 'Upload your transfer receipt'}
-                </p>
-                <input
-                  id="donate-proof"
-                  type="file"
-                  accept="image/*,.pdf"
-                  className="hidden"
-                  onChange={(e) => setProofFile(e.target.files[0])}
-                />
-              </div>
-            </div>
+            <FlutterwaveButton
+              amount={amount}
+              student={student || {}}
+              paymentType="donation"
+              onSuccess={handleSuccess}
+              loading={loading}
+              disabled={!student || !amount || !!amountError}
+            />
 
-            {/* Confirmation checkbox */}
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input type="checkbox" checked={!validationWarning}
-                onChange={e => setValidationWarning(!e.target.checked)}
-                className="mt-0.5 accent-rose-600" />
-              <span className="text-xs text-gray-600">
-                I confirm my bank transfer description contains my {student?.level === '100' ? 'Reg No' : 'Matric No and Reg No'} followed by "Love Foundation"
-              </span>
-            </label>
-
-            <Button
-              type="submit"
-              disabled={loading || !proofFile || !amount || !!amountError}
-              className="w-full bg-rose-600 hover:bg-rose-700 rounded-xl h-12 text-base shadow-lg shadow-rose-200"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>
-                  <Heart className="w-4 h-4 mr-2" />
-                  Submit Donation
-                </>
-              )}
-            </Button>
-          </form>
+            <p className="text-center text-xs text-gray-400">
+              🔒 Secured by Flutterwave · Card, Bank Transfer, USSD
+            </p>
+          </div>
         </motion.div>
       </div>
     </div>
