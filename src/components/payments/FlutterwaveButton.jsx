@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 
-const FLW_PUBLIC_KEY = 'FLWPUBK_TEST-c254ce2604dcf42474d5b95031ddd4aa-X';
+const FLW_PUBLIC_KEY = 'FLWPUBK_TEST-c205afdee32e3692aded6100a3823f10-X';
 
 export default function FlutterwaveButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading }) {
   useEffect(() => {
