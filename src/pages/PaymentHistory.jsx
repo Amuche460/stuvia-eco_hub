@@ -6,7 +6,7 @@ import NesaLogo from '../components/NesaLogo';
 import ReceiptCard from '../components/receipt/ReceiptCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CreditCard, Heart, Clock, CheckCircle, XCircle, Receipt, ChevronRight } from 'lucide-react';
+import { ArrowLeft, CreditCard, Heart, Clock, CheckCircle, XCircle, Receipt, ChevronRight, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
@@ -14,6 +14,55 @@ const STATUS_STYLES = {
   pending:  { color: 'bg-amber-100 text-amber-700', Icon: Clock },
   verified: { color: 'bg-emerald-100 text-emerald-700', Icon: CheckCircle },
   rejected: { color: 'bg-red-100 text-red-700', Icon: XCircle },
+};
+
+const downloadReceiptPDF = (p) => {
+  import('jspdf').then(({ jsPDF }) => {
+    const doc = new jsPDF();
+    doc.setFillColor(26, 107, 98);
+    doc.rect(0, 0, 210, 35, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('NESA Payment Receipt', 105, 18, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Nigerian Economic Students Association', 105, 27, { align: 'center' });
+
+    doc.setTextColor(0, 0, 0);
+    const lines = [
+      ['Receipt No.', p.receipt_number || p.id?.slice(0, 8).toUpperCase()],
+      ['Date', format(new Date(p.created_date), 'MMM d, yyyy • h:mm a')],
+      ['Student Name', p.student_name || '—'],
+      ['Reg No.', p.student_reg_no || '—'],
+      ['Matric No.', p.student_matric_no || '—'],
+      ['Level', p.student_level ? `${p.student_level}L` : '—'],
+      ['Payment Type', p.type === 'dues' ? 'NESA Dues' : 'Love Foundation Donation'],
+      ['Amount', `NGN ${p.amount?.toLocaleString()}`],
+      ['Status', 'VERIFIED'],
+    ];
+
+    let y = 50;
+    lines.forEach(([label, value]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(label + ':', 20, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(value), 80, y);
+      doc.setDrawColor(220, 220, 220);
+      doc.line(20, y + 3, 190, y + 3);
+      y += 12;
+    });
+
+    doc.setFillColor(26, 107, 98);
+    doc.roundedRect(20, y + 5, 170, 14, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('This receipt is digitally generated and valid.', 105, y + 14, { align: 'center' });
+
+    doc.save(`NESA-Receipt-${p.receipt_number || p.id?.slice(0, 8)}.pdf`);
+  });
 };
 
 export default function PaymentHistory() {
@@ -138,7 +187,18 @@ export default function PaymentHistory() {
                         {p.status}
                       </Badge>
                     </div>
-                    {p.status === 'verified' && <ChevronRight className="w-4 h-4 text-gray-300" />}
+                    {p.status === 'verified' && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); downloadReceiptPDF(p); }}
+                          className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors"
+                          title="Download Receipt"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <ChevronRight className="w-4 h-4 text-gray-300" />
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               );

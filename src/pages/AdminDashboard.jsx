@@ -6,11 +6,12 @@ import AutoVerifyPanel from '../components/admin/AutoVerifyPanel';
 import AnnouncementBoard from '../components/admin/AnnouncementBoard';
 import PaymentTable from '../components/admin/PaymentTable';
 import SuggestionsList from '../components/admin/SuggestionsList';
+import NotifyUnpaidPanel from '../components/admin/NotifyUnpaidPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Wallet, Heart, Users, CreditCard, MessageSquare,
-  BarChart3, Receipt, ArrowLeft, Calendar, UserCircle, Zap, Megaphone
+  BarChart3, Receipt, ArrowLeft, Calendar, UserCircle, Zap, Megaphone, Bell
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -199,6 +200,10 @@ export default function AdminDashboard() {
               <Megaphone className="w-4 h-4 mr-2" />
               Announcements
             </TabsTrigger>
+            <TabsTrigger value="notify" className="rounded-lg">
+              <Bell className="w-4 h-4 mr-2" />
+              Notify Unpaid
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="payments" className="mt-4">
@@ -256,6 +261,12 @@ export default function AdminDashboard() {
           <TabsContent value="announcements" className="mt-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
               <AnnouncementBoard />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notify" className="mt-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <NotifyUnpaidPanel students={students} payments={payments} />
             </div>
           </TabsContent>
         </Tabs>
