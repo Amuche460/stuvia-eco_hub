@@ -9,7 +9,8 @@ import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import FlutterwaveButton from '../components/payments/FlutterwaveButton';
+import PaymentGatewaySelector from '../components/payments/PaymentGatewaySelector';
+import { validatePaymentAmount, checkPaymentRateLimit, isRefAlreadyUsed, markRefUsed, sanitize } from '../lib/paymentSecurity';
 
 export default function PayDues() {
   const [student, setStudent] = useState(null);
@@ -27,6 +28,14 @@ export default function PayDues() {
   }, []);
 
   const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
+    // Security: prevent duplicate callback processing
+    if (isRefAlreadyUsed(txRef)) return;
+    markRefUsed(txRef);
+
+    // Security: validate amount server-side match
+    const validation = validatePaymentAmount(paidAmount, 'dues');
+    if (!validation.valid) { alert(validation.error); return; }
+
     setLoading(true);
     const receiptNumber = `NESA-${txRef.split('-').slice(-2).join('-')}`;
 
@@ -151,7 +160,7 @@ export default function PayDues() {
               />
             </div>
 
-            <FlutterwaveButton
+            <PaymentGatewaySelector
               amount={amount}
               student={student || {}}
               paymentType="dues"
@@ -159,10 +168,6 @@ export default function PayDues() {
               loading={loading}
               disabled={!student || !amount || (student?.level !== '100' && !student?.matric_no)}
             />
-
-            <p className="text-center text-xs text-gray-400">
-              🔒 Secured by Flutterwave · Card, Bank Transfer, USSD
-            </p>
           </div>
         </motion.div>
       </div>

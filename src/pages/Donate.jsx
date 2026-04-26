@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, CheckCircle, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import FlutterwaveButton from '../components/payments/FlutterwaveButton';
+import PaymentGatewaySelector from '../components/payments/PaymentGatewaySelector';
+import { validatePaymentAmount, checkPaymentRateLimit, isRefAlreadyUsed, markRefUsed, sanitize } from '../lib/paymentSecurity';
 
 export default function Donate() {
   const [student, setStudent] = useState(null);
@@ -34,6 +35,14 @@ export default function Donate() {
   };
 
   const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
+    // Security: prevent duplicate callback processing
+    if (isRefAlreadyUsed(txRef)) return;
+    markRefUsed(txRef);
+
+    // Security: validate amount
+    const validation = validatePaymentAmount(paidAmount, 'donation');
+    if (!validation.valid) { alert(validation.error); return; }
+
     setLoading(true);
     const receiptNumber = `NESA-DON-${txRef.split('-').slice(-2).join('-')}`;
 
@@ -171,7 +180,7 @@ export default function Donate() {
               </div>
             </div>
 
-            <FlutterwaveButton
+            <PaymentGatewaySelector
               amount={amount}
               student={student || {}}
               paymentType="donation"
@@ -179,10 +188,6 @@ export default function Donate() {
               loading={loading}
               disabled={!student || !amount || !!amountError}
             />
-
-            <p className="text-center text-xs text-gray-400">
-              🔒 Secured by Flutterwave · Card, Bank Transfer, USSD
-            </p>
           </div>
         </motion.div>
       </div>

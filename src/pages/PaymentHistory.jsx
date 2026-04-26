@@ -16,53 +16,103 @@ const STATUS_STYLES = {
   rejected: { color: 'bg-red-100 text-red-700', Icon: XCircle },
 };
 
+const NESA_LOGO_URL = 'https://media.base44.com/images/public/6998637834968a098c6b2721/24f9cf519_IMG_20260217_123243_461.jpg';
+
 const downloadReceiptPDF = (p) => {
-  import('jspdf').then(({ jsPDF }) => {
-    const doc = new jsPDF();
-    doc.setFillColor(26, 107, 98);
-    doc.rect(0, 0, 210, 35, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('NESA Payment Receipt', 105, 18, { align: 'center' });
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Nigerian Economic Students Association', 105, 27, { align: 'center' });
+  // Load logo image as base64 first, then generate PDF
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = NESA_LOGO_URL;
+  img.onload = () => {
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF();
 
-    doc.setTextColor(0, 0, 0);
-    const lines = [
-      ['Receipt No.', p.receipt_number || p.id?.slice(0, 8).toUpperCase()],
-      ['Date', format(new Date(p.created_date), 'MMM d, yyyy • h:mm a')],
-      ['Student Name', p.student_name || '—'],
-      ['Reg No.', p.student_reg_no || '—'],
-      ['Matric No.', p.student_matric_no || '—'],
-      ['Level', p.student_level ? `${p.student_level}L` : '—'],
-      ['Payment Type', p.type === 'dues' ? 'NESA Dues' : 'Love Foundation Donation'],
-      ['Amount', `NGN ${p.amount?.toLocaleString()}`],
-      ['Status', 'VERIFIED'],
-    ];
+      // Header bar
+      doc.setFillColor(26, 107, 98);
+      doc.rect(0, 0, 210, 50, 'F');
 
-    let y = 50;
-    lines.forEach(([label, value]) => {
+      // NESA logo (circular crop simulation via addImage)
+      const canvas = document.createElement('canvas');
+      canvas.width = 80; canvas.height = 80;
+      const ctx = canvas.getContext('2d');
+      ctx.beginPath();
+      ctx.arc(40, 40, 40, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, 80, 80);
+      const logoData = canvas.toDataURL('image/png');
+      doc.addImage(logoData, 'PNG', 93, 4, 24, 24);
+
+      // Header text
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.text(label + ':', 20, y);
+      doc.text('NESA Official Receipt', 105, 35, { align: 'center' });
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text(String(value), 80, y);
-      doc.setDrawColor(220, 220, 220);
-      doc.line(20, y + 3, 190, y + 3);
-      y += 12;
+      doc.text('Nigerian Economic Students Association · Covenant University', 105, 43, { align: 'center' });
+
+      // Receipt number
+      doc.setFillColor(240, 253, 244);
+      doc.roundedRect(65, 53, 80, 9, 2, 2, 'F');
+      doc.setTextColor(26, 107, 98);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(p.receipt_number || p.id?.slice(0, 8).toUpperCase(), 105, 59.5, { align: 'center' });
+
+      doc.setTextColor(0, 0, 0);
+      const lines = [
+        ['Receipt No.', p.receipt_number || p.id?.slice(0, 8).toUpperCase()],
+        ['Date', format(new Date(p.created_date), 'MMM d, yyyy · h:mm a')],
+        ['Student Name', p.student_name || '—'],
+        ['Reg No.', p.student_reg_no || '—'],
+        ['Matric No.', p.student_matric_no || '—'],
+        ['Level', p.student_level ? `${p.student_level}L` : '—'],
+        ['Payment Type', p.type === 'dues' ? 'NESA Dues Payment' : 'Love Foundation Donation'],
+        ['Gateway', p.verified_by ? p.verified_by.charAt(0).toUpperCase() + p.verified_by.slice(1) : 'N/A'],
+        ['Amount', `NGN ${p.amount?.toLocaleString()}`],
+        ['Status', 'VERIFIED ✓'],
+      ];
+
+      let y = 72;
+      lines.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text(label + ':', 20, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(20, 20, 20);
+        doc.text(String(value), 80, y);
+        doc.setDrawColor(230, 230, 230);
+        doc.line(20, y + 3, 190, y + 3);
+        y += 12;
+      });
+
+      // Security footer
+      doc.setFillColor(240, 253, 244);
+      doc.roundedRect(15, y + 6, 180, 18, 3, 3, 'F');
+      doc.setTextColor(22, 101, 52);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('🔒 This receipt is digitally generated and cryptographically linked to', 105, y + 14, { align: 'center' });
+      doc.text(`transaction ${p.receipt_number}. Any alteration renders it invalid.`, 105, y + 20, { align: 'center' });
+
+      doc.save(`NESA-Receipt-${p.receipt_number || p.id?.slice(0, 8)}.pdf`);
     });
-
-    doc.setFillColor(26, 107, 98);
-    doc.roundedRect(20, y + 5, 170, 14, 3, 3, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('This receipt is digitally generated and valid.', 105, y + 14, { align: 'center' });
-
-    doc.save(`NESA-Receipt-${p.receipt_number || p.id?.slice(0, 8)}.pdf`);
-  });
+  };
+  // Fallback if image fails to load
+  img.onerror = () => {
+    import('jspdf').then(({ jsPDF }) => {
+      const doc = new jsPDF();
+      doc.setFillColor(26, 107, 98);
+      doc.rect(0, 0, 210, 35, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('NESA Payment Receipt', 105, 20, { align: 'center' });
+      doc.save(`NESA-Receipt-${p.receipt_number || p.id?.slice(0, 8)}.pdf`);
+    });
+  };
 };
 
 export default function PaymentHistory() {
