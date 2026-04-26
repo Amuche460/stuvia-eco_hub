@@ -48,7 +48,7 @@ export default function FlutterwaveButton({ amount, student, paymentType, onSucc
       },
       callback: (response) => {
         if (response.status === 'successful' || response.status === 'completed') {
-          onSuccess({ txRef, flwRef: response.flw_ref, amount: parseFloat(amount), response });
+          onSuccess({ txRef, flwRef: response.flw_ref, amount: parseFloat(amount), response, gateway: 'flutterwave' });
         }
       },
       onclose: () => {

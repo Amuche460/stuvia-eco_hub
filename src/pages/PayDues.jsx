@@ -27,7 +27,7 @@ export default function PayDues() {
     });
   }, []);
 
-  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
+  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount, gateway }) => {
     // Security: prevent duplicate callback processing
     if (isRefAlreadyUsed(txRef)) return;
     markRefUsed(txRef);
@@ -52,7 +52,7 @@ export default function PayDues() {
       status: 'verified',
       receipt_number: receiptNumber,
       verified_at: new Date().toISOString(),
-      verified_by: 'flutterwave',
+      verified_by: gateway || 'flutterwave',
     });
 
     await base44.entities.Student.update(student.id, { dues_paid: true });

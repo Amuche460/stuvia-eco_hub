@@ -34,7 +34,7 @@ export default function Donate() {
     setAmountError(parseFloat(val) > 5000 ? 'Maximum donation amount is ₦5,000.' : '');
   };
 
-  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount }) => {
+  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount, gateway }) => {
     // Security: prevent duplicate callback processing
     if (isRefAlreadyUsed(txRef)) return;
     markRefUsed(txRef);
@@ -59,7 +59,7 @@ export default function Donate() {
       status: 'verified',
       receipt_number: receiptNumber,
       verified_at: new Date().toISOString(),
-      verified_by: 'flutterwave',
+      verified_by: gateway || 'flutterwave',
     });
 
     await base44.entities.Student.update(student.id, {

@@ -44,7 +44,7 @@ export default function PaystackButton({ amount, student, paymentType, onSuccess
       },
       callback: (response) => {
         if (response.status === 'success') {
-          onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response });
+          onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response, gateway: 'paystack' });
         }
       },
       onClose: () => {
