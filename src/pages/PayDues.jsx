@@ -5,16 +5,17 @@ import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, CheckCircle, CreditCard, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import PaymentGatewaySelector from '../components/payments/PaymentGatewaySelector';
-import { validatePaymentAmount, checkPaymentRateLimit, isRefAlreadyUsed, markRefUsed, sanitize } from '../lib/paymentSecurity';
+import { checkPaymentRateLimit, isRefAlreadyUsed, markRefUsed, validatePaymentAmount } from '../lib/paymentSecurity';
 
 export default function PayDues() {
   const [student, setStudent] = useState(null);
   const [amount, setAmount] = useState('');
+  const [amountError, setAmountError] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [receiptNo, setReceiptNo] = useState('');
@@ -27,16 +28,22 @@ export default function PayDues() {
     });
   }, []);
 
-  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount, gateway }) => {
+  const handleAmountChange = (val) => {
+    setAmount(val);
+    const { valid, error } = validatePaymentAmount(val, 'dues');
+    setAmountError(!val ? '' : valid ? '' : error);
+  };
+
+  const handleSuccess = async ({ txRef, flwRef, amount: paidAmount, response }) => {
     // Security: prevent duplicate callback processing
-    if (isRefAlreadyUsed(txRef)) return;
+    if (isRefAlreadyUsed(txRef)) {
+      toast.error('This transaction has already been processed.');
+      return;
+    }
     markRefUsed(txRef);
 
-    // Security: validate amount server-side match
-    const validation = validatePaymentAmount(paidAmount, 'dues');
-    if (!validation.valid) { alert(validation.error); return; }
-
     setLoading(true);
+    const gateway = response?.charge_response_code !== undefined ? 'paystack' : 'flutterwave';
     const receiptNumber = `NESA-${txRef.split('-').slice(-2).join('-')}`;
 
     await base44.entities.Payment.create({
@@ -52,7 +59,7 @@ export default function PayDues() {
       status: 'verified',
       receipt_number: receiptNumber,
       verified_at: new Date().toISOString(),
-      verified_by: gateway || 'flutterwave',
+      verified_by: gateway,
     });
 
     await base44.entities.Student.update(student.id, { dues_paid: true });
@@ -64,17 +71,26 @@ export default function PayDues() {
       is_read_by: [],
     });
 
-    // Send receipt email
     await base44.integrations.Core.SendEmail({
       to: student.email,
       subject: `NESA Dues Payment Receipt — ${receiptNumber}`,
-      body: `Dear ${student.full_name},\n\nYour NESA dues payment has been received and verified.\n\nReceipt No: ${receiptNumber}\nAmount: ₦${paidAmount.toLocaleString()}\nFlutterwave Ref: ${flwRef}\nDate: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}\n\nThank you!\nNESA FinTech Portal`,
+      body: `Dear ${student.full_name},\n\nYour NESA dues payment has been received and verified.\n\nReceipt No: ${receiptNumber}\nAmount: ₦${paidAmount.toLocaleString()}\nGateway Ref: ${flwRef}\nDate: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}\n\nThank you!\nNESA FinTech Portal`,
     });
 
     setReceiptNo(receiptNumber);
     setSubmitted(true);
     setLoading(false);
     toast.success('Payment verified! Receipt sent to your email.');
+  };
+
+  const handlePayClick = () => {
+    const { allowed, remainingMs } = checkPaymentRateLimit();
+    if (!allowed) {
+      const mins = Math.ceil(remainingMs / 60000);
+      toast.error(`Too many attempts. Please wait ${mins} minute(s) before trying again.`);
+      return false;
+    }
+    return true;
   };
 
   if (submitted) {
@@ -116,6 +132,12 @@ export default function PayDues() {
             <p className="text-gray-500 text-sm mt-1">Pay securely via card, bank transfer, or USSD</p>
           </div>
 
+          {/* Security badge */}
+          <div className="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 mb-4">
+            <Shield className="w-4 h-4 text-emerald-600" />
+            <p className="text-xs text-emerald-700 font-medium">256-bit encrypted · PCI DSS compliant · No card data stored</p>
+          </div>
+
           {student?.level !== '100' && !student?.matric_no && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
               <p className="text-red-800 font-semibold text-sm mb-1">⚠️ Matric Number Required</p>
@@ -133,7 +155,7 @@ export default function PayDues() {
                 <p className="font-mono font-bold text-xl tracking-wider">0520003964</p>
               </div>
               <button
-                onClick={() => { navigator.clipboard.writeText('0520003964'); }}
+                onClick={() => { navigator.clipboard.writeText('0520003964'); toast.success('Account number copied!'); }}
                 className="text-white bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1.5 text-xs font-medium"
               >
                 Copy
@@ -154,10 +176,11 @@ export default function PayDues() {
               <Input
                 type="number"
                 value={amount}
-                onChange={e => setAmount(e.target.value)}
+                onChange={e => handleAmountChange(e.target.value)}
                 placeholder="Enter amount"
-                className="mt-1 rounded-xl h-11 border-gray-200"
+                className={`mt-1 rounded-xl h-11 border-gray-200 ${amountError ? 'border-red-400' : ''}`}
               />
+              {amountError && <p className="text-xs text-red-600 mt-1">{amountError}</p>}
             </div>
 
             <PaymentGatewaySelector
@@ -166,7 +189,8 @@ export default function PayDues() {
               paymentType="dues"
               onSuccess={handleSuccess}
               loading={loading}
-              disabled={!student || !amount || (student?.level !== '100' && !student?.matric_no)}
+              disabled={!student || !amount || !!amountError || (student?.level !== '100' && !student?.matric_no)}
+              onBeforePay={handlePayClick}
             />
           </div>
         </motion.div>

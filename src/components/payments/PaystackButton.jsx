@@ -4,7 +4,7 @@ import { Loader2, CreditCard } from 'lucide-react';
 
 const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Replace with real Paystack public key
 
-export default function PaystackButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading }) {
+export default function PaystackButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading, onBeforePay }) {
   useEffect(() => {
     if (!document.getElementById('paystack-script')) {
       const script = document.createElement('script');
@@ -16,6 +16,7 @@ export default function PaystackButton({ amount, student, paymentType, onSuccess
   }, []);
 
   const handlePay = () => {
+    if (onBeforePay && !onBeforePay()) return;
     if (!window.PaystackPop) {
       alert('Paystack is loading, please try again in a moment.');
       return;
@@ -44,7 +45,7 @@ export default function PaystackButton({ amount, student, paymentType, onSuccess
       },
       callback: (response) => {
         if (response.status === 'success') {
-          onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response, gateway: 'paystack' });
+          onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response });
         }
       },
       onClose: () => {

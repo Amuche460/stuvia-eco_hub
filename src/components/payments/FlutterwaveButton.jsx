@@ -4,7 +4,7 @@ import { Loader2, CreditCard } from 'lucide-react';
 
 const FLW_PUBLIC_KEY = 'FLWPUBK_TEST-c205afdee32e3692aded6100a3823f10-X';
 
-export default function FlutterwaveButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading }) {
+export default function FlutterwaveButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading, onBeforePay }) {
   useEffect(() => {
     if (!document.getElementById('flutterwave-script')) {
       const script = document.createElement('script');
@@ -16,6 +16,7 @@ export default function FlutterwaveButton({ amount, student, paymentType, onSucc
   }, []);
 
   const handlePay = () => {
+    if (onBeforePay && !onBeforePay()) return;
     if (!window.FlutterwaveCheckout) {
       alert('Payment gateway is loading, please try again in a moment.');
       return;
@@ -48,7 +49,7 @@ export default function FlutterwaveButton({ amount, student, paymentType, onSucc
       },
       callback: (response) => {
         if (response.status === 'successful' || response.status === 'completed') {
-          onSuccess({ txRef, flwRef: response.flw_ref, amount: parseFloat(amount), response, gateway: 'flutterwave' });
+          onSuccess({ txRef, flwRef: response.flw_ref, amount: parseFloat(amount), response });
         }
       },
       onclose: () => {

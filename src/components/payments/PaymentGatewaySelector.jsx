@@ -6,7 +6,7 @@ import PaystackButton from './PaystackButton';
  * Lets the user pick their preferred payment gateway (Flutterwave or Paystack)
  * then renders the chosen button.
  */
-export default function PaymentGatewaySelector({ amount, student, paymentType, onSuccess, loading, disabled }) {
+export default function PaymentGatewaySelector({ amount, student, paymentType, onSuccess, loading, disabled, onBeforePay }) {
   const [gateway, setGateway] = useState('flutterwave');
 
   return (
@@ -41,6 +41,7 @@ export default function PaymentGatewaySelector({ amount, student, paymentType, o
           onSuccess={onSuccess}
           loading={loading}
           disabled={disabled}
+          onBeforePay={onBeforePay}
         />
       ) : (
         <PaystackButton
@@ -50,6 +51,7 @@ export default function PaymentGatewaySelector({ amount, student, paymentType, o
           onSuccess={onSuccess}
           loading={loading}
           disabled={disabled}
+          onBeforePay={onBeforePay}
         />
       )}
 
