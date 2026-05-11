@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { sendReceiptEmail } from '../../lib/sendReceiptEmail';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +64,25 @@ export default function PaymentTable({ payments, onRefresh }) {
       type: 'payment',
       is_read_by: [],
     });
+
+    // Fetch student email and send receipt email
+    if (payment.student_id) {
+      const students = await base44.entities.Student.filter({ id: payment.student_id });
+      if (students.length && students[0].email) {
+        await sendReceiptEmail({
+          email: students[0].email,
+          studentName: payment.student_name,
+          receiptNumber,
+          amount: payment.amount,
+          paymentType: payment.type,
+          regNo: payment.student_reg_no,
+          matricNo: payment.student_matric_no,
+          level: payment.student_level,
+          gateway: 'admin',
+          date: new Date().toISOString(),
+        });
+      }
+    }
 
     setProcessing(null);
     onRefresh();

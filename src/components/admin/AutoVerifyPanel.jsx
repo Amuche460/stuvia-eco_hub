@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { sendReceiptEmail } from '../../lib/sendReceiptEmail';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,25 @@ export default function AutoVerifyPanel({ payments, onRefresh }) {
         type: 'payment',
         is_read_by: [],
       });
+
+      // Send receipt email
+      if (payment.student_id) {
+        const students = await base44.entities.Student.filter({ id: payment.student_id });
+        if (students.length && students[0].email) {
+          await sendReceiptEmail({
+            email: students[0].email,
+            studentName: payment.student_name,
+            receiptNumber,
+            amount: payment.amount,
+            paymentType: 'dues',
+            regNo: payment.student_reg_no,
+            matricNo: payment.student_matric_no,
+            level: payment.student_level,
+            gateway: 'auto-system',
+            date: new Date().toISOString(),
+          });
+        }
+      }
     }
 
     setResults({ matched, unmatched });

@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import PaymentGatewaySelector from '../components/payments/PaymentGatewaySelector';
 import { checkPaymentRateLimit, isRefAlreadyUsed, markRefUsed, validatePaymentAmount } from '../lib/paymentSecurity';
+import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 
 export default function PayDues() {
   const [student, setStudent] = useState(null);
@@ -71,10 +72,16 @@ export default function PayDues() {
       is_read_by: [],
     });
 
-    await base44.integrations.Core.SendEmail({
-      to: student.email,
-      subject: `NESA Dues Payment Receipt — ${receiptNumber}`,
-      body: `Dear ${student.full_name},\n\nYour NESA dues payment has been received and verified.\n\nReceipt No: ${receiptNumber}\nAmount: ₦${paidAmount.toLocaleString()}\nGateway Ref: ${flwRef}\nDate: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'long' })}\n\nThank you!\nNESA FinTech Portal`,
+    await sendReceiptEmail({
+      email: student.email,
+      studentName: student.full_name,
+      receiptNumber,
+      amount: paidAmount,
+      paymentType: 'dues',
+      regNo: student.reg_no,
+      matricNo: student.matric_no,
+      level: student.level,
+      gateway,
     });
 
     setReceiptNo(receiptNumber);
