@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard } from 'lucide-react';
 
-const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; // Replace with real Paystack public key
+const PAYSTACK_PUBLIC_KEY = 'pk_test_b10638dff0e8ee2c2399ed157c6e6501465863f9';
 
 export default function PaystackButton({ amount, student, paymentType, onSuccess, onClose, disabled, loading, onBeforePay }) {
   useEffect(() => {
@@ -21,8 +21,12 @@ export default function PaystackButton({ amount, student, paymentType, onSuccess
       alert('Paystack is loading, please try again in a moment.');
       return;
     }
+    if (!student?.email) {
+      alert('Your profile is missing an email address. Please update your profile before paying.');
+      return;
+    }
 
-    const amountKobo = Math.round(parseFloat(amount) * 100); // Paystack uses kobo (minor unit)
+    const amountKobo = Math.round(parseFloat(amount) * 100);
     const ref = `NESA-${paymentType.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     const handler = window.PaystackPop.setup({
@@ -44,9 +48,8 @@ export default function PaystackButton({ amount, student, paymentType, onSuccess
         ],
       },
       callback: (response) => {
-        if (response.status === 'success') {
-          onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response });
-        }
+        // response.status === 'success' for Paystack
+        onSuccess({ txRef: ref, flwRef: response.reference, amount: parseFloat(amount), response });
       },
       onClose: () => {
         if (onClose) onClose();

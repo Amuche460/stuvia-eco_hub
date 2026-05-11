@@ -43,7 +43,7 @@ export default function PayDues() {
     markRefUsed(txRef);
 
     setLoading(true);
-    const gateway = response?.charge_response_code !== undefined ? 'paystack' : 'flutterwave';
+    const gateway = response?.reference ? 'paystack' : 'flutterwave';
     const receiptNumber = `NESA-${txRef.split('-').slice(-2).join('-')}`;
 
     await base44.entities.Payment.create({
