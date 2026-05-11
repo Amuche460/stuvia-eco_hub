@@ -238,23 +238,24 @@ export default function StudentDashboard() {
         {/* Announcements */}
         <AnnouncementFeed studentLevel={student.level} />
 
-        {/* Payment History */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <Receipt className="w-4 h-4 text-emerald-600" />
-            Payment History
-          </h3>
-          {payments.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
-              <p className="text-gray-400 text-sm">No payments yet</p>
+        {/* Recent Payments Preview */}
+        {payments.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-emerald-600" />
+                Recent Payments
+              </h3>
+              <Link to={createPageUrl('PaymentHistory')} className="text-xs text-emerald-600 hover:underline font-medium">
+                View all →
+              </Link>
             </div>
-          ) : (
             <div className="space-y-2">
-              {payments.map(p => {
+              {payments.slice(0, 3).map(p => {
                 const StatusIcon = statusIcons[p.status] || Clock;
                 return (
                   <div
@@ -294,8 +295,8 @@ export default function StudentDashboard() {
                 );
               })}
             </div>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

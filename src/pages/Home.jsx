@@ -13,9 +13,8 @@ export default function Home() {
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
     if (sid) {
-      base44.entities.Student.list().then(students => {
-        const found = students.find(s => s.id === sid);
-        if (found) setStudent(found);
+      base44.entities.Student.filter({ id: sid }).then(students => {
+        if (students.length) setStudent(students[0]);
       });
     }
   }, []);

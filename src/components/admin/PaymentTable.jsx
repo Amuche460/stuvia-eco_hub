@@ -37,23 +37,32 @@ export default function PaymentTable({ payments, onRefresh }) {
 
   const handleVerify = async (payment) => {
     setProcessing(payment.id);
+    const receiptNumber = payment.receipt_number || `NESA-ADMIN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     await base44.entities.Payment.update(payment.id, {
       status: 'verified',
       verified_at: new Date().toISOString(),
       verified_by: 'admin',
+      receipt_number: receiptNumber,
     });
 
     if (payment.type === 'dues') {
       await base44.entities.Student.update(payment.student_id, { dues_paid: true });
-    } else {
+    } else if (payment.student_id) {
       const students = await base44.entities.Student.filter({ id: payment.student_id });
       if (students.length) {
-        const current = students[0].total_donated || 0;
         await base44.entities.Student.update(payment.student_id, {
-          total_donated: current + payment.amount,
+          total_donated: (students[0].total_donated || 0) + (payment.amount || 0),
         });
       }
     }
+
+    // Send verification notification
+    await base44.entities.NesaNotification.create({
+      title: `Payment Verified ✅`,
+      message: `Your ${payment.type === 'dues' ? 'dues' : 'donation'} payment of ₦${payment.amount?.toLocaleString()} has been verified.`,
+      type: 'payment',
+      is_read_by: [],
+    });
 
     setProcessing(null);
     onRefresh();
