@@ -8,7 +8,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div
-      className="min-h-screen bg-background text-foreground select-none"
+      className="min-h-screen bg-background text-foreground select-none transition-colors duration-200"
       style={{
         '--teal': '#1a6b62',
         '--teal-dark': '#0f4a44',

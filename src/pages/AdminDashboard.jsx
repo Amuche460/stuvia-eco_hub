@@ -13,6 +13,7 @@ import {
   Wallet, Heart, Users, CreditCard, MessageSquare,
   BarChart3, Receipt, ArrowLeft, Calendar, UserCircle, Zap, Megaphone, Bell
 } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
@@ -127,9 +128,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 transition-colors duration-200">
       {/* Header */}
-      <header className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-gray-100 z-50">
+      <header className="sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <NesaLogo size="sm" />
@@ -138,6 +139,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link to={createPageUrl('StudentProfiles')}>
               <span className="text-sm text-emerald-600 hover:text-emerald-800 flex items-center gap-1 font-medium">
                 <UserCircle className="w-4 h-4" /> Students

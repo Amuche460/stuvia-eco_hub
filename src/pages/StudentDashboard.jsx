@@ -11,6 +11,7 @@ import {
   User, CheckCircle, Clock, XCircle, ChevronRight, Calendar
 } from 'lucide-react';
 import NotificationBell from '../components/dashboard/NotificationBell';
+import ThemeToggle from '../components/ThemeToggle';
 import AnnouncementFeed from '../components/dashboard/AnnouncementFeed';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -88,14 +89,15 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50/30">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-200">
       {/* Header */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-emerald-100 z-50">
+      <header className="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-emerald-100 dark:border-gray-800 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <NesaLogo size="sm" />
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <NotificationBell studentId={student?.id} />
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500 dark:text-gray-400">
               <LogOut className="w-4 h-4 mr-1" />
               Sign out
             </Button>
@@ -149,13 +151,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white border border-emerald-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+              className="bg-white dark:bg-gray-800 border border-emerald-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
             >
-              <div className="bg-emerald-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-emerald-100 transition-colors">
-                <CreditCard className="w-5 h-5 text-emerald-600" />
+              <div className="bg-emerald-50 dark:bg-emerald-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/60 transition-colors">
+                <CreditCard className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Pay Dues</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Submit proof of payment</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Pay Dues</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Submit proof of payment</p>
             </motion.div>
           </Link>
 
@@ -164,13 +166,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="bg-white border border-rose-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+              className="bg-white dark:bg-gray-800 border border-rose-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
             >
-              <div className="bg-rose-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-rose-100 transition-colors">
-                <Heart className="w-5 h-5 text-rose-500" />
+              <div className="bg-rose-50 dark:bg-rose-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-rose-100 transition-colors">
+                <Heart className="w-5 h-5 text-rose-500 dark:text-rose-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Donate</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Love Foundation</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Donate</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Love Foundation</p>
             </motion.div>
           </Link>
 
@@ -179,13 +181,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white border border-amber-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+              className="bg-white dark:bg-gray-800 border border-amber-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
             >
-              <div className="bg-amber-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-amber-100 transition-colors">
-                <MessageSquare className="w-5 h-5 text-amber-600" />
+              <div className="bg-amber-50 dark:bg-amber-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-amber-100 transition-colors">
+                <MessageSquare className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Feedback</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Send suggestions</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Feedback</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Send suggestions</p>
             </motion.div>
           </Link>
 
@@ -194,13 +196,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-white border border-blue-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+              className="bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
             >
-              <div className="bg-blue-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-blue-100 transition-colors">
-                <User className="w-5 h-5 text-blue-600" />
+              <div className="bg-blue-50 dark:bg-blue-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-blue-100 transition-colors">
+                <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Profile</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Update matric no.</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Profile</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update matric no.</p>
             </motion.div>
           </Link>
 
@@ -209,13 +211,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white border border-teal-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+              className="bg-white dark:bg-gray-800 border border-teal-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group"
             >
-              <div className="bg-teal-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-teal-100 transition-colors">
-                <Calendar className="w-5 h-5 text-teal-600" />
+              <div className="bg-teal-50 dark:bg-teal-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-teal-100 transition-colors">
+                <Calendar className="w-5 h-5 text-teal-600 dark:text-teal-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Calendar</h3>
-              <p className="text-xs text-gray-500 mt-0.5">NESA events</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Calendar</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">NESA events</p>
             </motion.div>
           </Link>
 
@@ -224,13 +226,13 @@ export default function StudentDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="bg-white border border-purple-100 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group col-span-2"
+              className="bg-white dark:bg-gray-800 border border-purple-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-lg transition-all cursor-pointer group col-span-2"
             >
-              <div className="bg-purple-50 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-purple-100 transition-colors">
-                <Receipt className="w-5 h-5 text-purple-600" />
+              <div className="bg-purple-50 dark:bg-purple-900/40 rounded-xl p-2.5 w-fit mb-3 group-hover:bg-purple-100 transition-colors">
+                <Receipt className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm">Payment History</h3>
-              <p className="text-xs text-gray-500 mt-0.5">All transactions & receipts</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">Payment History</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">All transactions & receipts</p>
             </motion.div>
           </Link>
         </div>
@@ -246,7 +248,7 @@ export default function StudentDashboard() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-emerald-600" />
                 Recent Payments
               </h3>
@@ -260,7 +262,7 @@ export default function StudentDashboard() {
                 return (
                   <div
                     key={p.id}
-                    className="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 flex items-center justify-between hover:shadow-sm transition-all cursor-pointer"
                     onClick={() => p.status === 'verified' ? setSelectedReceipt(p) : null}
                   >
                     <div className="flex items-center gap-3">
@@ -271,10 +273,10 @@ export default function StudentDashboard() {
                         }
                       </div>
                       <div>
-                        <p className="font-medium text-sm text-gray-900">
+                        <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
                           {p.type === 'dues' ? 'Dues Payment' : 'Donation'}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
                           {format(new Date(p.created_date), 'MMM d, yyyy')}
                         </p>
                       </div>
