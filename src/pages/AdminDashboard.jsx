@@ -243,6 +243,35 @@ export default function AdminDashboard() {
                   <SelectItem value="400">400L</SelectItem>
                 </SelectContent>
               </Select>
+
+              <button
+                onClick={() => {
+                  const headers = ['Student Name', 'Reg No', 'Matric No', 'Level', 'Type', 'Amount (₦)', 'Status', 'Receipt No', 'Date'];
+                  const rows = filteredPayments.map(p => [
+                    p.student_name || '',
+                    p.student_reg_no || '',
+                    p.student_matric_no || '',
+                    p.student_level ? `${p.student_level}L` : '',
+                    p.type || '',
+                    p.amount || 0,
+                    p.status || '',
+                    p.receipt_number || '',
+                    p.created_date ? new Date(p.created_date).toLocaleDateString() : '',
+                  ]);
+                  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `nesa-payments-${new Date().toISOString().slice(0, 10)}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="ml-auto flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Download CSV
+              </button>
             </div>
 
             <PaymentTable payments={filteredPayments} onRefresh={loadData} />
