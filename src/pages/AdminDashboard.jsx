@@ -46,6 +46,45 @@ export default function AdminDashboard() {
     setStudents(s);
     setSuggestions(sug);
     setLoading(false);
+    sendBirthdayEmails(s);
+  };
+
+  const sendBirthdayEmails = async (allStudents) => {
+    const today = new Date();
+    const todayMonth = today.getMonth() + 1; // 1-12
+    const todayDay = today.getDate();
+    const birthdayStudents = allStudents.filter(s => {
+      if (!s.date_of_birth || !s.email) return false;
+      const dob = new Date(s.date_of_birth);
+      return dob.getMonth() + 1 === todayMonth && dob.getDate() === todayDay;
+    });
+    for (const student of birthdayStudents) {
+      await base44.integrations.Core.SendEmail({
+        to: student.email,
+        subject: `🎂 Happy Birthday from NESA, ${student.full_name.split(' ')[0]}!`,
+        body: `
+          <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; background: #f0fdf4; border-radius: 16px; padding: 32px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 12px;">🎂🎉</div>
+            <h1 style="color: #1a6b62; font-size: 26px; margin-bottom: 8px;">Happy Birthday, ${student.full_name.split(' ')[0]}!</h1>
+            <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+              On behalf of the entire <strong>NESA Executive Team</strong>, we want to celebrate YOU today! 🌟
+            </p>
+            <p style="color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+              As a valued member of our NESA family, you bring energy, excellence, and passion to everything you do. 
+              May this special day bring you joy, laughter, and everything your heart desires.
+            </p>
+            <div style="background: #d4a833; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <p style="color: #fff; font-size: 18px; font-weight: bold; margin: 0;">
+                🎊 Wishing you a blessed and wonderful birthday! 🎊
+              </p>
+            </div>
+            <p style="color: #6b7280; font-size: 13px;">With love & warm wishes,</p>
+            <p style="color: #1a6b62; font-weight: bold; font-size: 15px; margin-top: 4px;">The NESA Executive Team 💚</p>
+            <p style="color: #9ca3af; font-size: 11px; margin-top: 20px;">Nigerian Economic Students Association — My NESA Portal</p>
+          </div>
+        `,
+      });
+    }
   };
 
   useEffect(() => { loadData(); }, []);

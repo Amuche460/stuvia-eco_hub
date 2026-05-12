@@ -1,0 +1,83 @@
+{
+  "name": "Student",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Student's full name"
+    },
+    "reg_no": {
+      "type": "string",
+      "description": "Registration number"
+    },
+    "matric_no": {
+      "type": "string",
+      "description": "Matriculation number (optional for 100L)"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "100",
+        "200",
+        "300",
+        "400"
+      ],
+      "description": "Academic level"
+    },
+    "course_of_study": {
+      "type": "string",
+      "description": "Student's course of study"
+    },
+    "year_of_entry": {
+      "type": "string",
+      "description": "Year the student entered the university"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "description": "Student's date of birth (YYYY-MM-DD)"
+    },
+    "email": {
+      "type": "string",
+      "description": "Student email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "profile_picture_url": {
+      "type": "string",
+      "description": "URL to profile picture"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether student email is verified"
+    },
+    "otp_code": {
+      "type": "string",
+      "description": "Current OTP for verification"
+    },
+    "otp_expiry": {
+      "type": "string",
+      "description": "OTP expiration timestamp"
+    },
+    "dues_paid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether dues are paid for current session"
+    },
+    "total_donated": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount donated"
+    }
+  },
+  "required": [
+    "full_name",
+    "reg_no",
+    "level",
+    "email",
+    "phone",
+    "date_of_birth"
+  ]
+}

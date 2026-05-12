@@ -44,8 +44,9 @@ export default function NesaCalendar() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const adminFlag = localStorage.getItem('nesa_is_admin');
-    setIsAdmin(adminFlag === 'true');
+    const execId = localStorage.getItem('nesa_executive_id');
+    // Only executives can add/delete calendar events
+    setIsAdmin(!!execId);
     const sid = localStorage.getItem('nesa_student_id');
     if (sid) {
       setStudentId(sid);

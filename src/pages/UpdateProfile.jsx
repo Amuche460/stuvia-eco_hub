@@ -12,7 +12,7 @@ import { useState as useConfirmState } from 'react';
 
 export default function UpdateProfile() {
   const [student, setStudent] = useState(null);
-  const [form, setForm] = useState({ matric_no: '', phone: '', email: '', course_of_study: '', year_of_entry: '', profile_picture_url: '' });
+  const [form, setForm] = useState({ matric_no: '', phone: '', email: '', course_of_study: '', year_of_entry: '', profile_picture_url: '', date_of_birth: '' });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -33,6 +33,7 @@ export default function UpdateProfile() {
           course_of_study: st.course_of_study || '',
           year_of_entry: st.year_of_entry || '',
           profile_picture_url: st.profile_picture_url || '',
+          date_of_birth: st.date_of_birth || '',
         });
       }
     });
@@ -64,6 +65,7 @@ export default function UpdateProfile() {
       course_of_study: form.course_of_study,
       year_of_entry: form.year_of_entry,
       profile_picture_url: form.profile_picture_url,
+      date_of_birth: form.date_of_birth,
     });
     toast.success('Profile updated successfully!');
     setLoading(false);
@@ -160,6 +162,15 @@ export default function UpdateProfile() {
               <Label className="text-gray-700 text-sm">Phone Number</Label>
               <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                 placeholder="08012345678" className="mt-1 rounded-xl h-11 border-gray-200" type="tel" />
+            </div>
+
+            <div>
+              <Label className="text-gray-700 text-sm">Date of Birth *</Label>
+              <Input value={form.date_of_birth} onChange={e => setForm(f => ({ ...f, date_of_birth: e.target.value }))}
+                className="mt-1 rounded-xl h-11 border-gray-200" type="date" required />
+              {!form.date_of_birth && (
+                <p className="text-xs text-red-500 mt-1">Date of birth is required to receive birthday greetings.</p>
+              )}
             </div>
 
             <Button onClick={handleSave} disabled={loading}

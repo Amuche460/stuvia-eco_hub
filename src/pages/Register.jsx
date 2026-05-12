@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 
 export default function Register() {
   const [form, setForm] = useState({
-    full_name: '', reg_no: '', matric_no: '', level: '', email: '', phone: ''
+    full_name: '', reg_no: '', matric_no: '', level: '', email: '', phone: '', date_of_birth: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -166,6 +166,17 @@ export default function Register() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="08012345678"
+                className="mt-1 rounded-xl h-11 border-gray-200"
+              />
+            </div>
+
+            <div>
+              <Label className="text-gray-700">Date of Birth *</Label>
+              <Input
+                required
+                type="date"
+                value={form.date_of_birth}
+                onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
                 className="mt-1 rounded-xl h-11 border-gray-200"
               />
             </div>
