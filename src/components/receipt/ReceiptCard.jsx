@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { Download, CheckCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/3dd2bd76d_file_000000000098720a9afba54a4d234d96.png';
+const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/24f9cf519_IMG_20260217_123243_461.jpg';
 
 export default function ReceiptCard({ payment }) {
   const receiptRef = useRef(null);
