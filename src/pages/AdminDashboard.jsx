@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import StatCard from '../components/dashboard/StatCard';
@@ -29,6 +30,7 @@ const LEVEL_COLORS = {
 };
 
 export default function AdminDashboard() {
+  const { user, isLoadingAuth } = useAuth();
   const [payments, setPayments] = useState([]);
   const [students, setStudents] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -119,7 +121,13 @@ export default function AdminDashboard() {
     return true;
   });
 
-  if (loading) {
+  // Redirect non-admins to home
+  if (!isLoadingAuth && (!user || user.role !== 'admin')) {
+    window.location.href = '/';
+    return null;
+  }
+
+  if (loading || isLoadingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-emerald-50">
         <div className="animate-pulse text-emerald-600">Loading dashboard...</div>
