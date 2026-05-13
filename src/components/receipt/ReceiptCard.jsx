@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { Download, CheckCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/24f9cf519_IMG_20260217_123243_461.jpg';
+const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/3dd2bd76d_file_000000000098720a9afba54a4d234d96.png';
 
 export default function ReceiptCard({ payment }) {
   const receiptRef = useRef(null);
@@ -15,7 +15,7 @@ export default function ReceiptCard({ payment }) {
       <style>
         body { font-family: 'Segoe UI', sans-serif; padding: 40px; max-width: 520px; margin: 0 auto; background: #fff; }
         .header { text-align: center; border-bottom: 3px solid #1a6b62; padding-bottom: 20px; margin-bottom: 20px; }
-        .logo-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 3px solid #1a6b62; }
+        .logo-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 8px; }
         .org-name { font-size: 13px; font-weight: 700; color: #1a6b62; letter-spacing: 1px; text-transform: uppercase; }
         .subtitle { font-size: 11px; color: #666; margin-top: 2px; }
         .receipt-no { background: #f0fdf4; padding: 7px 18px; border-radius: 8px; display: inline-block; font-weight: bold; color: #1a6b62; margin-top: 10px; font-family: monospace; font-size: 14px; border: 1px solid #bbf7d0; }
@@ -63,7 +63,7 @@ export default function ReceiptCard({ payment }) {
           <img
             src={NESA_LOGO}
             alt="NESA Logo"
-            className="w-16 h-16 rounded-full border-2 border-white/40 object-cover shadow-lg"
+            className="w-16 h-16 object-contain drop-shadow-lg"
           />
         </div>
         <p className="text-emerald-200 text-[10px] tracking-widest uppercase font-semibold">Nigerian Economic Students Association</p>
