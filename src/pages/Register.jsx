@@ -48,7 +48,11 @@ export default function Register() {
       otp_expiry: expiry,
     });
 
-    await base44.integrations.Core.SendEmail({
+    localStorage.setItem('nesa_verify_student_id', student.id);
+    localStorage.setItem('nesa_verify_email', form.email);
+
+    // Fire email without awaiting — user is redirected immediately
+    base44.integrations.Core.SendEmail({
       to: form.email,
       subject: 'NESA - Email Verification Code',
       body: `
@@ -64,8 +68,6 @@ export default function Register() {
       `
     });
 
-    localStorage.setItem('nesa_verify_student_id', student.id);
-    localStorage.setItem('nesa_verify_email', form.email);
     window.location.href = createPageUrl('VerifyOtp');
   };
 

@@ -35,7 +35,11 @@ export default function SignIn() {
 
     await base44.entities.Student.update(student.id, { otp_code: otp, otp_expiry: expiry });
 
-    await base44.integrations.Core.SendEmail({
+    localStorage.setItem('nesa_verify_student_id', student.id);
+    localStorage.setItem('nesa_verify_email', student.email);
+
+    // Fire email without awaiting — user is redirected immediately
+    base44.integrations.Core.SendEmail({
       to: student.email,
       subject: 'NESA - Sign In Verification Code',
       body: `
@@ -51,8 +55,6 @@ export default function SignIn() {
       `
     });
 
-    localStorage.setItem('nesa_verify_student_id', student.id);
-    localStorage.setItem('nesa_verify_email', student.email);
     window.location.href = createPageUrl('VerifyOtp');
   };
 
