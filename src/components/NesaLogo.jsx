@@ -14,7 +14,8 @@ export default function NesaLogo({ size = 'md' }) {
         <img
           src="https://media.base44.com/images/public/6998637834968a098c6b2721/3dd2bd76d_file_000000000098720a9afba54a4d234d96.png"
           alt="NESA Logo"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-screen dark:invert"
+          style={{ mixBlendMode: 'multiply' }}
         />
       </div>
       <div className="flex flex-col leading-tight">
