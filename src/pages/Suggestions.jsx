@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSelect from '../components/MobileSelect';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Send, Loader2, CheckCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -34,18 +34,19 @@ export default function Suggestions() {
     e.preventDefault();
     setLoading(true);
 
-    await base44.entities.Suggestion.create({
-      student_id: anonymous ? '' : student.id,
-      student_name: anonymous ? 'Anonymous' : student.full_name,
+    // Optimistic: show success immediately, sync in background
+    setSubmitted(true);
+    setLoading(false);
+
+    base44.entities.Suggestion.create({
+      student_id: anonymous ? '' : student?.id,
+      student_name: anonymous ? 'Anonymous' : student?.full_name,
       team,
       subject,
       message,
       is_anonymous: anonymous,
       status: 'new',
     });
-
-    setSubmitted(true);
-    setLoading(false);
   };
 
   if (submitted) {
@@ -91,16 +92,13 @@ export default function Suggestions() {
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-amber-100 shadow-lg p-6 space-y-4">
             <div>
               <Label className="text-gray-700">Team *</Label>
-              <Select value={team} onValueChange={setTeam}>
-                <SelectTrigger className="mt-1 rounded-xl h-11 border-gray-200">
-                  <SelectValue placeholder="Select a team" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEAMS.map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={team}
+                onValueChange={setTeam}
+                placeholder="Select a team"
+                options={TEAMS.map(t => ({ value: t, label: t }))}
+                triggerClassName="mt-1 rounded-xl h-11 border-gray-200"
+              />
             </div>
 
             <div>

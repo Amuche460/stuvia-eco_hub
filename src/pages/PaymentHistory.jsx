@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import PullToRefresh from '../components/PullToRefresh';
 import NesaLogo from '../components/NesaLogo';
 import ReceiptCard from '../components/receipt/ReceiptCard';
 import { Badge } from '@/components/ui/badge';
@@ -103,6 +104,13 @@ export default function PaymentHistory() {
     });
   }, []);
 
+  const handleRefresh = useCallback(async () => {
+    const sid = localStorage.getItem('nesa_student_id');
+    if (!sid) return;
+    const p = await base44.entities.Payment.filter({ student_id: sid }, '-created_date');
+    setPayments(p);
+  }, []);
+
   const filtered = filter === 'all' ? payments : payments.filter(p =>
     filter === 'dues' ? p.type === 'dues' : filter === 'donation' ? p.type === 'donation' : p.status === filter
   );
@@ -124,6 +132,7 @@ export default function PaymentHistory() {
   }
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-white">
       <header className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-gray-100 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -230,5 +239,6 @@ export default function PaymentHistory() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }

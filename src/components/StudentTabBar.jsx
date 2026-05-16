@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Home, Receipt, Calendar, User } from 'lucide-react';
 
@@ -12,6 +12,20 @@ const tabs = [
 
 export default function StudentTabBar() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleTabPress = (e, page) => {
+    const url = createPageUrl(page);
+    const isActive = location.pathname.includes(page) ||
+      (page === 'StudentDashboard' && location.pathname === '/');
+
+    if (isActive) {
+      // Already on this tab — scroll to top and force reload by navigating to root of page
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigate(url, { replace: true });
+    }
+  };
 
   return (
     <div
@@ -26,7 +40,8 @@ export default function StudentTabBar() {
           <Link
             key={page}
             to={url}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors no-min-h
+            onClick={(e) => handleTabPress(e, page)}
+            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors
               ${isActive
                 ? 'text-emerald-700 dark:text-emerald-400'
                 : 'text-gray-400 dark:text-gray-500 hover:text-gray-600'

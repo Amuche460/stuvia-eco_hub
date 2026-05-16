@@ -6,7 +6,7 @@ import NesaLogo from '../components/NesaLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSelect from '../components/MobileSelect';
 import { ArrowLeft, Plus, Calendar, MapPin, Clock, Trash2, X, ChevronLeft, ChevronRight, Users, CheckCircle2, Loader2, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, parseISO, isToday } from 'date-fns';
@@ -68,17 +68,33 @@ export default function NesaCalendar() {
     if (!studentId || !studentData) return;
     const alreadyRegistered = registrations.some(r => r.event_id === event.id);
     if (alreadyRegistered) return;
-    setRsvpLoading(event.id);
-    const reg = await base44.entities.EventRegistration.create({
+
+    // Optimistic update — add a placeholder immediately
+    const optimisticReg = {
+      id: `optimistic-${event.id}`,
       event_id: event.id,
       event_title: event.title,
       student_id: studentId,
       student_name: studentData.full_name,
       student_reg_no: studentData.reg_no,
       student_level: studentData.level,
+    };
+    setRegistrations(prev => [...prev, optimisticReg]);
+    setRsvpLoading(event.id);
+
+    // Sync in background, replace optimistic entry with real one
+    base44.entities.EventRegistration.create({
+      event_id: event.id,
+      event_title: event.title,
+      student_id: studentId,
+      student_name: studentData.full_name,
+      student_reg_no: studentData.reg_no,
+      student_level: studentData.level,
+    }).then(reg => {
+      setRegistrations(prev => prev.map(r => r.id === optimisticReg.id ? reg : r));
+    }).finally(() => {
+      setRsvpLoading(null);
     });
-    setRegistrations(prev => [...prev, reg]);
-    setRsvpLoading(null);
   };
 
   const loadEvents = async () => {
@@ -185,24 +201,26 @@ export default function NesaCalendar() {
 
           {showFilters && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              <Select value={filterTeam} onValueChange={setFilterTeam}>
-                <SelectTrigger className="rounded-xl h-9 text-xs"><SelectValue placeholder="Team" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Teams</SelectItem>
-                  {['General NESA','Welfare','Social','Sports','Financial','Community Development','Academic'].map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterColor} onValueChange={setFilterColor}>
-                <SelectTrigger className="rounded-xl h-9 text-xs"><SelectValue placeholder="Color" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Colors</SelectItem>
-                  {Object.keys(COLOR_CLASSES).map(c => (
-                    <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={filterTeam}
+                onValueChange={setFilterTeam}
+                placeholder="Team"
+                options={[
+                  { value: 'all', label: 'All Teams' },
+                  ...['General NESA','Welfare','Social','Sports','Financial','Community Development','Academic'].map(t => ({ value: t, label: t }))
+                ]}
+                triggerClassName="rounded-xl h-9 text-xs"
+              />
+              <MobileSelect
+                value={filterColor}
+                onValueChange={setFilterColor}
+                placeholder="Color"
+                options={[
+                  { value: 'all', label: 'All Colors' },
+                  ...Object.keys(COLOR_CLASSES).map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))
+                ]}
+                triggerClassName="rounded-xl h-9 text-xs"
+              />
               <div>
                 <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-300" placeholder="From date" />
@@ -431,14 +449,13 @@ export default function NesaCalendar() {
                 </div>
                 <div>
                   <Label className="text-sm text-gray-700">Team</Label>
-                  <Select value={form.team} onValueChange={v => setForm(f => ({ ...f, team: v }))}>
-                    <SelectTrigger className="mt-1 rounded-xl h-11"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {['General NESA','Welfare','Social','Sports','Financial','Community Development','Academic'].map(t => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MobileSelect
+                    value={form.team}
+                    onValueChange={v => setForm(f => ({ ...f, team: v }))}
+                    placeholder="Select team"
+                    options={['General NESA','Welfare','Social','Sports','Financial','Community Development','Academic'].map(t => ({ value: t, label: t }))}
+                    triggerClassName="mt-1 rounded-xl h-11"
+                  />
                 </div>
                 <div className="flex items-center gap-3">
                   <input

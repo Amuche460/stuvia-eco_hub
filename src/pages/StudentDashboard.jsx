@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import ReceiptCard from '../components/receipt/ReceiptCard';
+import PullToRefresh from '../components/PullToRefresh';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -44,6 +45,17 @@ export default function StudentDashboard() {
     setPayments(allPayments);
     setLoading(false);
   };
+
+  const handleRefresh = useCallback(async () => {
+    const sid = localStorage.getItem('nesa_student_id');
+    if (!sid) return;
+    const [students, allPayments] = await Promise.all([
+      base44.entities.Student.filter({ id: sid }),
+      base44.entities.Payment.filter({ student_id: sid }, '-created_date'),
+    ]);
+    if (students.length > 0) setStudent(students[0]);
+    setPayments(allPayments);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('nesa_student_id');
@@ -89,6 +101,7 @@ export default function StudentDashboard() {
   }
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-200">
       {/* Header */}
       <header className="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-emerald-100 dark:border-gray-800 z-50">
@@ -301,5 +314,6 @@ export default function StudentDashboard() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }
