@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import { ArrowRight, Shield, Receipt, Heart, MessageSquare, Users, ChevronRight, BookOpen } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -34,12 +35,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-amber-50/30">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-amber-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-200">
       {/* Header */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-emerald-100 z-50">
+      <header className="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-emerald-100 dark:border-gray-800 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <NesaLogo size="sm" />
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {student ? (
               <Link to={createPageUrl('StudentDashboard')}>
                 <Button size="sm" className="bg-emerald-700 hover:bg-emerald-800 rounded-xl">
@@ -69,16 +71,16 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Users className="w-4 h-4" />
             Nigerian Economic Students Association
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
             Dues & Donations,
             <br />
             <span className="text-emerald-700">Made Simple.</span>
           </h1>
-          <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
             Pay your NESA dues, donate to the Love Foundation, and share feedback — all in one secure portal.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
@@ -155,8 +157,8 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        <p>© {new Date().getFullYear()} NESA — Nigerian Economic Students Association</p>
+      <footer className="border-t border-gray-100 dark:border-gray-800 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
+        <p>© {new Date().getFullYear()} STUVIA Eco Hub — Nigerian Economic Students Association</p>
         <p className="mt-1">Economics Department • Secure FinTech Portal</p>
       </footer>
     </div>

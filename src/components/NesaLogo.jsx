@@ -18,8 +18,8 @@ export default function NesaLogo({ size = 'md' }) {
         />
       </div>
       <div className="flex flex-col leading-tight">
-        <span className={`${s.text} font-bold tracking-tight`} style={{ color: '#1a6b62' }}>My_NESA</span>
-        <span className={`${s.sub} font-medium tracking-wider uppercase`} style={{ color: '#2a9082' }}>My NESA</span>
+        <span className={`${s.text} font-bold tracking-tight`} style={{ color: '#1a6b62' }}>STUVIA</span>
+        <span className={`${s.sub} font-medium tracking-wider uppercase`} style={{ color: '#2a9082' }}>eco hub</span>
       </div>
     </div>
   );
