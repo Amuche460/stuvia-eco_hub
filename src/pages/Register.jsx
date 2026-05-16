@@ -37,38 +37,32 @@ export default function Register() {
       return;
     }
 
-    // Generate OTP
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
     const student = await base44.entities.Student.create({
       ...form,
-      is_verified: false,
-      otp_code: otp,
-      otp_expiry: expiry,
+      is_verified: true,
     });
 
-    localStorage.setItem('nesa_verify_student_id', student.id);
-    localStorage.setItem('nesa_verify_email', form.email);
+    localStorage.setItem('nesa_student_id', student.id);
 
-    // Fire email without awaiting — user is redirected immediately
+    // Send welcome email asynchronously — don't block redirect
     base44.integrations.Core.SendEmail({
       to: form.email,
-      subject: 'NESA - Email Verification Code',
+      subject: '🎉 Welcome to NESA Portal!',
       body: `
-        <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; text-align: center;">
-          <h2 style="color: #059669;">Welcome to NESA!</h2>
-          <p>Hello ${form.full_name},</p>
-          <p>Your verification code is:</p>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #059669;">${otp}</span>
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; background: #f0fdf4; border-radius: 16px; padding: 32px; text-align: center;">
+          <h2 style="color: #1a6b62;">Welcome to NESA, ${form.full_name.split(' ')[0]}! 🎉</h2>
+          <p style="color: #374151; font-size: 15px; line-height: 1.6;">You've successfully registered on the NESA Portal.</p>
+          <div style="background: #fff; border-radius: 12px; padding: 16px; margin: 20px 0; border: 1px solid #d1fae5;">
+            <p style="margin: 0; color: #555; font-size: 13px;">Your Sign-In Credential</p>
+            <p style="margin: 8px 0 0; font-size: 22px; font-weight: bold; color: #1a6b62; font-family: monospace; letter-spacing: 2px;">${form.reg_no}</p>
+            <p style="margin: 4px 0 0; color: #888; font-size: 12px;">Keep your registration number safe — you'll need it to sign in.</p>
           </div>
-          <p style="color: #888; font-size: 14px;">This code expires in 10 minutes.</p>
+          <p style="color: #6b7280; font-size: 13px;">Nigerian Economic Students Association · Covenant University</p>
         </div>
       `
     });
 
-    window.location.href = createPageUrl('VerifyOtp');
+    window.location.href = createPageUrl('StudentDashboard');
   };
 
   return (
@@ -191,7 +185,7 @@ export default function Register() {
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <>
                   <UserPlus className="w-5 h-5 mr-2" />
-                  Register & Verify Email
+                  Register
                 </>
               )}
             </Button>

@@ -22,40 +22,14 @@ export default function SignIn() {
     const students = await base44.entities.Student.filter({ reg_no: regNo.trim() });
 
     if (students.length === 0) {
-      setError('No account found with this email. Please register first.');
+      setError('No account found with this registration number. Please register first.');
       setLoading(false);
       return;
     }
 
     const student = students[0];
-
-    // Generate OTP and send to student email
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await base44.entities.Student.update(student.id, { otp_code: otp, otp_expiry: expiry });
-
-    localStorage.setItem('nesa_verify_student_id', student.id);
-    localStorage.setItem('nesa_verify_email', student.email);
-
-    // Fire email without awaiting — user is redirected immediately
-    base44.integrations.Core.SendEmail({
-      to: student.email,
-      subject: 'NESA - Sign In Verification Code',
-      body: `
-        <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; text-align: center;">
-          <h2 style="color: #059669;">NESA Sign In</h2>
-          <p>Hello ${student.full_name},</p>
-          <p>Your sign-in code is:</p>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #059669;">${otp}</span>
-          </div>
-          <p style="color: #888; font-size: 14px;">This code expires in 10 minutes.</p>
-        </div>
-      `
-    });
-
-    window.location.href = createPageUrl('VerifyOtp');
+    localStorage.setItem('nesa_student_id', student.id);
+    window.location.href = createPageUrl('StudentDashboard');
   };
 
   return (
@@ -107,7 +81,7 @@ export default function SignIn() {
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <>
                   <LogIn className="w-5 h-5 mr-2" />
-                  Send Verification Code
+                  Sign In
                 </>
               )}
             </Button>
