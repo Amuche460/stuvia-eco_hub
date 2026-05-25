@@ -98,6 +98,9 @@
           "created_by": "{{user.email}}"
         }
       ]
+    },
+    "update": {
+      "created_by": "{{user.email}}"
     }
   }
 }
