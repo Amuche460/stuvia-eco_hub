@@ -1,0 +1,103 @@
+{
+  "name": "Executive",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "description": "Linked student record ID"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "reg_no": {
+      "type": "string"
+    },
+    "matric_no": {
+      "type": "string"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "100",
+        "200",
+        "300",
+        "400"
+      ]
+    },
+    "email": {
+      "type": "string"
+    },
+    "post": {
+      "type": "string",
+      "enum": [
+        "President",
+        "Vice President Male",
+        "Vice President Female",
+        "Senate President",
+        "General Secretary",
+        "Assistant General Secretary",
+        "Academic Director",
+        "Assistant Academic Director",
+        "Sports Coordinator Female",
+        "Sports Coordinator Male",
+        "Welfare Director",
+        "Assistant Welfare Director",
+        "Social Director",
+        "Assistant Social Director",
+        "Financial Secretary",
+        "Assistant Financial Secretary",
+        "PRO",
+        "Assistant PRO",
+        "Editor in Chief",
+        "Assistant Editor in Chief",
+        "Community Development Officer",
+        "Assistant Community Development Officer",
+        "100 Level Rep",
+        "200 Level Rep",
+        "Chaplain"
+      ]
+    },
+    "term_end_date": {
+      "type": "string",
+      "description": "Term end date (ISO)"
+    },
+    "graduation_year": {
+      "type": "string",
+      "description": "Expected graduation year e.g. 2028"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "otp_code": {
+      "type": "string"
+    },
+    "otp_expiry": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name",
+    "reg_no",
+    "level",
+    "email",
+    "post",
+    "term_end_date"
+  ],
+  "rls": {
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
