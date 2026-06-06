@@ -44,10 +44,10 @@ export default function Splash() {
           className="text-center"
         >
           <h1 className="text-4xl font-bold tracking-tight" style={{ color: '#f0c040' }}>
-            My_NESA
+            STUVIA
           </h1>
           <p className="text-lg mt-2 font-medium italic" style={{ color: '#a8d5ce' }}>
-            "Always here to serve"
+            eco_hub
           </p>
         </motion.div>
       </motion.div>
