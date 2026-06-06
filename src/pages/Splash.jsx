@@ -4,6 +4,12 @@ import { createPageUrl } from '@/utils';
 
 export default function Splash() {
   useEffect(() => {
+    // If already seen this session, skip straight to Home
+    if (sessionStorage.getItem('splash_shown')) {
+      window.location.href = createPageUrl('Home');
+      return;
+    }
+    sessionStorage.setItem('splash_shown', '1');
     const timer = setTimeout(() => {
       window.location.href = createPageUrl('Home');
     }, 3000);
