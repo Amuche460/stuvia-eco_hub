@@ -28,9 +28,9 @@
       "type": "string",
       "description": "Student's course of study"
     },
-    "year_of_entry": {
+    "graduation_year": {
       "type": "string",
-      "description": "Year the student entered the university"
+      "description": "Expected graduation year e.g. 2027"
     },
     "date_of_birth": {
       "type": "string",
@@ -78,6 +78,7 @@
     "level",
     "email",
     "phone",
-    "date_of_birth"
+    "date_of_birth",
+    "graduation_year"
   ]
 }

@@ -136,7 +136,7 @@ export default function StudentDashboard() {
               <h2 className="text-xl font-bold">{student.full_name}</h2>
               <p className="text-emerald-200 text-sm">{student.level}L • {student.reg_no}</p>
               {student.course_of_study && (
-                <p className="text-emerald-300 text-xs mt-0.5">{student.course_of_study}{student.year_of_entry ? ` • Entry ${student.year_of_entry}` : ''}</p>
+                <p className="text-emerald-300 text-xs mt-0.5">{student.course_of_study}{student.graduation_year ? ` • Graduating ${student.graduation_year}` : ''}</p>
               )}
               {student.matric_no && (
                 <p className="text-emerald-300 text-xs">Matric: {student.matric_no}</p>

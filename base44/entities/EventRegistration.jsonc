@@ -1,0 +1,36 @@
+{
+  "name": "EventRegistration",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Reference to NesaEvent"
+    },
+    "event_title": {
+      "type": "string",
+      "description": "Event title (denormalized)"
+    },
+    "student_id": {
+      "type": "string",
+      "description": "Reference to Student"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Student full name"
+    },
+    "student_reg_no": {
+      "type": "string",
+      "description": "Student registration number"
+    },
+    "student_level": {
+      "type": "string",
+      "description": "Student level"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_title",
+    "student_id",
+    "student_name"
+  ]
+}

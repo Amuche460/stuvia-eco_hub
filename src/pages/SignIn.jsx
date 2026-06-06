@@ -28,6 +28,20 @@ export default function SignIn() {
     }
 
     const student = students[0];
+
+    // Check graduation expiry — block access from November of graduation year
+    if (student.graduation_year) {
+      const now = new Date();
+      const gradYear = parseInt(student.graduation_year, 10);
+      // November = month index 10 (0-based)
+      const expiryDate = new Date(gradYear, 10, 1); // Nov 1 of graduation year
+      if (now >= expiryDate) {
+        setError(`Your access expired in November ${gradYear} upon graduation. Please contact NESA if you believe this is an error.`);
+        setLoading(false);
+        return;
+      }
+    }
+
     localStorage.setItem('nesa_student_id', student.id);
     window.location.href = createPageUrl('StudentDashboard');
   };

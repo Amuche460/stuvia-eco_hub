@@ -1,0 +1,36 @@
+{
+  "name": "NesaNotification",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "event",
+        "payment",
+        "announcement",
+        "general"
+      ],
+      "default": "general",
+      "description": "Notification type"
+    },
+    "is_read_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of student IDs who have read this notification"
+    }
+  },
+  "required": [
+    "title",
+    "message"
+  ]
+}

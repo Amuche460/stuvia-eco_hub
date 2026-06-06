@@ -1,0 +1,46 @@
+{
+  "name": "NesaAnnouncement",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "announcement",
+        "editorial",
+        "magazine",
+        "weekly_update",
+        "form_poll"
+      ],
+      "default": "announcement"
+    },
+    "posted_by": {
+      "type": "string",
+      "description": "Executive post"
+    },
+    "posted_by_name": {
+      "type": "string"
+    },
+    "form_url": {
+      "type": "string",
+      "description": "Link for forms/polls"
+    },
+    "target_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which levels to show to (empty = all)"
+    }
+  },
+  "required": [
+    "title",
+    "content",
+    "type"
+  ]
+}

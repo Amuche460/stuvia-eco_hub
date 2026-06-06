@@ -1,0 +1,62 @@
+{
+  "name": "NesaEvent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description"
+    },
+    "event_date": {
+      "type": "string",
+      "description": "Event date (ISO format)"
+    },
+    "event_time": {
+      "type": "string",
+      "description": "Event time e.g. 10:00 AM"
+    },
+    "location": {
+      "type": "string",
+      "description": "Event location or venue"
+    },
+    "team": {
+      "type": "string",
+      "enum": [
+        "Welfare",
+        "Social",
+        "Sports",
+        "Financial",
+        "Community Development",
+        "Academic",
+        "General NESA"
+      ],
+      "description": "Organizing team"
+    },
+    "color": {
+      "type": "string",
+      "enum": [
+        "emerald",
+        "blue",
+        "amber",
+        "rose",
+        "purple",
+        "teal"
+      ],
+      "default": "emerald",
+      "description": "Event color tag"
+    },
+    "requires_rsvp": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this event requires student registration/RSVP"
+    }
+  },
+  "required": [
+    "title",
+    "event_date",
+    "team"
+  ]
+}

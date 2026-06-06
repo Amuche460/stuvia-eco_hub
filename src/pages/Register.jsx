@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 
 export default function Register() {
   const [form, setForm] = useState({
-    full_name: '', reg_no: '', matric_no: '', level: '', email: '', phone: '', date_of_birth: ''
+    full_name: '', reg_no: '', matric_no: '', level: '', email: '', phone: '', date_of_birth: '', graduation_year: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -177,9 +177,23 @@ export default function Register() {
               />
             </div>
 
+            <div>
+              <Label className="text-gray-700">Graduation Year *</Label>
+              <Input
+                required
+                value={form.graduation_year}
+                onChange={(e) => setForm({ ...form, graduation_year: e.target.value })}
+                placeholder="e.g. 2027"
+                className="mt-1 rounded-xl h-11 border-gray-200"
+                maxLength={4}
+                pattern="\d{4}"
+              />
+              <p className="text-xs text-gray-400 mt-1">The year you expect to graduate</p>
+            </div>
+
             <Button
               type="submit"
-              disabled={loading || !form.level}
+              disabled={loading || !form.level || !form.graduation_year}
               className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-12 text-base shadow-lg shadow-emerald-200"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (

@@ -1,0 +1,55 @@
+{
+  "name": "Suggestion",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "description": "Reference to student"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Student name"
+    },
+    "team": {
+      "type": "string",
+      "enum": [
+        "Welfare",
+        "Social",
+        "Sports",
+        "Financial",
+        "Community Development",
+        "Academic",
+        "General NESA"
+      ],
+      "description": "Target team for feedback"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Suggestion subject"
+    },
+    "message": {
+      "type": "string",
+      "description": "Detailed feedback message"
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether suggestion is anonymous"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "addressed"
+      ],
+      "default": "new",
+      "description": "Status of the suggestion"
+    }
+  },
+  "required": [
+    "team",
+    "subject",
+    "message"
+  ]
+}

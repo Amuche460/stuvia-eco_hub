@@ -12,7 +12,7 @@ import { useState as useConfirmState } from 'react';
 
 export default function UpdateProfile() {
   const [student, setStudent] = useState(null);
-  const [form, setForm] = useState({ matric_no: '', phone: '', email: '', course_of_study: '', year_of_entry: '', profile_picture_url: '', date_of_birth: '' });
+  const [form, setForm] = useState({ matric_no: '', phone: '', email: '', course_of_study: '', graduation_year: '', profile_picture_url: '', date_of_birth: '' });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -31,7 +31,7 @@ export default function UpdateProfile() {
           phone: st.phone || '',
           email: st.email || '',
           course_of_study: st.course_of_study || '',
-          year_of_entry: st.year_of_entry || '',
+          graduation_year: st.graduation_year || '',
           profile_picture_url: st.profile_picture_url || '',
           date_of_birth: st.date_of_birth || '',
         });
@@ -63,7 +63,7 @@ export default function UpdateProfile() {
       phone: form.phone,
       email: form.email,
       course_of_study: form.course_of_study,
-      year_of_entry: form.year_of_entry,
+      graduation_year: form.graduation_year,
       profile_picture_url: form.profile_picture_url,
       date_of_birth: form.date_of_birth,
     });
@@ -147,9 +147,9 @@ export default function UpdateProfile() {
             </div>
 
             <div>
-              <Label className="text-gray-700 text-sm">Year of Entry</Label>
-              <Input value={form.year_of_entry} onChange={e => setForm(f => ({ ...f, year_of_entry: e.target.value }))}
-                placeholder="e.g. 2022" className="mt-1 rounded-xl h-11 border-gray-200" maxLength={4} />
+              <Label className="text-gray-700 text-sm">Graduation Year</Label>
+              <Input value={form.graduation_year} onChange={e => setForm(f => ({ ...f, graduation_year: e.target.value }))}
+                placeholder="e.g. 2027" className="mt-1 rounded-xl h-11 border-gray-200" maxLength={4} />
             </div>
 
             <div>
