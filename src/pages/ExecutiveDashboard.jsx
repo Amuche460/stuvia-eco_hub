@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle
+  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck
 } from 'lucide-react';
+import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
@@ -139,6 +140,8 @@ export default function ExecutiveDashboard() {
   const canPostAnnouncement = ANNOUNCEMENT_POSTS.includes(exec?.post) ||
     exec?.post?.includes('Editor') || exec?.post?.includes('PRO');
 
+  const isSuperExec = exec?.post === 'President' || exec?.post === 'Financial Secretary';
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-purple-50">
       <div className="animate-pulse text-purple-600">Loading executive portal...</div>
@@ -212,6 +215,11 @@ export default function ExecutiveDashboard() {
             <TabsTrigger value="announcements" className="rounded-lg text-xs"><Megaphone className="w-3.5 h-3.5 mr-1" /> Announcements</TabsTrigger>
             <TabsTrigger value="forms" className="rounded-lg text-xs"><FileText className="w-3.5 h-3.5 mr-1" /> Forms & Polls</TabsTrigger>
             <TabsTrigger value="suggestions" className="rounded-lg text-xs"><Bell className="w-3.5 h-3.5 mr-1" /> Suggestions</TabsTrigger>
+            {isSuperExec && (
+              <TabsTrigger value="executives" className="rounded-lg text-xs bg-amber-50 data-[state=active]:bg-amber-100 text-amber-700">
+                <UserCheck className="w-3.5 h-3.5 mr-1" /> Executives
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Student Database */}
@@ -378,6 +386,13 @@ export default function ExecutiveDashboard() {
               ))}
             </div>
           </TabsContent>
+
+          {/* Approve Executives — President & Financial Secretary only */}
+          {isSuperExec && (
+            <TabsContent value="executives" className="mt-4">
+              <ApproveExecutivesPanel />
+            </TabsContent>
+          )}
 
           {/* Suggestions relevant to exec's team */}
           <TabsContent value="suggestions" className="mt-4 space-y-3">
