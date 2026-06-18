@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck
+  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import { motion } from 'framer-motion';
@@ -36,6 +36,7 @@ export default function ExecutiveDashboard() {
   const [pollForm, setPollForm] = useState({ title: '', content: '', form_url: '' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const eid = localStorage.getItem('nesa_executive_id');
@@ -62,6 +63,23 @@ export default function ExecutiveDashboard() {
       return;
     }
 
+    // Bridge student session for seamless portal access
+    if (execData.student_id) {
+      localStorage.setItem('nesa_student_id', execData.student_id);
+    }
+
+    // Tenure ending notification (within 30 days)
+    const daysLeft = Math.ceil((new Date(execData.term_end_date) - new Date()) / (1000 * 60 * 60 * 24));
+    const reminderKey = `nesa_term_reminder_${execData.id}`;
+    if (daysLeft <= 30 && daysLeft > 0 && !localStorage.getItem(reminderKey)) {
+      await base44.integrations.Core.SendEmail({
+        to: execData.email,
+        subject: `NESA Executive Tenure Ending Soon — ${daysLeft} Days Remaining`,
+        body: `Hello ${execData.full_name},\n\nYour tenure as ${execData.post} ends on ${format(new Date(execData.term_end_date), 'MMMM d, yyyy')} — just ${daysLeft} day(s) away.\n\nPlease prepare for a smooth transition of power. Ensure all pending tasks, reports, and access handovers are completed before your term ends.\n\nThank you for your service!\n\nNESA Leadership`,
+      });
+      localStorage.setItem(reminderKey, '1');
+    }
+
     setExec(execData);
     setStudents(studs);
     setPayments(pays);
@@ -73,6 +91,8 @@ export default function ExecutiveDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('nesa_executive_id');
+    localStorage.removeItem('nesa_student_id');
+    localStorage.removeItem('nesa_is_admin');
     window.location.href = createPageUrl('Home');
   };
 
@@ -123,10 +143,32 @@ export default function ExecutiveDashboard() {
     loadAll(exec.id);
   };
 
-  const filteredStudents = students.filter(s => filterLevel === 'all' || s.level === filterLevel);
+  const filteredStudents = students.filter(s => {
+    if (filterLevel !== 'all' && s.level !== filterLevel) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        (s.full_name || '').toLowerCase().includes(q) ||
+        (s.reg_no || '').toLowerCase().includes(q) ||
+        (s.matric_no || '').toLowerCase().includes(q) ||
+        (s.email || '').toLowerCase().includes(q) ||
+        (s.course_of_study || '').toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
   const filteredPayments = payments.filter(p => {
     if (filterLevel !== 'all' && p.student_level !== filterLevel) return false;
     if (filterType !== 'all' && p.type !== filterType) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        (p.student_name || '').toLowerCase().includes(q) ||
+        (p.student_reg_no || '').toLowerCase().includes(q) ||
+        (p.receipt_number || '').toLowerCase().includes(q) ||
+        (p.student_matric_no || '').toLowerCase().includes(q)
+      );
+    }
     return true;
   });
 
@@ -225,7 +267,16 @@ export default function ExecutiveDashboard() {
 
           {/* Student Database */}
           <TabsContent value="database" className="mt-4 space-y-4">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, reg no, email..."
+                  className="pl-9 rounded-xl border-gray-200 text-sm h-10"
+                />
+              </div>
               <Select value={filterLevel} onValueChange={setFilterLevel}>
                 <SelectTrigger className="w-28 rounded-xl border-gray-200 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -243,16 +294,66 @@ export default function ExecutiveDashboard() {
               </Select>
             </div>
 
+            {/* Student Profiles Matching Search */}
+            {searchQuery && filteredStudents.length > 0 && (
+              <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
+                <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
+                  <p className="text-xs font-semibold text-purple-700">Students ({filteredStudents.length})</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                      <tr>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Name</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Reg No</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Level</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Course</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Dues</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredStudents.map(s => {
+                        const hasDues = payments.some(p => p.student_id === s.id && p.type === 'dues' && p.status === 'verified');
+                        return (
+                          <tr key={s.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 font-medium text-gray-900">{s.full_name}</td>
+                            <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.reg_no}</td>
+                            <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{s.level}L</Badge></td>
+                            <td className="px-4 py-3 text-xs text-gray-500">{s.course_of_study || '—'}</td>
+                            <td className="px-4 py-3">
+                              <Badge className={hasDues ? 'bg-emerald-100 text-emerald-700 border-0 text-xs' : 'bg-red-50 text-red-600 border-0 text-xs'}>
+                                {hasDues ? 'Paid' : 'Unpaid'}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Link to={createPageUrl('StudentProfileDetail') + '?id=' + s.id}
+                                className="text-xs text-purple-700 font-medium hover:underline inline-flex items-center gap-1">
+                                View <ExternalLink className="w-3 h-3" />
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-600">Payments ({filteredPayments.length})</p>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Name</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Reg No</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Level</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Amount</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Type</th>
+                      <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Name</th>
+                      <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Reg No</th>
+                      <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Level</th>
+                      <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Amount</th>
+                      <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Type</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
