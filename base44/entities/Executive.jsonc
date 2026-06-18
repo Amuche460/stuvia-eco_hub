@@ -89,16 +89,7 @@
     "term_end_date"
   ],
   "rls": {
-    "delete": {
-      "$or": [
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    },
+    "delete": {},
     "update": {
       "created_by": "{{user.email}}"
     }
