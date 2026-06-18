@@ -54,10 +54,11 @@ export default function ExecutiveDashboard() {
     if (!execs.length) { window.location.href = createPageUrl('ExecutiveSignIn'); return; }
 
     const execData = execs[0];
-    // Check term expiry
+    // Check term expiry — delete expired executive
     if (new Date(execData.term_end_date) < new Date()) {
+      await base44.entities.Executive.delete(execData.id);
       localStorage.removeItem('nesa_executive_id');
-      window.location.href = createPageUrl('ExecutiveSignIn');
+      window.location.href = createPageUrl('Home');
       return;
     }
 

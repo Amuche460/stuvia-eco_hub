@@ -29,10 +29,11 @@ export default function ExecutiveSignIn() {
 
     const exec = executives[0];
 
-    // Check term expiry
+    // Check term expiry — delete expired executive
     const termEnd = new Date(exec.term_end_date);
     if (termEnd < new Date()) {
-      setError('Your executive term has ended. You can still access the student portal.');
+      await base44.entities.Executive.delete(exec.id);
+      setError('Your executive term has ended and your record has been removed. You can still access the student portal.');
       setLoading(false);
       return;
     }
