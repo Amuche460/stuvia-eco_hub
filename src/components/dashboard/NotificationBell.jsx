@@ -88,7 +88,9 @@ export default function NotificationBell({ studentId }) {
 
   const loadNotifications = async () => {
     const all = await base44.entities.NesaNotification.list('-created_date', 30);
-    setNotifications(all);
+    // Only show personal notifications (student_id matches) plus broadcasts (no student_id)
+    const relevant = all.filter(n => !n.student_id || n.student_id === studentId);
+    setNotifications(relevant);
   };
 
   const unreadCount = notifications.filter(n => !n.is_read_by?.includes(studentId)).length;

@@ -59,11 +59,12 @@ export default function AutoVerifyPanel({ payments, onRefresh }) {
       });
       await base44.entities.Student.update(payment.student_id, { dues_paid: true });
 
-      // Create notification
+      // Create notification — personal to the student
       await base44.entities.NesaNotification.create({
         title: 'Dues Payment Verified ✅',
         message: `Your dues payment of ₦${payment.amount?.toLocaleString()} has been verified. Receipt: ${receiptNumber}`,
         type: 'payment',
+        student_id: payment.student_id,
         is_read_by: [],
       });
 

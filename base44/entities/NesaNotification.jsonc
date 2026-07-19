@@ -21,6 +21,10 @@
       "default": "general",
       "description": "Notification type"
     },
+    "student_id": {
+      "type": "string",
+      "description": "Target student ID for personal notifications. Empty/null = broadcast to all students (general announcements, events)"
+    },
     "is_read_by": {
       "type": "array",
       "items": {

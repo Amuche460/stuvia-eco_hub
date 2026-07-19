@@ -69,6 +69,7 @@ export default function PayDues() {
       title: 'Dues Payment Verified ✅',
       message: `Your dues payment of ₦${paidAmount.toLocaleString()} has been verified. Receipt: ${receiptNumber}`,
       type: 'payment',
+      student_id: student.id,
       is_read_by: [],
     });
 

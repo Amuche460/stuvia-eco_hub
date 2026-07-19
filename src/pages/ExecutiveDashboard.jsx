@@ -17,10 +17,8 @@ import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
-const ANNOUNCEMENT_POSTS = [
-  "President","Vice President Male","Vice President Female","Senate President",
-  "General Secretary","Assistant General Secretary","Academic Director","Assistant Academic Director"
-];
+// Only the General Secretary can post announcements
+const ANNOUNCEMENT_POSTS = ["General Secretary"];
 
 export default function ExecutiveDashboard() {
   const [exec, setExec] = useState(null);
@@ -172,8 +170,7 @@ export default function ExecutiveDashboard() {
     students: students.filter(s => s.level === lvl).length,
   }));
 
-  const canPostAnnouncement = ANNOUNCEMENT_POSTS.includes(exec?.post) ||
-    exec?.post?.includes('Editor') || exec?.post?.includes('PRO');
+  const canPostAnnouncement = exec?.post === 'General Secretary';
 
   const isSuperExec = exec?.post === 'President' || exec?.post === 'Financial Secretary';
 

@@ -72,6 +72,7 @@ export default function Donate() {
       title: 'Donation Received 💛',
       message: `Your donation of ₦${paidAmount.toLocaleString()} to the Love Foundation has been received. Receipt: ${receiptNumber}`,
       type: 'payment',
+      student_id: student.id,
       is_read_by: [],
     });
 

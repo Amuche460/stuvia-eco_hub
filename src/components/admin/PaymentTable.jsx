@@ -57,11 +57,12 @@ export default function PaymentTable({ payments, onRefresh }) {
       }
     }
 
-    // Send verification notification
+    // Send verification notification — personal to the student
     await base44.entities.NesaNotification.create({
       title: `Payment Verified ✅`,
       message: `Your ${payment.type === 'dues' ? 'dues' : 'donation'} payment of ₦${payment.amount?.toLocaleString()} has been verified.`,
       type: 'payment',
+      student_id: payment.student_id,
       is_read_by: [],
     });
 

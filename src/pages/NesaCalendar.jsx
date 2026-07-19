@@ -113,7 +113,7 @@ export default function NesaCalendar() {
   const selectedDayEvents = selectedDay ? eventsOnDay(selectedDay) : [];
 
   const handleSave = async () => {
-    if (!form.title || !form.event_date) return;
+    if (!isAdmin || !form.title || !form.event_date) return;
     setSaving(true);
     const newEvent = await base44.entities.NesaEvent.create(form);
     // Also create a notification
@@ -130,6 +130,7 @@ export default function NesaCalendar() {
   };
 
   const handleDelete = async (id) => {
+    if (!isAdmin) return;
     await base44.entities.NesaEvent.delete(id);
     setEvents(prev => prev.filter(e => e.id !== id));
   };
