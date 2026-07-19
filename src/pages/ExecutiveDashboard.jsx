@@ -13,6 +13,7 @@ import {
   LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
+import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
@@ -68,18 +69,6 @@ export default function ExecutiveDashboard() {
       localStorage.setItem('nesa_student_id', execData.student_id);
     }
 
-    // Tenure ending notification (within 30 days)
-    const daysLeft = Math.ceil((new Date(execData.term_end_date) - new Date()) / (1000 * 60 * 60 * 24));
-    const reminderKey = `nesa_term_reminder_${execData.id}`;
-    if (daysLeft <= 30 && daysLeft > 0 && !localStorage.getItem(reminderKey)) {
-      await base44.integrations.Core.SendEmail({
-        to: execData.email,
-        subject: `NESA Executive Tenure Ending Soon — ${daysLeft} Days Remaining`,
-        body: `Hello ${execData.full_name},\n\nYour tenure as ${execData.post} ends on ${format(new Date(execData.term_end_date), 'MMMM d, yyyy')} — just ${daysLeft} day(s) away.\n\nPlease prepare for a smooth transition of power. Ensure all pending tasks, reports, and access handovers are completed before your term ends.\n\nThank you for your service!\n\nNESA Leadership`,
-      });
-      localStorage.setItem(reminderKey, '1');
-    }
-
     setExec(execData);
     setStudents(studs);
     setPayments(pays);
@@ -87,6 +76,9 @@ export default function ExecutiveDashboard() {
     // Filter suggestions relevant to this exec's post/team
     setSuggestions(suggs);
     setLoading(false);
+
+    // Fire tenure-end reminders for all executives (non-blocking)
+    checkAllExecutiveTenures();
   };
 
   const handleLogout = () => {
