@@ -31,8 +31,9 @@ export default function NotifyUnpaidPanel({ students, payments }) {
         // In-app notification
         await base44.entities.NesaNotification.create({
           title: '⚠️ Dues Payment Reminder',
-          message: `Hi ${student.full_name}, your NESA dues for this session are still outstanding. Please pay ₦3,000 to avoid losing access to NESA benefits. Tap "Pay Dues" on your dashboard.`,
+          message: `Hi ${student.full_name}, your NESA dues for this session are still outstanding. Please log in to the portal and complete your payment to retain full access to NESA benefits.`,
           type: 'payment',
+          student_id: student.id,
           is_read_by: [],
         });
 

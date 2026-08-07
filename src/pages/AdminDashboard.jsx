@@ -8,6 +8,7 @@ import AnnouncementBoard from '../components/admin/AnnouncementBoard';
 import PaymentTable from '../components/admin/PaymentTable';
 import SuggestionsList from '../components/admin/SuggestionsList';
 import NotifyUnpaidPanel from '../components/admin/NotifyUnpaidPanel';
+import { sendDuesReminders } from '@/lib/duesReminderNotifier';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -50,6 +51,7 @@ export default function AdminDashboard() {
     setSuggestions(sug);
     setLoading(false);
     sendBirthdayEmails(s);
+    sendDuesReminders(s, p);
   };
 
   const sendBirthdayEmails = async (allStudents) => {
@@ -296,7 +298,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => {
                   const headers = ['Student Name', 'Reg No', 'Matric No', 'Level', 'Type', 'Amount (₦)', 'Status', 'Receipt No', 'Date'];
-                  const rows = filteredPayments.map(p => [
+                  const rows = payments.map(p => [
                     p.student_name || '',
                     p.student_reg_no || '',
                     p.student_matric_no || '',
