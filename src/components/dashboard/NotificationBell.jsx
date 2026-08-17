@@ -88,8 +88,12 @@ export default function NotificationBell({ studentId }) {
 
   const loadNotifications = async () => {
     const all = await base44.entities.NesaNotification.list('-created_date', 30);
-    // Only show personal notifications (student_id matches) plus broadcasts (no student_id)
-    const relevant = all.filter(n => !n.student_id || n.student_id === studentId);
+    // Payment notifications are always personal — only show to the owner.
+    // Announcements, events, and general can be broadcasts (no student_id) or personal.
+    const relevant = all.filter(n => {
+      if (n.type === 'payment') return n.student_id === studentId;
+      return !n.student_id || n.student_id === studentId;
+    });
     setNotifications(relevant);
   };
 
