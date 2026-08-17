@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 // Level color map
 const LEVEL_COLORS = {
@@ -114,6 +114,32 @@ export default function AdminDashboard() {
     name: l.level,
     value: l.dues + l.donations,
   })).filter(d => d.value > 0);
+
+  // Dues vs Donations split
+  const duesVsDonations = [
+    { name: 'Dues', value: totalDues, fill: '#10b981' },
+    { name: 'Donations', value: totalDonations, fill: '#f43f5e' },
+  ].filter(d => d.value > 0);
+
+  // Donation trends over time (monthly, last 6 months)
+  const donationTrends = (() => {
+    const verifiedDonations = payments.filter(p => p.type === 'donation' && p.status === 'verified');
+    const byMonth = {};
+    verifiedDonations.forEach(p => {
+      if (!p.created_date) return;
+      const d = new Date(p.created_date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      byMonth[key] = (byMonth[key] || 0) + (p.amount || 0);
+    });
+    return Object.entries(byMonth)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+      .map(([key, amount]) => {
+        const [year, month] = key.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+        return { month: date.toLocaleString('default', { month: 'short' }), amount };
+      });
+  })();
 
   // Filter payments
   const filteredPayments = payments.filter(p => {
@@ -227,6 +253,74 @@ export default function AdminDashboard() {
             ) : (
               <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">
                 No verified payments yet
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Trends */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        >
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <h3 className="font-bold text-gray-900 mb-4">Dues vs Donations</h3>
+            {duesVsDonations.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={duesVsDonations}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
+                    {duesVsDonations.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => `₦${v.toLocaleString()}`} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">
+                No verified payments yet
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <h3 className="font-bold text-gray-900 mb-4">Donation Trends Over Time</h3>
+            {donationTrends.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={donationTrends}>
+                  <defs>
+                    <linearGradient id="donationGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value) => `₦${value.toLocaleString()}`} />
+                  <Area
+                    type="monotone"
+                    dataKey="amount"
+                    name="Donations"
+                    stroke="#f43f5e"
+                    strokeWidth={2}
+                    fill="url(#donationGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">
+                No donation data yet
               </div>
             )}
           </div>
