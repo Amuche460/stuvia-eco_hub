@@ -22,9 +22,9 @@ export default function Register() {
     setError('');
     setLoading(true);
 
-    // Validate matric number if provided
+    // Validate matric number if provided — only economics students have AF as 3rd & 4th characters
     if (form.matric_no && form.matric_no.trim().toUpperCase().slice(2, 4) !== 'AF') {
-      setError('Invalid matric number. The 3rd and 4th characters must be "AF" (e.g. 22AF012345).');
+      setError('Not authorized. This app is only for Economics students. Your matric number must have "AF" as the 3rd and 4th characters.');
       setLoading(false);
       return;
     }
