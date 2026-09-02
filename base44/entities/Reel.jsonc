@@ -4,11 +4,22 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "Reel title"
+      "description": "Hook/headline that captures attention"
     },
-    "description": {
+    "content": {
       "type": "string",
-      "description": "Short description of the educational content"
+      "description": "Main educational content body"
+    },
+    "key_takeaways": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key bullet points students should remember"
+    },
+    "did_you_know": {
+      "type": "string",
+      "description": "A surprising, thought-provoking fact"
     },
     "topic": {
       "type": "string",
@@ -23,13 +34,9 @@
       ],
       "description": "Content category"
     },
-    "youtube_video_id": {
-      "type": "string",
-      "description": "YouTube video ID for embedding"
-    },
     "creator": {
       "type": "string",
-      "description": "Creator or channel name"
+      "description": "Content source label"
     },
     "order": {
       "type": "number",
@@ -39,8 +46,7 @@
   },
   "required": [
     "title",
-    "topic",
-    "youtube_video_id",
-    "creator"
+    "content",
+    "topic"
   ]
 }

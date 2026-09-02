@@ -1,91 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, Bookmark, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Heart, Bookmark, Sparkles, CheckCircle, Lightbulb } from 'lucide-react';
 
 const TOPIC_STYLES = {
-  'Finance': 'bg-emerald-500',
-  'Economics': 'bg-blue-500',
-  'Nigeria Economy': 'bg-amber-500',
-  'Geopolitics': 'bg-purple-500',
-  'Purpose': 'bg-rose-500',
-  'Mindset': 'bg-teal-500',
-  'Faith': 'bg-indigo-500',
+  'Finance': { gradient: 'from-emerald-600 via-teal-700 to-emerald-900', accent: '#10b981' },
+  'Economics': { gradient: 'from-blue-600 via-indigo-700 to-blue-900', accent: '#3b82f6' },
+  'Nigeria Economy': { gradient: 'from-green-600 via-emerald-700 to-amber-800', accent: '#22c55e' },
+  'Geopolitics': { gradient: 'from-purple-600 via-violet-700 to-purple-900', accent: '#a855f7' },
+  'Purpose': { gradient: 'from-rose-600 via-pink-700 to-rose-900', accent: '#f43f5e' },
+  'Mindset': { gradient: 'from-teal-600 via-cyan-700 to-teal-900', accent: '#14b8a6' },
+  'Faith': { gradient: 'from-indigo-600 via-violet-700 to-indigo-900', accent: '#6366f1' },
 };
 
 export default function ReelItem({ reel, index, active, isLiked, isSaved, isNew, onLike, onSave }) {
-  const [muted, setMuted] = useState(true);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const topicClass = TOPIC_STYLES[reel.topic] || 'bg-emerald-500';
-  const thumbnail = `https://img.youtube.com/vi/${reel.youtube_video_id}/hqdefault.jpg`;
-
-  useEffect(() => {
-    if (active) setIframeLoaded(false);
-  }, [active]);
+  const style = TOPIC_STYLES[reel.topic] || TOPIC_STYLES['Finance'];
 
   return (
     <div
       data-reel
       data-index={index}
-      className="snap-start snap-always relative w-full h-full bg-black overflow-hidden"
+      className="snap-start snap-always relative w-full h-full overflow-hidden"
     >
-      {/* Thumbnail background */}
-      <img
-        src={thumbnail}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-        loading="lazy"
+      {/* Gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient}`} />
+
+      {/* Decorative blurred orbs */}
+      <div
+        className="absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl opacity-25"
+        style={{ background: style.accent }}
+      />
+      <div
+        className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl opacity-20"
+        style={{ background: style.accent }}
       />
 
-      {/* YouTube iframe — only when active */}
-      {active && (
-        <iframe
-          src={`https://www.youtube.com/embed/${reel.youtube_video_id}?autoplay=1&mute=${muted ? 1 : 0}&rel=0&modestbranding=1&playsinline=1&controls=1`}
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-          className="absolute inset-0 w-full h-full"
-          style={{ border: 'none' }}
-          onLoad={() => setIframeLoaded(true)}
-          title={reel.title}
-        />
-      )}
-
-      {/* Loading spinner */}
-      {active && !iframeLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-        </div>
-      )}
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-
-      {/* Topic badge + New badge */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <span className={`${topicClass} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg`}>
-          {reel.topic}
-        </span>
-        {isNew && (
-          <span className="bg-white text-emerald-600 text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> New
+      {/* Content — scrollable if long */}
+      <div className="relative h-full flex flex-col px-6 pt-6 pb-24 overflow-y-auto scrollbar-hide">
+        {/* Badges */}
+        <div className="flex items-center gap-2 mb-5">
+          <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">
+            {reel.topic}
           </span>
-        )}
-      </div>
+          {isNew && (
+            <span className="bg-white text-emerald-600 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+              <Sparkles className="w-3 h-3" /> New
+            </span>
+          )}
+        </div>
 
-      {/* Mute toggle */}
-      {active && (
-        <button
-          onClick={() => setMuted(m => !m)}
-          className="absolute top-4 right-4 z-10 bg-black/60 text-white p-2.5 rounded-full backdrop-blur-sm active:scale-95 transition-transform"
-        >
-          {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
-      )}
+        {/* Hook / Headline */}
+        <h2 className="text-white font-bold text-2xl leading-tight mb-4 drop-shadow-lg">
+          {reel.title}
+        </h2>
 
-      {/* Bottom info */}
-      <div className="absolute bottom-6 left-4 right-20 z-10 pointer-events-none">
-        <p className="text-white font-bold text-lg leading-tight drop-shadow-lg">{reel.title}</p>
-        <p className="text-white/80 text-sm mt-1 drop-shadow">@{reel.creator}</p>
-        {reel.description && (
-          <p className="text-white/70 text-sm mt-2 line-clamp-2 drop-shadow">{reel.description}</p>
+        {/* Main content */}
+        <p className="text-white/90 text-base leading-relaxed mb-5 whitespace-pre-line">
+          {reel.content}
+        </p>
+
+        {/* Key takeaways */}
+        {reel.key_takeaways?.length > 0 && (
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-4 border border-white/10">
+            <p className="text-white/60 text-xs font-bold uppercase tracking-wider mb-3">
+              Key Takeaways
+            </p>
+            <div className="space-y-2.5">
+              {reel.key_takeaways.map((t, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-white/80 flex-shrink-0 mt-0.5" />
+                  <p className="text-white/90 text-sm leading-snug">{t}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
+
+        {/* Did you know */}
+        {reel.did_you_know && (
+          <div className="bg-amber-400/20 backdrop-blur-sm rounded-2xl p-4 border border-amber-300/30">
+            <p className="text-amber-200 text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5" /> Did You Know?
+            </p>
+            <p className="text-white/90 text-sm leading-snug">{reel.did_you_know}</p>
+          </div>
+        )}
+
+        {/* Creator */}
+        <p className="text-white/50 text-xs mt-5">@{reel.creator || 'EduReels Daily'}</p>
       </div>
 
       {/* Right action buttons */}
@@ -94,7 +94,7 @@ export default function ReelItem({ reel, index, active, isLiked, isSaved, isNew,
           onClick={() => onLike(reel.id)}
           className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
         >
-          <div className={`p-2.5 rounded-full backdrop-blur-sm ${isLiked ? 'bg-rose-500' : 'bg-black/50'}`}>
+          <div className={`p-2.5 rounded-full backdrop-blur-sm ${isLiked ? 'bg-rose-500' : 'bg-black/30'}`}>
             <Heart className={`w-6 h-6 text-white ${isLiked ? 'fill-white' : ''}`} />
           </div>
           <span className="text-white text-[10px] font-medium drop-shadow">Like</span>
@@ -103,7 +103,7 @@ export default function ReelItem({ reel, index, active, isLiked, isSaved, isNew,
           onClick={() => onSave(reel.id)}
           className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
         >
-          <div className={`p-2.5 rounded-full backdrop-blur-sm ${isSaved ? 'bg-amber-500' : 'bg-black/50'}`}>
+          <div className={`p-2.5 rounded-full backdrop-blur-sm ${isSaved ? 'bg-amber-500' : 'bg-black/30'}`}>
             <Bookmark className={`w-6 h-6 text-white ${isSaved ? 'fill-white' : ''}`} />
           </div>
           <span className="text-white text-[10px] font-medium drop-shadow">Save</span>
