@@ -1,0 +1,46 @@
+{
+  "name": "Reel",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Reel title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of the educational content"
+    },
+    "topic": {
+      "type": "string",
+      "enum": [
+        "Finance",
+        "Economics",
+        "Nigeria Economy",
+        "Geopolitics",
+        "Purpose",
+        "Mindset",
+        "Faith"
+      ],
+      "description": "Content category"
+    },
+    "youtube_video_id": {
+      "type": "string",
+      "description": "YouTube video ID for embedding"
+    },
+    "creator": {
+      "type": "string",
+      "description": "Creator or channel name"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display order"
+    }
+  },
+  "required": [
+    "title",
+    "topic",
+    "youtube_video_id",
+    "creator"
+  ]
+}
