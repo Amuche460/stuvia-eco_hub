@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Bookmark, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Bookmark, Volume2, VolumeX, Sparkles } from 'lucide-react';
 
 const TOPIC_STYLES = {
   'Finance': 'bg-emerald-500',
@@ -11,7 +11,7 @@ const TOPIC_STYLES = {
   'Faith': 'bg-indigo-500',
 };
 
-export default function ReelItem({ reel, index, active, isLiked, isSaved, onLike, onSave }) {
+export default function ReelItem({ reel, index, active, isLiked, isSaved, isNew, onLike, onSave }) {
   const [muted, setMuted] = useState(true);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const topicClass = TOPIC_STYLES[reel.topic] || 'bg-emerald-500';
@@ -57,11 +57,16 @@ export default function ReelItem({ reel, index, active, isLiked, isSaved, onLike
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
-      {/* Topic badge */}
-      <div className="absolute top-4 left-4 z-10">
+      {/* Topic badge + New badge */}
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <span className={`${topicClass} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg`}>
           {reel.topic}
         </span>
+        {isNew && (
+          <span className="bg-white text-emerald-600 text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
+            <Sparkles className="w-3 h-3" /> New
+          </span>
+        )}
       </div>
 
       {/* Mute toggle */}

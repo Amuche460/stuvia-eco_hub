@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import ReelItem from '../components/reels/ReelItem';
+import { needsRefresh, refreshReels } from '../lib/reelsRefresh';
 
 const CONTAINER_STYLE = { height: 'calc(100dvh - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom))' };
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function Reels() {
   const [reels, setReels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [likedReels, setLikedReels] = useState(() => {
     try { return JSON.parse(localStorage.getItem('nesa_liked_reels') || '[]'); } catch { return []; }
@@ -18,22 +21,36 @@ export default function Reels() {
   });
   const containerRef = useRef(null);
 
+  const loadReels = useCallback(async () => {
+    try {
+      const data = await base44.entities.Reel.list('-created_date', 50);
+      setReels(data);
+      return data;
+    } catch (e) {
+      return [];
+    }
+  }, []);
+
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
     if (!sid) {
       window.location.href = createPageUrl('SignIn');
       return;
     }
+    let mounted = true;
     (async () => {
-      try {
-        const data = await base44.entities.Reel.list('order', 50);
-        setReels(data);
-      } catch (e) {
-        // silently fail
-      } finally {
-        setLoading(false);
+      const data = await loadReels();
+      if (!mounted) return;
+      setLoading(false);
+      if (needsRefresh(data)) {
+        setRefreshing(true);
+        const newCount = await refreshReels();
+        if (!mounted) return;
+        if (newCount > 0) await loadReels();
+        setRefreshing(false);
       }
     })();
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -51,7 +68,7 @@ export default function Reels() {
     const items = containerRef.current.querySelectorAll('[data-reel]');
     items.forEach(item => observer.observe(item));
     return () => observer.disconnect();
-  }, [reels, loading]);
+  }, [reels, loading, refreshing]);
 
   const toggleLike = (reelId) => {
     setLikedReels(prev => {
@@ -67,6 +84,11 @@ export default function Reels() {
       localStorage.setItem('nesa_saved_reels', JSON.stringify(next));
       return next;
     });
+  };
+
+  const isNew = (reel) => {
+    if (!reel.created_date) return false;
+    return Date.now() - new Date(reel.created_date).getTime() < DAY_MS;
   };
 
   if (loading) {
@@ -87,6 +109,12 @@ export default function Reels() {
 
   return (
     <div className="bg-black relative" style={CONTAINER_STYLE}>
+      {refreshing && (
+        <div className="absolute top-0 left-0 right-0 z-20 bg-emerald-600 text-white text-xs py-2 px-4 flex items-center justify-center gap-2">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          Finding fresh educational content for you...
+        </div>
+      )}
       <div
         ref={containerRef}
         className="h-full overflow-y-auto snap-y snap-mandatory scrollbar-hide"
@@ -99,6 +127,7 @@ export default function Reels() {
             active={index === activeIndex}
             isLiked={likedReels.includes(reel.id)}
             isSaved={savedReels.includes(reel.id)}
+            isNew={isNew(reel)}
             onLike={toggleLike}
             onSave={toggleSave}
           />
