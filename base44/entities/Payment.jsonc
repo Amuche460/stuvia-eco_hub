@@ -61,7 +61,7 @@
     },
     "verified_by": {
       "type": "string",
-      "description": "Admin who verified"
+      "description": "Who or what verified the payment"
     },
     "verified_at": {
       "type": "string",
@@ -70,6 +70,40 @@
     "rejection_reason": {
       "type": "string",
       "description": "Reason for rejection if applicable"
+    },
+    "receipt_data": {
+      "type": "object",
+      "description": "Data extracted from the uploaded receipt by AI",
+      "properties": {
+        "amount": {
+          "type": "number"
+        },
+        "date": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "bank_name": {
+          "type": "string"
+        },
+        "account_number": {
+          "type": "string"
+        },
+        "account_name": {
+          "type": "string"
+        },
+        "sender_name": {
+          "type": "string"
+        }
+      }
+    },
+    "validation_errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Compliance errors found during validation"
     }
   },
   "required": [

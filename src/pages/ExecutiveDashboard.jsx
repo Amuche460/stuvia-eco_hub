@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink
+  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
@@ -174,6 +174,8 @@ export default function ExecutiveDashboard() {
 
   const isSuperExec = exec?.post === 'President' || exec?.post === 'Financial Secretary';
 
+  const isFinExec = exec?.post === 'Financial Secretary' || exec?.post === 'Assistant Financial Secretary';
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-purple-50">
       <div className="animate-pulse text-purple-600">Loading executive portal...</div>
@@ -247,6 +249,11 @@ export default function ExecutiveDashboard() {
             <TabsTrigger value="announcements" className="rounded-lg text-xs"><Megaphone className="w-3.5 h-3.5 mr-1" /> Announcements</TabsTrigger>
             <TabsTrigger value="forms" className="rounded-lg text-xs"><FileText className="w-3.5 h-3.5 mr-1" /> Forms & Polls</TabsTrigger>
             <TabsTrigger value="suggestions" className="rounded-lg text-xs"><Bell className="w-3.5 h-3.5 mr-1" /> Suggestions</TabsTrigger>
+            {isFinExec && (
+              <TabsTrigger value="payments" className="rounded-lg text-xs bg-emerald-50 data-[state=active]:bg-emerald-100 text-emerald-700">
+                <CreditCard className="w-3.5 h-3.5 mr-1" /> Dues & Payments
+              </TabsTrigger>
+            )}
             {isSuperExec && (
               <TabsTrigger value="executives" className="rounded-lg text-xs bg-amber-50 data-[state=active]:bg-amber-100 text-amber-700">
                 <UserCheck className="w-3.5 h-3.5 mr-1" /> Executives
@@ -477,6 +484,55 @@ export default function ExecutiveDashboard() {
               ))}
             </div>
           </TabsContent>
+
+          {/* Dues & Payments — Financial Secretary & Assistant Financial Secretary */}
+          {isFinExec && (
+            <TabsContent value="payments" className="mt-4 space-y-4">
+              <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden">
+                <div className="px-4 py-3 bg-emerald-50 border-b border-emerald-100">
+                  <p className="text-xs font-semibold text-emerald-700">Verified Dues Payments ({filteredPayments.filter(p => p.type === 'dues').length})</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                      <tr>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Name</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Reg No</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Matric</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Level</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Amount</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Receipt No</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Date</th>
+                        <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Proof</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredPayments.filter(p => p.type === 'dues').length === 0 ? (
+                        <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-sm">No dues payments yet</td></tr>
+                      ) : filteredPayments.filter(p => p.type === 'dues').map(p => (
+                        <tr key={p.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-900">{p.student_name}</td>
+                          <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no || '—'}</td>
+                          <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_matric_no || '—'}</td>
+                          <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{p.student_level}L</Badge></td>
+                          <td className="px-4 py-3 font-semibold text-emerald-700">₦{p.amount?.toLocaleString()}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{p.receipt_number || '—'}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500">{p.verified_at ? format(new Date(p.verified_at), 'MMM d, yyyy') : '—'}</td>
+                          <td className="px-4 py-3">
+                            {p.proof_url ? (
+                              <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
+                                View <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+          )}
 
           {/* Approve Executives — President & Financial Secretary only */}
           {isSuperExec && (

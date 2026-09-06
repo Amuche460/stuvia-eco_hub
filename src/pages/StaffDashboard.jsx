@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, BookOpen, Users, Calendar, Bell } from 'lucide-react';
+import { LogOut, BookOpen, Users, Calendar, Bell, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
@@ -140,24 +140,36 @@ export default function StaffDashboard() {
                     <tr>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Name</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Reg No</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Matric</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Level</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Amount</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Type</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Receipt No</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs">Proof</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {filteredPayments.length === 0 ? (
-                      <tr><td colSpan={5} className="text-center py-8 text-gray-400 text-sm">No records found</td></tr>
+                      <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-sm">No records found</td></tr>
                     ) : filteredPayments.map(p => (
                       <tr key={p.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-900">{p.student_name}</td>
-                        <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no}</td>
+                        <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no || '—'}</td>
+                        <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_matric_no || '—'}</td>
                         <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{p.student_level}L</Badge></td>
                         <td className="px-4 py-3 font-semibold text-emerald-700">₦{p.amount?.toLocaleString()}</td>
                         <td className="px-4 py-3">
                           <Badge className={p.type === 'dues' ? 'bg-emerald-100 text-emerald-700 border-0 text-xs' : 'bg-rose-100 text-rose-700 border-0 text-xs'}>
                             {p.type === 'dues' ? 'Dues' : 'Donation'}
                           </Badge>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs text-gray-600">{p.receipt_number || '—'}</td>
+                        <td className="px-4 py-3">
+                          {p.proof_url ? (
+                            <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-700 font-medium hover:underline inline-flex items-center gap-1">
+                              View <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : '—'}
                         </td>
                       </tr>
                     ))}
