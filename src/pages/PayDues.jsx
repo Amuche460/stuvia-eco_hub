@@ -51,18 +51,45 @@ export default function PayDues() {
   };
 
   const handleSubmit = async () => {
-    if (!file || !student) return;
+    if (!file) {
+      toast.error('Please upload a receipt first.');
+      return;
+    }
+    if (!student) {
+      toast.error('Student profile is still loading. Please try again in a moment.');
+      return;
+    }
     setLoading(true);
     setErrors([]);
     try {
       // 1. Upload the receipt
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      let file_url;
+      try {
+        const uploadRes = await base44.integrations.Core.UploadFile({ file });
+        file_url = uploadRes.file_url;
+      } catch (uploadErr) {
+        setErrors(['Could not upload the receipt image. Please check your connection and try again.']);
+        toast.error('Upload failed. Please try again.');
+        setLoading(false);
+        return;
+      }
 
       // 2. Validate the receipt with AI
-      const { data, errors: validationErrors, valid } = await validateReceipt(file_url, student);
+      let result;
+      try {
+        result = await validateReceipt(file_url, student);
+      } catch (valErr) {
+        setErrors(['Could not analyze the receipt. Please ensure the image is clear and try again.']);
+        toast.error('Receipt analysis failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { data, errors: validationErrors, valid } = result;
 
       if (!valid) {
         setErrors(validationErrors);
+        toast.error(`Receipt not compliant — ${validationErrors.length} issue(s) found. See details below.`);
         setLoading(false);
         return;
       }
@@ -116,6 +143,7 @@ export default function PayDues() {
       toast.success('Receipt verified! Your NESA receipt has been generated.');
     } catch (e) {
       setErrors(['An error occurred while processing your receipt. Please try again.']);
+      toast.error('Something went wrong. Please try again.');
     }
     setLoading(false);
   };
