@@ -285,7 +285,11 @@ export default function PayDues() {
             <Button
               onClick={handleSubmit}
               disabled={!file || loading || alreadyPaid}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 rounded-xl h-11"
+              className={`w-full rounded-xl h-11 transition-colors ${
+                file && !loading && !alreadyPaid
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                  : 'bg-emerald-200 text-emerald-500'
+              }`}
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying receipt...</>
