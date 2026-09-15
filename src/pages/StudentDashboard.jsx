@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   CreditCard, Heart, MessageSquare, LogOut, Receipt,
-  User, CheckCircle, Clock, XCircle, ChevronRight, Calendar, Play
+  User, CheckCircle, Clock, XCircle, ChevronRight, Calendar
 } from 'lucide-react';
 import NotificationBell from '../components/dashboard/NotificationBell';
 import ThemeToggle from '../components/ThemeToggle';
@@ -158,27 +158,6 @@ export default function StudentDashboard() {
         </motion.div>
 
         {/* Quick Actions */}
-        {/* EduReels Banner */}
-        <Link to={createPageUrl('Reels')}>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-700 dark:to-teal-700 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 rounded-xl p-2.5 group-hover:bg-white/30 transition-colors">
-                <Play className="w-6 h-6 text-white fill-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-base">EduReels</h3>
-                <p className="text-emerald-100 text-xs mt-0.5">Finance, economics, geopolitics & more — learn while you scroll</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform" />
-          </motion.div>
-        </Link>
-
         <div className="grid grid-cols-2 gap-3">
           <Link to={createPageUrl('PayDues')}>
             <motion.div

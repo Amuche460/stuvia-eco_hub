@@ -1,7 +1,7 @@
 import React from 'react';
 import StudentTabBar from './components/StudentTabBar';
 
-const STUDENT_PAGES = ['StudentDashboard', 'Reels', 'PaymentHistory', 'NesaCalendar', 'UpdateProfile', 'PayDues', 'Donate', 'Suggestions'];
+const STUDENT_PAGES = ['StudentDashboard', 'PaymentHistory', 'NesaCalendar', 'UpdateProfile', 'PayDues', 'Donate', 'Suggestions'];
 
 export default function Layout({ children, currentPageName }) {
   const isStudentPage = STUDENT_PAGES.includes(currentPageName);

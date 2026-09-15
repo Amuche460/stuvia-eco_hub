@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Receipt, Calendar, User, Play } from 'lucide-react';
+import { Home, Receipt, Calendar, User } from 'lucide-react';
 
 const tabs = [
   { label: 'Home', icon: Home, page: 'StudentDashboard' },
-  { label: 'Reels', icon: Play, page: 'Reels' },
   { label: 'History', icon: Receipt, page: 'PaymentHistory' },
   { label: 'Calendar', icon: Calendar, page: 'NesaCalendar' },
   { label: 'Profile', icon: User, page: 'UpdateProfile' },
