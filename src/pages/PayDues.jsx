@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, CheckCircle, Upload, Shield, AlertCircle, Loader2, FileImage, X
 } from 'lucide-react';
@@ -208,7 +207,7 @@ export default function PayDues() {
                 <p className="font-mono font-bold text-xl tracking-wider">{NESA_ACCOUNT}</p>
               </div>
               <button
-                onClick={() => { navigator.clipboard.writeText(NESA_ACCOUNT); toast.success('Account number copied!'); }}
+                onClick={() => { navigator.clipboard.writeText(NESA_ACCOUNT); toast({ title: 'Account number copied!' }); }}
                 className="text-white bg-white/20 hover:bg-white/30 rounded-lg px-3 py-1.5 text-xs font-medium"
               >
                 Copy
@@ -283,13 +282,13 @@ export default function PayDues() {
               </div>
             )}
 
-            <Button
+            <button
               onClick={handleSubmit}
               disabled={!file || loading || alreadyPaid}
-              className={`w-full rounded-xl h-11 transition-colors ${
+              className={`w-full rounded-xl h-11 transition-colors flex items-center justify-center text-sm font-medium ${
                 file && !loading && !alreadyPaid
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
-                  : 'bg-emerald-200 text-emerald-500'
+                  : 'bg-emerald-200 text-emerald-500 cursor-not-allowed'
               }`}
             >
               {loading ? (
@@ -297,7 +296,7 @@ export default function PayDues() {
               ) : (
                 <><Shield className="w-4 h-4 mr-2" /> Validate & Generate Receipt</>
               )}
-            </Button>
+            </button>
           </div>
         </motion.div>
       </div>
