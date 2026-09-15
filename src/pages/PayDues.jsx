@@ -7,7 +7,7 @@ import {
   ArrowLeft, CheckCircle, Upload, Shield, AlertCircle, Loader2, FileImage, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 import { validateReceipt } from '../lib/receiptValidator';
 import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 import ReceiptCard from '../components/receipt/ReceiptCard';
@@ -16,6 +16,7 @@ const NESA_ACCOUNT = '0520003964';
 const NESA_BANK = 'Covenant Microfinance Bank (CMFB)';
 
 export default function PayDues() {
+  const { toast } = useToast();
   const [student, setStudent] = useState(null);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -52,11 +53,11 @@ export default function PayDues() {
 
   const handleSubmit = async () => {
     if (!file) {
-      toast.error('Please upload a receipt first.');
+      toast({ title: 'Please upload a receipt first.', variant: 'destructive' });
       return;
     }
     if (!student) {
-      toast.error('Student profile is still loading. Please try again in a moment.');
+      toast({ title: 'Student profile is still loading. Please try again in a moment.', variant: 'destructive' });
       return;
     }
     setLoading(true);
@@ -65,11 +66,11 @@ export default function PayDues() {
       // 1. Upload the receipt
       let file_url;
       try {
-        const uploadRes = await base44.integrations.Core.UploadFile({ file });
+        const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
         file_url = uploadRes.file_url;
       } catch (uploadErr) {
         setErrors(['Could not upload the receipt image. Please check your connection and try again.']);
-        toast.error('Upload failed. Please try again.');
+        toast({ title: 'Upload failed. Please try again.', variant: 'destructive' });
         setLoading(false);
         return;
       }
@@ -80,7 +81,7 @@ export default function PayDues() {
         result = await validateReceipt(file_url, student);
       } catch (valErr) {
         setErrors(['Could not analyze the receipt. Please ensure the image is clear and try again.']);
-        toast.error('Receipt analysis failed. Please try again.');
+        toast({ title: 'Receipt analysis failed. Please try again.', variant: 'destructive' });
         setLoading(false);
         return;
       }
@@ -89,7 +90,7 @@ export default function PayDues() {
 
       if (!valid) {
         setErrors(validationErrors);
-        toast.error(`Receipt not compliant — ${validationErrors.length} issue(s) found. See details below.`);
+        toast({ title: 'Receipt not compliant', description: `${validationErrors.length} issue(s) found — see details below.`, variant: 'destructive' });
         setLoading(false);
         return;
       }
@@ -140,10 +141,10 @@ export default function PayDues() {
       });
 
       setPayment(created);
-      toast.success('Receipt verified! Your NESA receipt has been generated.');
+      toast({ title: 'Receipt verified! 🎉', description: 'Your NESA receipt has been generated.' });
     } catch (e) {
       setErrors(['An error occurred while processing your receipt. Please try again.']);
-      toast.error('Something went wrong. Please try again.');
+      toast({ title: 'Something went wrong. Please try again.', variant: 'destructive' });
     }
     setLoading(false);
   };
