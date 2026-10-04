@@ -13,13 +13,18 @@
     "team": {
       "type": "string",
       "enum": [
-        "Welfare",
-        "Social",
+        "General",
+        "Chaplaincy",
         "Sports",
-        "Financial",
+        "Editorial",
         "Community Development",
+        "Public Relations",
+        "100 Level Representative",
         "Academic",
-        "General NESA"
+        "Social",
+        "Welfare",
+        "200 Level Representative",
+        "Finance"
       ],
       "description": "Target team for feedback"
     },

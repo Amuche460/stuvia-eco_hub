@@ -10,8 +10,7 @@ import MobileSelect from '../components/MobileSelect';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Send, Loader2, CheckCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const TEAMS = ['Welfare', 'Social', 'Sports', 'Financial', 'Community Development', 'Academic', 'General NESA'];
+import { SUGGESTION_TEAMS as TEAMS } from '../lib/suggestionTeams';
 
 export default function Suggestions() {
   const [student, setStudent] = useState(null);

@@ -13,6 +13,7 @@ import {
   LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
+import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -543,9 +544,12 @@ export default function ExecutiveDashboard() {
 
           {/* Suggestions relevant to exec's team */}
           <TabsContent value="suggestions" className="mt-4 space-y-3">
-            {suggestions.filter(s => s.team === 'General NESA' || exec?.post?.toLowerCase().includes(s.team?.toLowerCase().split(' ')[0]?.toLowerCase())).length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">No suggestions for your post yet.</div>
-            ) : suggestions.map(s => (
+            {(() => {
+              const visible = suggestions.filter(s => execSeesSuggestion(exec?.post, s.team));
+              if (visible.length === 0) {
+                return <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">No suggestions for your post yet.</div>;
+              }
+              return visible.map(s => (
               <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-4">
                 <div className="flex items-start justify-between">
                   <div>
@@ -559,7 +563,8 @@ export default function ExecutiveDashboard() {
                   </Badge>
                 </div>
               </div>
-            ))}
+              ));
+            })()}
           </TabsContent>
         </Tabs>
       </div>
