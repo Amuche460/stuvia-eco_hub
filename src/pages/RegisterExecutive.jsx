@@ -27,11 +27,14 @@ const POSTS = [
 export default function RegisterExecutive() {
   const [form, setForm] = useState({
     full_name: '', reg_no: '', matric_no: '', level: '', email: '',
-    post: '', term_end_date: '', graduation_year: ''
+    post: '', term_end_date: '', graduation_year: '', secret_code: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [autoApproved, setAutoApproved] = useState(false);
+
+  const EXCO_SECRET_CODE = 'STUVIA_ECOHUB';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,13 +71,16 @@ export default function RegisterExecutive() {
       if (match) studentId = match.id;
     }
 
+    const codeMatches = form.secret_code.trim() === EXCO_SECRET_CODE;
+
     await base44.entities.Executive.create({
       ...form,
       student_id: studentId,
       is_active: true,
-      is_approved: false,
+      is_approved: codeMatches,
     });
 
+    setAutoApproved(codeMatches);
     setSubmitted(true);
     setLoading(false);
   };
@@ -87,7 +93,11 @@ export default function RegisterExecutive() {
             <CheckCircle className="w-10 h-10 text-purple-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Submitted!</h2>
-          <p className="text-gray-500 mb-6">Your executive registration is pending admin approval. You'll be able to sign in once approved.</p>
+          <p className="text-gray-500 mb-6">
+            {autoApproved
+              ? "Your secret code was verified — you're approved! You can sign in to the executive portal now."
+              : "Your executive registration is pending admin approval. You'll be able to sign in once approved."}
+          </p>
           <Link to={createPageUrl('Home')}>
             <Button className="bg-purple-700 hover:bg-purple-800 rounded-xl">Back to Home</Button>
           </Link>
@@ -180,6 +190,13 @@ export default function RegisterExecutive() {
                 onChange={e => setForm(f => ({ ...f, term_end_date: e.target.value }))}
                 className="mt-1 rounded-xl h-11" />
               <p className="text-xs text-gray-400 mt-1">You will be automatically logged out after this date.</p>
+            </div>
+
+            <div>
+              <Label className="text-gray-700">Exco Secret Code</Label>
+              <Input value={form.secret_code} onChange={e => setForm(f => ({ ...f, secret_code: e.target.value }))}
+                placeholder="Enter exco code (optional)" className="mt-1 rounded-xl h-11" />
+              <p className="text-xs text-gray-400 mt-1">Have a secret code? Enter it for instant approval. Without it, your registration will need admin approval.</p>
             </div>
 
             <Button type="submit" disabled={loading || !form.post || !form.level}
