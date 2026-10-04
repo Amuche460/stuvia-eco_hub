@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 const NESA_ACCOUNT_NUMBER = '0520003964';
 const NESA_BANK_KEYWORD = 'covenant';
 const MIN_DUES = 6000;
+const MIN_DONATION = 100;
 const DATE_WINDOW_DAYS = 7;
 
 /**
@@ -11,9 +12,10 @@ const DATE_WINDOW_DAYS = 7;
  *
  * @param {string} fileUrl - URL of the uploaded receipt file
  * @param {object} student - the student profile record
+ * @param {string} paymentType - 'dues' | 'donation' (default: 'dues')
  * @returns {Promise<{ data: object, errors: string[], valid: boolean }>}
  */
-export async function validateReceipt(fileUrl, student) {
+export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   const response = await base44.integrations.Core.InvokeLLM({
     prompt: `You are a receipt validation assistant. Analyze this payment receipt carefully and extract the following information as JSON:
 
@@ -43,11 +45,13 @@ Look very carefully at the receipt. If a field is not visible or unreadable, use
 
   const data = response || {};
   const errors = [];
+  const isDonation = paymentType === 'donation';
+  const minAmount = isDonation ? MIN_DONATION : MIN_DUES;
 
-  // 1. Amount >= ₦6,000
-  if (!data.amount || data.amount < MIN_DUES) {
+  // 1. Amount check
+  if (!data.amount || data.amount < minAmount) {
     errors.push(
-      `Amount must be at least ₦${MIN_DUES.toLocaleString()}. ` +
+      `Amount must be at least ₦${minAmount.toLocaleString()}. ` +
       `Detected: ${data.amount ? '₦' + Number(data.amount).toLocaleString() : 'not found'}.`
     );
   }
@@ -72,12 +76,20 @@ Look very carefully at the receipt. If a field is not visible or unreadable, use
     }
   }
 
-  // 3. Description mentions "NESA dues"
+  // 3. Description check
   const desc = (data.description || '').toLowerCase();
-  if (!desc.includes('nesa') || !desc.includes('due')) {
-    errors.push(
-      `Description must mention "NESA dues". Detected: "${data.description || 'not found'}".`
-    );
+  if (isDonation) {
+    if (!desc.includes('donation') && !desc.includes('love') && !desc.includes('foundation')) {
+      errors.push(
+        `Description must mention "donation" or "Love Foundation". Detected: "${data.description || 'not found'}".`
+      );
+    }
+  } else {
+    if (!desc.includes('nesa') || !desc.includes('due')) {
+      errors.push(
+        `Description must mention "NESA dues". Detected: "${data.description || 'not found'}".`
+      );
+    }
   }
 
   // 4. Addressed to NESA account: Covenant Microfinance Bank, 0520003964
