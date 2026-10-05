@@ -1,7 +1,7 @@
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 
-const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/24f9cf519_IMG_20260217_123243_461.jpg';
+const NESA_LOGO = 'https://media.base44.com/images/public/6998637834968a098c6b2721/84f11a8f1_ChatGPTImageSep17202612_24_39PM.png';
 
 /**
  * Sends a beautiful HTML receipt email to the student.

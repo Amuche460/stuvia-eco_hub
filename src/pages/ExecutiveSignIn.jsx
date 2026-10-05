@@ -10,7 +10,7 @@ import { ArrowLeft, Shield, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ExecutiveSignIn() {
-  const [email, setEmail] = useState('');
+  const [regNo, setRegNo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,9 +20,9 @@ export default function ExecutiveSignIn() {
 
     setLoading(true);
 
-    const executives = await base44.entities.Executive.filter({ email, is_approved: true, is_active: true });
+    const executives = await base44.entities.Executive.filter({ reg_no: regNo.trim(), is_approved: true, is_active: true });
     if (executives.length === 0) {
-      setError('No approved executive account found with this email. Contact the admin.');
+      setError('No approved executive account found with this registration number. Contact the admin.');
       setLoading(false);
       return;
     }
@@ -55,7 +55,7 @@ export default function ExecutiveSignIn() {
     await base44.entities.Executive.update(exec.id, { otp_code: otp, otp_expiry: expiry });
 
     await base44.integrations.Core.SendEmail({
-      to: email,
+      to: exec.email,
       subject: 'NESA Executive Portal - Sign In Code',
       body: `Hello ${exec.full_name},\n\nYour sign-in code is: ${otp}\n\nThis expires in 10 minutes.\n\nPost: ${exec.post}`,
     });
@@ -83,9 +83,9 @@ export default function ExecutiveSignIn() {
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-purple-100 shadow-lg p-6 space-y-4">
           <div>
-            <Label className="text-gray-700">Student Email</Label>
-            <Input required type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com" className="mt-1 rounded-xl h-11" />
+            <Label className="text-gray-700">Registration Number</Label>
+            <Input required value={regNo} onChange={e => setRegNo(e.target.value)}
+              placeholder="e.g. ECO/2021/001" className="mt-1 rounded-xl h-11" />
           </div>
           <Button type="submit" disabled={loading}
             className="w-full bg-purple-700 hover:bg-purple-800 rounded-xl h-12 text-base">

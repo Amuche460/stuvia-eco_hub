@@ -30,7 +30,7 @@ export default function Splash() {
         {/* NESA Logo Image */}
         <div className="w-44 h-44 rounded-full overflow-hidden shadow-2xl border-4 border-amber-400/40">
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6998637834968a098c6b2721/ce06469b5_IMG_20260217_123243_461.jpg"
+            src="https://media.base44.com/images/public/6998637834968a098c6b2721/84f11a8f1_ChatGPTImageSep17202612_24_39PM.png"
             alt="NESA Logo"
             className="w-full h-full object-cover"
           />

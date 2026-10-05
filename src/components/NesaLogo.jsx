@@ -12,7 +12,7 @@ export default function NesaLogo({ size = 'md' }) {
     <div className={`flex items-center ${s.gap}`}>
       <div className={`${s.img} flex-shrink-0`}>
         <img
-          src="https://media.base44.com/images/public/6998637834968a098c6b2721/6e0495afe_file_000000000098720a9afba54a4d234d96.png"
+          src="https://media.base44.com/images/public/6998637834968a098c6b2721/84f11a8f1_ChatGPTImageSep17202612_24_39PM.png"
           alt="NESA Logo"
           className="w-full h-full object-contain"
         />

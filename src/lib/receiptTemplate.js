@@ -5,7 +5,7 @@
 
 export const RECEIPT_TEMPLATE = {
   // ── Branding ──────────────────────────────────────────────
-  logoUrl: 'https://media.base44.com/images/public/6998637834968a098c6b2721/6e0495afe_file_000000000098720a9afba54a4d234d96.png',
+  logoUrl: 'https://media.base44.com/images/public/6998637834968a098c6b2721/84f11a8f1_ChatGPTImageSep17202612_24_39PM.png',
   orgName: 'Nigerian Economic Students Association',
   orgSubtitle: 'Covenant University · Since 2005 · "Ceteris Paribus"',
 
