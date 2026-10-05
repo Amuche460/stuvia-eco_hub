@@ -110,5 +110,11 @@
     "student_name",
     "type",
     "amount"
-  ]
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
 }
