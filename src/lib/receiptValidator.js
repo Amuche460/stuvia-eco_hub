@@ -17,17 +17,8 @@ const DATE_WINDOW_DAYS = 60;
  */
 export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   const response = await base44.integrations.Core.InvokeLLM({
-    prompt: `You are a receipt validation assistant. Analyze this payment receipt carefully and extract the following information as JSON:
-
-- amount: The payment amount as a number (in Naira, no commas or currency symbol)
-- date: The payment date (in YYYY-MM-DD format if possible, otherwise as shown on the receipt)
-- description: The payment description / narration / reason / remark text
-- bank_name: The name of the bank receiving the payment (the destination bank)
-- account_number: The account number receiving the payment (the destination account)
-- account_name: The name on the receiving account
-- sender_name: The name of the person who sent / made the payment
-
-Look very carefully at the receipt. If a field is not visible or unreadable, use null for that field. Return only the JSON object, no other text.`,
+    model: 'gpt_5_mini',
+    prompt: `Extract these fields from this payment receipt as JSON: amount (number, Naira), date (YYYY-MM-DD), description, bank_name (destination bank), account_number (destination account), account_name (beneficiary name on receiving account), sender_name. Use null for any unreadable field. Return only JSON.`,
     file_urls: [fileUrl],
     response_json_schema: {
       type: 'object',
