@@ -4,7 +4,7 @@ const NESA_ACCOUNT_NUMBER = '0520003964';
 const NESA_BANK_KEYWORD = 'covenant';
 const MIN_DUES = 6000;
 const MIN_DONATION = 100;
-const DATE_WINDOW_DAYS = 7;
+const DATE_WINDOW_DAYS = 60;
 
 /**
  * Extracts data from an uploaded receipt image/PDF using AI vision,
@@ -68,7 +68,7 @@ Look very carefully at the receipt. If a field is not visible or unreadable, use
       const diffDays = (now - receiptDate) / (1000 * 60 * 60 * 24);
       if (diffDays > DATE_WINDOW_DAYS) {
         errors.push(
-          `Receipt is too old — dated ${data.date}. Payments must be made within the last ${DATE_WINDOW_DAYS} days.`
+          `Receipt is too old — dated ${data.date}. Payments must be made within the last 2 months.`
         );
       } else if (diffDays < -1) {
         errors.push(`Receipt date (${data.date}) is in the future. Please upload a current receipt.`);
@@ -76,20 +76,17 @@ Look very carefully at the receipt. If a field is not visible or unreadable, use
     }
   }
 
-  // 3. Description check
-  const desc = (data.description || '').toLowerCase();
-  if (isDonation) {
-    if (!desc.includes('donation') && !desc.includes('love') && !desc.includes('foundation')) {
-      errors.push(
-        `Description must mention "donation" or "Love Foundation". Detected: "${data.description || 'not found'}".`
-      );
-    }
-  } else {
-    if (!desc.includes('nesa') || !desc.includes('due')) {
-      errors.push(
-        `Description must mention "NESA dues". Detected: "${data.description || 'not found'}".`
-      );
-    }
+  // 3. Beneficiary check — must be The Nigerian Economic Student Association
+  const acctName = (data.account_name || '').toLowerCase();
+  const hasBeneficiary =
+    acctName.includes('nigerian') &&
+    acctName.includes('economic') &&
+    (acctName.includes('student') || acctName.includes('students')) &&
+    acctName.includes('association');
+  if (!hasBeneficiary) {
+    errors.push(
+      `Beneficiary must be "The Nigerian Economic Student Association". Detected: "${data.account_name || 'not found'}".`
+    );
   }
 
   // 4. Addressed to NESA account: Covenant Microfinance Bank, 0520003964
