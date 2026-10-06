@@ -36,5 +36,19 @@
   "required": [
     "title",
     "message"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": null,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
