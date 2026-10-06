@@ -17,9 +17,22 @@ import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
 
 // Only the General Secretary can post announcements
 const ANNOUNCEMENT_POSTS = ["General Secretary"];
+
+// Executives who can view the names of students who paid dues
+const DUES_VIEWER_POSTS = [
+  'President',
+  'Vice President Female',
+  'Vice President Male',
+  'Financial Secretary',
+  'Assistant Financial Secretary',
+];
+
+// Executives who can download the dues-payer list as PDF
+const DUES_DOWNLOADER_POSTS = ['Financial Secretary', 'Assistant Financial Secretary'];
 
 export default function ExecutiveDashboard() {
   const [exec, setExec] = useState(null);
@@ -45,13 +58,7 @@ export default function ExecutiveDashboard() {
   }, []);
 
   const loadAll = async (eid) => {
-    const [execs, studs, pays, anns, suggs] = await Promise.all([
-      base44.entities.Executive.filter({ id: eid }),
-      base44.entities.Student.list('full_name'),
-      base44.entities.Payment.filter({ status: 'verified' }, '-created_date'),
-      base44.entities.NesaAnnouncement.list('-created_date'),
-      base44.entities.Suggestion.list('-created_date'),
-    ]);
+    const execs = await base44.entities.Executive.filter({ id: eid });
     if (!execs.length) { window.location.href = createPageUrl('ExecutiveSignIn'); return; }
 
     const execData = execs[0];
@@ -81,11 +88,19 @@ export default function ExecutiveDashboard() {
       }
     }
 
+    const canViewDues = DUES_VIEWER_POSTS.includes(execData.post);
+
+    const [anns, suggs, studs, pays] = await Promise.all([
+      base44.entities.NesaAnnouncement.list('-created_date'),
+      base44.entities.Suggestion.list('-created_date'),
+      canViewDues ? base44.entities.Student.list('full_name') : Promise.resolve([]),
+      canViewDues ? base44.entities.Payment.filter({ status: 'verified' }, '-created_date') : Promise.resolve([]),
+    ]);
+
     setExec(execData);
     setStudents(studs);
     setPayments(pays);
     setAnnouncements(anns);
-    // Filter suggestions relevant to this exec's post/team
     setSuggestions(suggs);
     setLoading(false);
 
@@ -190,6 +205,41 @@ export default function ExecutiveDashboard() {
 
   const isFinExec = exec?.post === 'Financial Secretary' || exec?.post === 'Assistant Financial Secretary';
 
+  const canViewDuesPayers = DUES_VIEWER_POSTS.includes(exec?.post);
+  const canDownloadDuesPayers = DUES_DOWNLOADER_POSTS.includes(exec?.post);
+
+  const handleDownloadDuesPDF = () => {
+    const duesPayers = filteredPayments.filter(p => p.type === 'dues');
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('NESA — Students Who Paid Dues', 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(`Generated ${format(new Date(), 'MMM d, yyyy')} • ${duesPayers.length} payer(s)`, 14, 27);
+    doc.setTextColor(0);
+    let y = 38;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    ['Name', 'Reg No', 'Matric', 'Level', 'Amount', 'Receipt No', 'Date'].forEach((h, i) => doc.text(h, 14 + i * 27, y));
+    doc.setFont(undefined, 'normal');
+    y += 6;
+    duesPayers.forEach(p => {
+      if (y > 280) { doc.addPage(); y = 20; }
+      const row = [
+        (p.student_name || '').slice(0, 22),
+        (p.student_reg_no || '').slice(0, 14),
+        (p.student_matric_no || '').slice(0, 14),
+        (p.student_level || '') + 'L',
+        'N' + (p.amount?.toLocaleString() || 0),
+        (p.receipt_number || '').slice(0, 12),
+        p.verified_at ? format(new Date(p.verified_at), 'MMM d, yyyy') : '-',
+      ];
+      row.forEach((cell, i) => doc.text(String(cell), 14 + i * 27, y));
+      y += 6;
+    });
+    doc.save('NESA_Dues_Payers.pdf');
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-purple-50">
       <div className="animate-pulse text-purple-600">Loading executive portal...</div>
@@ -240,15 +290,17 @@ export default function ExecutiveDashboard() {
           </div>
 
           {/* Level stats */}
-          <div className="mt-5 grid grid-cols-4 gap-2">
-            {levelStats.map(l => (
-              <div key={l.level} className="bg-white/10 rounded-xl p-2.5 text-center">
-                <p className="text-purple-200 text-[10px]">{l.level}L</p>
-                <p className="font-bold text-sm">{l.dues} dues</p>
-                <p className="text-purple-300 text-[10px]">{l.donations} donated</p>
-              </div>
-            ))}
-          </div>
+          {canViewDuesPayers && (
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {levelStats.map(l => (
+                <div key={l.level} className="bg-white/10 rounded-xl p-2.5 text-center">
+                  <p className="text-purple-200 text-[10px]">{l.level}L</p>
+                  <p className="font-bold text-sm">{l.dues} dues</p>
+                  <p className="text-purple-300 text-[10px]">{l.donations} donated</p>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {saved && (
@@ -257,11 +309,15 @@ export default function ExecutiveDashboard() {
           </div>
         )}
 
-        <Tabs defaultValue="database">
+        <Tabs defaultValue={canViewDuesPayers ? 'database' : 'announcements'}>
           <TabsList className="bg-gray-100 rounded-xl p-1 flex-wrap gap-1">
-            <TabsTrigger value="database" className="rounded-lg text-xs"><Users className="w-3.5 h-3.5 mr-1" /> Student DB</TabsTrigger>
+            {canViewDuesPayers && (
+              <TabsTrigger value="database" className="rounded-lg text-xs"><Users className="w-3.5 h-3.5 mr-1" /> Student DB</TabsTrigger>
+            )}
             <TabsTrigger value="announcements" className="rounded-lg text-xs"><Megaphone className="w-3.5 h-3.5 mr-1" /> Announcements</TabsTrigger>
-            <TabsTrigger value="forms" className="rounded-lg text-xs"><FileText className="w-3.5 h-3.5 mr-1" /> Forms & Polls</TabsTrigger>
+            {canViewDuesPayers && (
+              <TabsTrigger value="forms" className="rounded-lg text-xs"><FileText className="w-3.5 h-3.5 mr-1" /> Forms & Polls</TabsTrigger>
+            )}
             <TabsTrigger value="suggestions" className="rounded-lg text-xs"><Bell className="w-3.5 h-3.5 mr-1" /> Suggestions</TabsTrigger>
             {isFinExec && (
               <TabsTrigger value="payments" className="rounded-lg text-xs bg-emerald-50 data-[state=active]:bg-emerald-100 text-emerald-700">
@@ -276,6 +332,7 @@ export default function ExecutiveDashboard() {
           </TabsList>
 
           {/* Student Database */}
+          {canViewDuesPayers && (
           <TabsContent value="database" className="mt-4 space-y-4">
             <div className="flex flex-wrap gap-2 items-center">
               <div className="relative flex-1 min-w-[200px]">
@@ -387,6 +444,7 @@ export default function ExecutiveDashboard() {
               </div>
             </div>
           </TabsContent>
+          )}
 
           {/* Announcements */}
           <TabsContent value="announcements" className="mt-4 space-y-4">
@@ -451,6 +509,7 @@ export default function ExecutiveDashboard() {
           </TabsContent>
 
           {/* Forms & Polls */}
+          {canViewDuesPayers && (
           <TabsContent value="forms" className="mt-4 space-y-4">
             <Button onClick={() => setShowFormPoll(true)} className="bg-purple-700 hover:bg-purple-800 rounded-xl text-sm">
               <Plus className="w-4 h-4 mr-1" /> Post Form / Poll
@@ -498,10 +557,16 @@ export default function ExecutiveDashboard() {
               ))}
             </div>
           </TabsContent>
+          )}
 
           {/* Dues & Payments — Financial Secretary & Assistant Financial Secretary */}
           {isFinExec && (
             <TabsContent value="payments" className="mt-4 space-y-4">
+              {canDownloadDuesPayers && (
+                <Button onClick={handleDownloadDuesPDF} className="bg-emerald-700 hover:bg-emerald-800 rounded-xl text-sm">
+                  <FileText className="w-4 h-4 mr-1" /> Download Dues Payers (PDF)
+                </Button>
+              )}
               <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden">
                 <div className="px-4 py-3 bg-emerald-50 border-b border-emerald-100">
                   <p className="text-xs font-semibold text-emerald-700">Verified Dues Payments ({filteredPayments.filter(p => p.type === 'dues').length})</p>

@@ -214,7 +214,7 @@ export default function PayDues() {
               </button>
             </div>
             <p className="text-emerald-200 text-xs mt-3">
-              Make the beneficiary <span className="font-semibold text-white">The Nigerian Economic Student Association</span>.
+              Make the beneficiary <span className="font-semibold text-white">NIGERIAN ECONOMIC STUDENT ASSOSIATI</span>.
             </p>
           </div>
 
@@ -226,7 +226,7 @@ export default function PayDues() {
             <ul className="text-xs text-gray-500 space-y-1.5">
               <li>• Amount ≥ ₦6,000</li>
               <li>• Date is within the last 2 months</li>
-              <li>• Beneficiary is "The Nigerian Economic Student Association"</li>
+              <li>• Beneficiary is "NIGERIAN ECONOMIC STUDENT ASSOSIATI"</li>
               <li>• Paid to Covenant MFB, account {NESA_ACCOUNT}</li>
               <li>• Sender name matches your profile name</li>
             </ul>

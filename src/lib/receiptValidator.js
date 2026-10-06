@@ -67,16 +67,16 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
     }
   }
 
-  // 3. Beneficiary check — must be The Nigerian Economic Student Association
+  // 3. Beneficiary check — must be NIGERIAN ECONOMIC STUDENT ASSOSIATI
   const acctName = (data.account_name || '').toLowerCase();
   const hasBeneficiary =
     acctName.includes('nigerian') &&
     acctName.includes('economic') &&
-    (acctName.includes('student') || acctName.includes('students')) &&
-    acctName.includes('association');
+    acctName.includes('student') &&
+    (acctName.includes('assoc') || acctName.includes('assos'));
   if (!hasBeneficiary) {
     errors.push(
-      `Beneficiary must be "The Nigerian Economic Student Association". Detected: "${data.account_name || 'not found'}".`
+      `Beneficiary must be "NIGERIAN ECONOMIC STUDENT ASSOSIATI". Detected: "${data.account_name || 'not found'}".`
     );
   }
 

@@ -205,7 +205,7 @@ export default function Donate() {
               </button>
             </div>
             <p className="text-rose-200 text-xs mt-3">
-              Make the beneficiary <span className="font-semibold text-white">The Nigerian Economic Student Association</span>.
+              Make the beneficiary <span className="font-semibold text-white">NIGERIAN ECONOMIC STUDENT ASSOSIATI</span>.
             </p>
           </div>
 
@@ -217,7 +217,7 @@ export default function Donate() {
             <ul className="text-xs text-gray-500 space-y-1.5">
               <li>• Amount ≥ ₦100</li>
               <li>• Date is within the last 2 months</li>
-              <li>• Beneficiary is "The Nigerian Economic Student Association"</li>
+              <li>• Beneficiary is "NIGERIAN ECONOMIC STUDENT ASSOSIATI"</li>
               <li>• Paid to Covenant MFB, account {NESA_ACCOUNT}</li>
               <li>• Sender name matches your profile name</li>
             </ul>
