@@ -66,8 +66,14 @@ export default function ExecutiveDashboard() {
     // Bridge student session for seamless portal access
     if (execData.student_id) {
       localStorage.setItem('nesa_student_id', execData.student_id);
-    } else if (execData.reg_no) {
-      const matchingStudents = await base44.entities.Student.filter({ reg_no: execData.reg_no });
+    } else {
+      let matchingStudents = [];
+      if (execData.reg_no) {
+        matchingStudents = await base44.entities.Student.filter({ reg_no: execData.reg_no });
+      }
+      if (matchingStudents.length === 0 && execData.matric_no) {
+        matchingStudents = await base44.entities.Student.filter({ matric_no: execData.matric_no });
+      }
       if (matchingStudents.length > 0) {
         await base44.entities.Executive.update(execData.id, { student_id: matchingStudents[0].id });
         execData.student_id = matchingStudents[0].id;

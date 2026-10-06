@@ -10,7 +10,7 @@ import { ArrowLeft, Shield, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ExecutiveSignIn() {
-  const [regNo, setRegNo] = useState('');
+  const [matricNo, setMatricNo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,11 +18,24 @@ export default function ExecutiveSignIn() {
     e.preventDefault();
     setError('');
 
+    const trimmed = matricNo.trim();
+
+    // Validate AF at positions 3-4 (index 2-3)
+    if (trimmed.length < 4 || trimmed[2].toUpperCase() !== 'A' || trimmed[3].toUpperCase() !== 'F') {
+      setError('Invalid matriculation number. Executive matric numbers have "AF" as the 3rd and 4th characters.');
+      return;
+    }
+
     setLoading(true);
 
-    const executives = await base44.entities.Executive.filter({ reg_no: regNo.trim(), is_approved: true, is_active: true });
+    const executives = await base44.entities.Executive.filter({
+      matric_no: { $regex: `^${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
+      is_approved: true,
+      is_active: true
+    });
+
     if (executives.length === 0) {
-      setError('No approved executive account found with this registration number. Contact the admin.');
+      setError('No approved executive account found with this matriculation number. Register first or contact the admin.');
       setLoading(false);
       return;
     }
@@ -48,21 +61,9 @@ export default function ExecutiveSignIn() {
       }
     }
 
-    // Send OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await base44.entities.Executive.update(exec.id, { otp_code: otp, otp_expiry: expiry });
-
-    await base44.integrations.Core.SendEmail({
-      to: exec.email,
-      subject: 'NESA Executive Portal - Sign In Code',
-      body: `Hello ${exec.full_name},\n\nYour sign-in code is: ${otp}\n\nThis expires in 10 minutes.\n\nPost: ${exec.post}`,
-    });
-
-    localStorage.setItem('nesa_exec_pending_id', exec.id);
-    window.location.href = createPageUrl('ExecutiveVerifyOtp');
-    setLoading(false);
+    // Direct sign-in — no OTP needed
+    localStorage.setItem('nesa_executive_id', exec.id);
+    window.location.href = createPageUrl('ExecutiveDashboard');
   };
 
   return (
@@ -83,13 +84,14 @@ export default function ExecutiveSignIn() {
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-purple-100 shadow-lg p-6 space-y-4">
           <div>
-            <Label className="text-gray-700">Registration Number</Label>
-            <Input required value={regNo} onChange={e => setRegNo(e.target.value)}
-              placeholder="e.g. ECO/2021/001" className="mt-1 rounded-xl h-11" />
+            <Label className="text-gray-700">Matriculation Number</Label>
+            <Input required value={matricNo} onChange={e => setMatricNo(e.target.value)}
+              placeholder="e.g. 22AF012345" className="mt-1 rounded-xl h-11" />
+            <p className="text-xs text-gray-400 mt-1">Must contain "AF" as the 3rd and 4th characters.</p>
           </div>
           <Button type="submit" disabled={loading}
             className="w-full bg-purple-700 hover:bg-purple-800 rounded-xl h-12 text-base">
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Verification Code'}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
           </Button>
         </form>
 
