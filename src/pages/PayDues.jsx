@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { validateReceipt } from '../lib/receiptValidator';
 import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 import ReceiptCard from '../components/receipt/ReceiptCard';
+import { checkStudentLevel } from '../lib/studentLevel';
 
 const NESA_ACCOUNT = '0520003964';
 const NESA_BANK = 'Covenant Microfinance Bank (CMFB)';
@@ -27,10 +28,17 @@ export default function PayDues() {
   useEffect(() => {
     const sid = localStorage.getItem('nesa_student_id');
     if (!sid) { window.location.href = createPageUrl('SignIn'); return; }
-    base44.entities.Student.filter({ id: sid }).then(s => {
+    base44.entities.Student.filter({ id: sid }).then(async (s) => {
       if (s.length) {
-        setStudent(s[0]);
-        if (s[0].dues_paid) setAlreadyPaid(true);
+        const studentData = s[0];
+        const { needsUpdate, correctLevel } = checkStudentLevel(studentData);
+        if (needsUpdate) {
+          await base44.entities.Student.update(studentData.id, { level: correctLevel, dues_paid: false });
+          studentData.level = correctLevel;
+          studentData.dues_paid = false;
+        }
+        setStudent(studentData);
+        if (studentData.dues_paid) setAlreadyPaid(true);
       }
     });
   }, []);

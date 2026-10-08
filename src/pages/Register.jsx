@@ -39,6 +39,7 @@ export default function Register() {
 
     const student = await base44.entities.Student.create({
       ...form,
+      registration_level: form.level,
       is_verified: true,
     });
 

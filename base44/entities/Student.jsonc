@@ -22,7 +22,17 @@
         "300",
         "400"
       ],
-      "description": "Academic level"
+      "description": "Current academic level (auto-promoted each September)"
+    },
+    "registration_level": {
+      "type": "string",
+      "enum": [
+        "100",
+        "200",
+        "300",
+        "400"
+      ],
+      "description": "The level at which the student first registered \u2014 used for automatic level promotion"
     },
     "course_of_study": {
       "type": "string",

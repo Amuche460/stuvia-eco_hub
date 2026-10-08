@@ -15,6 +15,7 @@ import {
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
+import { checkAllBirthdays } from '@/lib/birthdayNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
@@ -106,6 +107,7 @@ export default function ExecutiveDashboard() {
 
     // Fire tenure-end reminders for all executives (non-blocking)
     checkAllExecutiveTenures();
+    if (studs.length > 0) checkAllBirthdays(studs);
   };
 
   const handleLogout = () => {

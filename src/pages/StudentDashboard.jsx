@@ -16,6 +16,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import AnnouncementFeed from '../components/dashboard/AnnouncementFeed';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { checkStudentLevel } from '../lib/studentLevel';
+import { checkStudentBirthday } from '../lib/birthdayNotifier';
 
 export default function StudentDashboard() {
   const [student, setStudent] = useState(null);
@@ -39,7 +41,15 @@ export default function StudentDashboard() {
       window.location.href = createPageUrl('SignIn');
       return;
     }
-    setStudent(students[0]);
+    const s = students[0];
+    const { needsUpdate, correctLevel } = checkStudentLevel(s);
+    if (needsUpdate) {
+      await base44.entities.Student.update(s.id, { level: correctLevel, dues_paid: false });
+      s.level = correctLevel;
+      s.dues_paid = false;
+    }
+    setStudent(s);
+    checkStudentBirthday(s);
 
     const allPayments = await base44.entities.Payment.filter({ student_id: sid }, '-created_date');
     setPayments(allPayments);
