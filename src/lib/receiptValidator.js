@@ -18,7 +18,7 @@ const DATE_WINDOW_DAYS = 60;
 export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   const response = await base44.integrations.Core.InvokeLLM({
     model: 'gpt_5_mini',
-    prompt: `Extract these fields from this payment receipt as JSON: amount (number, Naira), date (YYYY-MM-DD), description, bank_name (destination bank), account_number (destination account), account_name (beneficiary name on receiving account), sender_name. Use null for any unreadable field. Return only JSON.`,
+    prompt: `Extract these fields from this payment document as JSON: amount (number, Naira), date (YYYY-MM-DD), description, bank_name (destination bank — null if this is a hand-written cash paper), account_number (destination account — null if hand-written cash paper), account_name (beneficiary name), sender_name (person who paid). Also detect has_fs_approval (boolean — true if the document contains "approved by the Financial Secretary" or similar wording approving this payment by a financial secretary). Use null for any unreadable field. Return only JSON.`,
     file_urls: [fileUrl],
     response_json_schema: {
       type: 'object',
@@ -30,6 +30,7 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
         account_number: { type: 'string' },
         account_name: { type: 'string' },
         sender_name: { type: 'string' },
+        has_fs_approval: { type: 'boolean' },
       }
     }
   });
@@ -38,6 +39,7 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   const errors = [];
   const isDonation = paymentType === 'donation';
   const minAmount = isDonation ? MIN_DONATION : MIN_DUES;
+  const isFSApproved = data.has_fs_approval === true;
 
   // 1. Amount check
   if (!data.amount || data.amount < minAmount) {
@@ -81,17 +83,20 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   }
 
   // 4. Addressed to NESA account: Covenant Microfinance Bank, 0520003964
-  const bank = (data.bank_name || '').toLowerCase();
-  const acct = (data.account_number || '').replace(/\s/g, '');
-  if (!bank.includes(NESA_BANK_KEYWORD)) {
-    errors.push(
-      `Payment must be to Covenant Microfinance Bank. Detected bank: "${data.bank_name || 'not found'}".`
-    );
-  }
-  if (acct !== NESA_ACCOUNT_NUMBER) {
-    errors.push(
-      `Account number must be ${NESA_ACCOUNT_NUMBER}. Detected: "${data.account_number || 'not found'}".`
-    );
+  //    Skipped for Financial Secretary-approved cash papers (no bank transfer)
+  if (!isFSApproved) {
+    const bank = (data.bank_name || '').toLowerCase();
+    const acct = (data.account_number || '').replace(/\s/g, '');
+    if (!bank.includes(NESA_BANK_KEYWORD)) {
+      errors.push(
+        `Payment must be to Covenant Microfinance Bank. Detected bank: "${data.bank_name || 'not found'}".`
+      );
+    }
+    if (acct !== NESA_ACCOUNT_NUMBER) {
+      errors.push(
+        `Account number must be ${NESA_ACCOUNT_NUMBER}. Detected: "${data.account_number || 'not found'}".`
+      );
+    }
   }
 
   // 5. Sender name matches student profile name

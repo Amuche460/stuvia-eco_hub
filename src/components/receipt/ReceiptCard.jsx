@@ -13,7 +13,6 @@ export default function ReceiptCard({ payment }) {
     switch (field.format) {
       case 'level': return `${value}L`;
       case 'type': return value === 'dues' ? T.duesLabel : T.donationLabel;
-      case 'gateway': return value === 'paystack' ? 'Paystack' : 'Flutterwave';
       case 'date': return format(new Date(value), 'PPP');
       case 'datetime': return format(new Date(value), 'PPP • p');
       default: return value || 'N/A';

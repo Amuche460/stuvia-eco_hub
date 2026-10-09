@@ -52,7 +52,6 @@ export async function sendReceiptEmail({
     ['Payment Type', typeLabel],
     ['Amount', `₦${Number(amount).toLocaleString()}`],
     ['Date', dateStr],
-    gateway ? ['Gateway', gateway === 'paystack' ? 'Paystack' : gateway === 'flutterwave' ? 'Flutterwave' : 'Admin Verified'] : null,
     ['Status', 'VERIFIED ✅'],
   ].filter(Boolean);
 

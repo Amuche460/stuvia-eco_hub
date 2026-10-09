@@ -117,7 +117,7 @@ export default function PayDues() {
         status: 'verified',
         receipt_number: receiptNumber,
         verified_at: new Date().toISOString(),
-        verified_by: 'AI Receipt Validator',
+        verified_by: data.has_fs_approval ? 'Financial Secretary' : 'AI Receipt Validator',
         receipt_data: data,
         validation_errors: [],
       });
@@ -239,7 +239,8 @@ export default function PayDues() {
               <li>• Amount ≥ ₦6,000</li>
               <li>• Date is within the last 2 months</li>
               <li>• Beneficiary is "NIGERIAN ECONOMIC STUDENT ASSOSIATI"</li>
-              <li>• Paid to Covenant MFB, account {NESA_ACCOUNT}</li>
+              <li>• Bank transfer: paid to Covenant MFB, account {NESA_ACCOUNT}</li>
+              <li>• Cash: paper approved by the Financial Secretary</li>
               <li>• Sender name matches your profile name</li>
             </ul>
           </div>

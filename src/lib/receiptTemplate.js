@@ -36,7 +36,6 @@ export const RECEIPT_TEMPLATE = {
     { key: 'student_matric_no', label: 'Matric Number' },
     { key: 'student_level',    label: 'Level',         format: 'level' },
     { key: 'type',             label: 'Payment Type',  format: 'type' },
-    { key: 'verified_by',      label: 'Gateway',       format: 'gateway' },
     { key: 'created_date',     label: 'Date',          format: 'date' },
     { key: 'verified_at',      label: 'Verified At',   format: 'datetime', optional: true },
   ],
