@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 
 const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 400;
+const TOAST_AUTO_DISMISS = 5000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -112,6 +113,7 @@ function dispatch(action) {
 
 function toast({ ...props }) {
   const id = genId();
+  const duration = props.duration !== undefined ? props.duration : TOAST_AUTO_DISMISS;
 
   const update = (props) =>
     dispatch({
@@ -133,6 +135,10 @@ function toast({ ...props }) {
       },
     },
   });
+
+  if (duration > 0) {
+    setTimeout(() => dismiss(), duration);
+  }
 
   return {
     id,
@@ -161,4 +167,4 @@ function useToast() {
   };
 }
 
-export { useToast, toast }; 
+export { useToast, toast };

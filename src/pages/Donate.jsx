@@ -120,32 +120,38 @@ export default function Donate() {
         validation_errors: [],
       });
 
-      // 4. Update total donated
-      await base44.entities.Student.update(student.id, {
-        total_donated: (student.total_donated || 0) + data.amount,
-      });
+      // 4. Update total donated (non-blocking — payment is already recorded)
+      try {
+        await base44.entities.Student.update(student.id, {
+          total_donated: (student.total_donated || 0) + data.amount,
+        });
+      } catch (e) { /* non-blocking */ }
 
-      // 5. Notify the student
-      await base44.entities.NesaNotification.create({
-        title: 'Donation Received 💛',
-        message: `Your donation of ₦${data.amount.toLocaleString()} to the Love Foundation has been verified. Receipt: ${receiptNumber}`,
-        type: 'payment',
-        student_id: student.id,
-        is_read_by: [],
-      });
+      // 5. Notify the student (non-blocking)
+      try {
+        await base44.entities.NesaNotification.create({
+          title: 'Donation Received 💛',
+          message: `Your donation of ₦${data.amount.toLocaleString()} to the Love Foundation has been verified. Receipt: ${receiptNumber}`,
+          type: 'payment',
+          student_id: student.id,
+          is_read_by: [],
+        });
+      } catch (e) { /* non-blocking */ }
 
-      // 6. Email the receipt
-      await sendReceiptEmail({
-        email: student.email,
-        studentName: student.full_name,
-        receiptNumber,
-        amount: data.amount,
-        paymentType: 'donation',
-        regNo: student.reg_no,
-        matricNo: student.matric_no,
-        level: student.level,
-        gateway: 'AI Validator',
-      });
+      // 6. Email the receipt (non-blocking — may fail on Free plan for non-registered emails)
+      try {
+        await sendReceiptEmail({
+          email: student.email,
+          studentName: student.full_name,
+          receiptNumber,
+          amount: data.amount,
+          paymentType: 'donation',
+          regNo: student.reg_no,
+          matricNo: student.matric_no,
+          level: student.level,
+          gateway: 'AI Validator',
+        });
+      } catch (e) { /* non-blocking */ }
 
       setPayment(created);
       toast({ title: 'Donation verified! 💛', description: 'Your Love Foundation receipt has been generated.' });

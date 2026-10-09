@@ -122,30 +122,34 @@ export default function PayDues() {
         validation_errors: [],
       });
 
-      // 4. Mark dues as paid
-      await base44.entities.Student.update(student.id, { dues_paid: true });
+      // 4. Mark dues as paid (non-blocking — payment is already recorded)
+      try { await base44.entities.Student.update(student.id, { dues_paid: true }); } catch (e) { /* non-blocking */ }
 
-      // 5. Notify the student
-      await base44.entities.NesaNotification.create({
-        title: 'Dues Payment Verified ✅',
-        message: `Your dues payment of ₦${data.amount.toLocaleString()} has been verified. Receipt: ${receiptNumber}`,
-        type: 'payment',
-        student_id: student.id,
-        is_read_by: [],
-      });
+      // 5. Notify the student (non-blocking)
+      try {
+        await base44.entities.NesaNotification.create({
+          title: 'Dues Payment Verified ✅',
+          message: `Your dues payment of ₦${data.amount.toLocaleString()} has been verified. Receipt: ${receiptNumber}`,
+          type: 'payment',
+          student_id: student.id,
+          is_read_by: [],
+        });
+      } catch (e) { /* non-blocking */ }
 
-      // 6. Email the receipt
-      await sendReceiptEmail({
-        email: student.email,
-        studentName: student.full_name,
-        receiptNumber,
-        amount: data.amount,
-        paymentType: 'dues',
-        regNo: student.reg_no,
-        matricNo: student.matric_no,
-        level: student.level,
-        gateway: 'AI Validator',
-      });
+      // 6. Email the receipt (non-blocking — may fail on Free plan for non-registered emails)
+      try {
+        await sendReceiptEmail({
+          email: student.email,
+          studentName: student.full_name,
+          receiptNumber,
+          amount: data.amount,
+          paymentType: 'dues',
+          regNo: student.reg_no,
+          matricNo: student.matric_no,
+          level: student.level,
+          gateway: 'AI Validator',
+        });
+      } catch (e) { /* non-blocking */ }
 
       setPayment(created);
       toast({ title: 'Receipt verified! 🎉', description: 'Your NESA receipt has been generated.' });
