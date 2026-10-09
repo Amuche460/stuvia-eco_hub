@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard
+  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard, Trash2
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import { execSeesSuggestion } from '@/lib/suggestionTeams';
@@ -51,6 +51,7 @@ export default function ExecutiveDashboard() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [deletingStudentId, setDeletingStudentId] = useState('');
 
   useEffect(() => {
     const eid = localStorage.getItem('nesa_executive_id');
@@ -115,6 +116,20 @@ export default function ExecutiveDashboard() {
     localStorage.removeItem('nesa_student_id');
     localStorage.removeItem('nesa_is_admin');
     window.location.href = createPageUrl('Home');
+  };
+
+  const handleDeleteStudent = async (studentId) => {
+    try {
+      await base44.entities.Student.delete(studentId);
+      setStudents(prev => prev.filter(s => s.id !== studentId));
+      setDeletingStudentId('');
+      setSaved('Student record deleted.');
+      setTimeout(() => setSaved(''), 3000);
+    } catch (e) {
+      setSaved('Could not delete student record. Please try again.');
+      setTimeout(() => setSaved(''), 3000);
+      setDeletingStudentId('');
+    }
   };
 
   const handlePostAnnouncement = async () => {
@@ -396,10 +411,31 @@ export default function ExecutiveDashboard() {
                               </Badge>
                             </td>
                             <td className="px-4 py-3">
-                              <Link to={createPageUrl('StudentProfileDetail') + '?id=' + s.id}
-                                className="text-xs text-purple-700 font-medium hover:underline inline-flex items-center gap-1">
-                                View <ExternalLink className="w-3 h-3" />
-                              </Link>
+                              <div className="flex items-center gap-3">
+                                <Link to={createPageUrl('StudentProfileDetail') + '?id=' + s.id}
+                                  className="text-xs text-purple-700 font-medium hover:underline inline-flex items-center gap-1">
+                                  View <ExternalLink className="w-3 h-3" />
+                                </Link>
+                                {isFinExec && (
+                                  deletingStudentId === s.id ? (
+                                    <div className="flex items-center gap-1">
+                                      <button onClick={() => handleDeleteStudent(s.id)}
+                                        className="text-xs text-red-600 font-medium hover:underline">
+                                        Confirm
+                                      </button>
+                                      <button onClick={() => setDeletingStudentId('')}
+                                        className="text-xs text-gray-500 hover:underline">
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button onClick={() => setDeletingStudentId(s.id)}
+                                      className="text-xs text-red-500 hover:text-red-700 inline-flex items-center gap-1">
+                                      <Trash2 className="w-3 h-3" /> Delete
+                                    </button>
+                                  )
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
