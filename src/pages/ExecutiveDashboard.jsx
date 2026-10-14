@@ -95,8 +95,8 @@ export default function ExecutiveDashboard() {
     const [anns, suggs, studs, pays] = await Promise.all([
       base44.entities.NesaAnnouncement.list('-created_date'),
       base44.entities.Suggestion.list('-created_date'),
-      canViewDues ? base44.entities.Student.list('full_name') : Promise.resolve([]),
-      canViewDues ? base44.entities.Payment.filter({ status: 'verified' }, '-created_date') : Promise.resolve([]),
+      canViewDues ? base44.entities.Student.filter({}, { sort: 'full_name', limit: 1000 }).then(p => p.items) : Promise.resolve([]),
+      canViewDues ? base44.entities.Payment.filter({ status: 'verified' }, { sort: '-created_date', limit: 1000 }).then(p => p.items) : Promise.resolve([]),
     ]);
 
     setExec(execData);

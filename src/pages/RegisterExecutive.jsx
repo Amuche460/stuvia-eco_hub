@@ -73,8 +73,9 @@ export default function RegisterExecutive() {
 
     const codeMatches = form.secret_code.trim() === EXCO_SECRET_CODE;
 
+    const { secret_code, ...execData } = form;
     await base44.entities.Executive.create({
-      ...form,
+      ...execData,
       student_id: studentId,
       is_active: true,
       is_approved: codeMatches,
@@ -146,8 +147,8 @@ export default function RegisterExecutive() {
               </div>
               <div>
                 <Label className="text-gray-700">Matric Number</Label>
-                <Input value={form.matric_no} onChange={e => setForm(f => ({ ...f, matric_no: e.target.value }))}
-                  placeholder="e.g. 20210001" className="mt-1 rounded-xl h-11" />
+                <Input required value={form.matric_no} onChange={e => setForm(f => ({ ...f, matric_no: e.target.value }))}
+                  placeholder="e.g. 24AF035011" className="mt-1 rounded-xl h-11" />
               </div>
             </div>
 

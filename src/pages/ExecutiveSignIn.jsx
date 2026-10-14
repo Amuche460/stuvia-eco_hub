@@ -30,17 +30,22 @@ export default function ExecutiveSignIn() {
 
     const executives = await base44.entities.Executive.filter({
       matric_no: { $regex: `^${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
-      is_approved: true,
       is_active: true
     });
 
     if (executives.length === 0) {
-      setError('No approved executive account found with this matriculation number. Register first or contact the admin.');
+      setError('No executive account found with this matriculation number. Please register first.');
       setLoading(false);
       return;
     }
 
     const exec = executives[0];
+
+    if (!exec.is_approved) {
+      setError('Your registration is pending admin approval. Please contact the admin or re-register with the exco secret code for instant approval.');
+      setLoading(false);
+      return;
+    }
 
     // Check term expiry — delete expired executive
     const termEnd = new Date(exec.term_end_date);

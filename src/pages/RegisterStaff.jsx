@@ -42,7 +42,7 @@ export default function RegisterStaff() {
     await base44.integrations.Core.SendEmail({
       to: form.email,
       subject: 'NESA Staff Portal - Verification Code',
-      body: `Hello ${form.name},\n\nYour NESA Staff Portal verification code is: ${otp}\n\nThis code expires in 10 minutes.`,
+      body: `Hello ${form.full_name},\n\nYour NESA Staff Portal verification code is: ${otp}\n\nThis code expires in 10 minutes.`,
     });
 
     localStorage.setItem('nesa_staff_pending_id', staff.id);
