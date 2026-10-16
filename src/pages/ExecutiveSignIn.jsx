@@ -91,7 +91,7 @@ export default function ExecutiveSignIn() {
           <div>
             <Label className="text-gray-700">Matriculation Number</Label>
             <Input required value={matricNo} onChange={e => setMatricNo(e.target.value)}
-              placeholder="e.g. 22AF012345" className="mt-1 rounded-xl h-11" />
+              placeholder="e.g. 22AF001234" className="mt-1 rounded-xl h-11" />
             <p className="text-xs text-gray-400 mt-1">Must contain "AF" as the 3rd and 4th characters.</p>
           </div>
           <Button type="submit" disabled={loading}

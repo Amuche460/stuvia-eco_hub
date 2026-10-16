@@ -147,12 +147,12 @@ export default function RegisterExecutive() {
               <div>
                 <Label className="text-gray-700">Reg Number *</Label>
                 <Input required value={form.reg_no} onChange={e => setForm(f => ({ ...f, reg_no: e.target.value }))}
-                  placeholder="e.g. ECO/2021/001" className="mt-1 rounded-xl h-11" />
+                  placeholder="e.g. 2201860" className="mt-1 rounded-xl h-11" />
               </div>
               <div>
                 <Label className="text-gray-700">Matric Number</Label>
                 <Input required value={form.matric_no} onChange={e => setForm(f => ({ ...f, matric_no: e.target.value }))}
-                  placeholder="e.g. 24AF035011" className="mt-1 rounded-xl h-11" />
+                  placeholder="e.g. 22AF001234" className="mt-1 rounded-xl h-11" />
               </div>
             </div>
 

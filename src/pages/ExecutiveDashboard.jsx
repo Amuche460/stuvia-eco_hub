@@ -52,6 +52,9 @@ export default function ExecutiveDashboard() {
   const [saved, setSaved] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingStudentId, setDeletingStudentId] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     const eid = localStorage.getItem('nesa_executive_id');
@@ -116,6 +119,24 @@ export default function ExecutiveDashboard() {
     localStorage.removeItem('nesa_student_id');
     localStorage.removeItem('nesa_is_admin');
     window.location.href = createPageUrl('Home');
+  };
+
+  const toggleSelect = (id) =>
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    const ids = [...selectedIds];
+    const results = await Promise.allSettled(ids.map(id => base44.entities.Student.delete(id)));
+    const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled');
+    setStudents(prev => prev.filter(s => !deletedIds.includes(s.id)));
+    setSelectedIds([]);
+    setBulkConfirm(false);
+    setBulkDeleting(false);
+    setSaved(deletedIds.length === ids.length
+      ? `${deletedIds.length} student record(s) deleted.`
+      : `${deletedIds.length} deleted, ${ids.length - deletedIds.length} failed. Please try again.`);
+    setTimeout(() => setSaved(''), 3000);
   };
 
   const handleDeleteStudent = async (studentId) => {
@@ -382,12 +403,39 @@ export default function ExecutiveDashboard() {
             {searchQuery && filteredStudents.length > 0 && (
               <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
                 <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
-                  <p className="text-xs font-semibold text-purple-700">Students ({filteredStudents.length})</p>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="text-xs font-semibold text-purple-700">Students ({filteredStudents.length})</p>
+                    {isFinExec && selectedIds.length > 0 && (
+                      bulkConfirm ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-red-600">Delete {selectedIds.length} record(s)?</span>
+                          <Button size="sm" disabled={bulkDeleting} onClick={handleBulkDelete}
+                            className="h-7 text-xs bg-red-600 hover:bg-red-700 rounded-lg">
+                            {bulkDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm'}
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={bulkDeleting} onClick={() => setBulkConfirm(false)}
+                            className="h-7 text-xs rounded-lg">Cancel</Button>
+                        </div>
+                      ) : (
+                        <Button size="sm" onClick={() => setBulkConfirm(true)}
+                          className="h-7 text-xs bg-red-600 hover:bg-red-700 rounded-lg">
+                          <Trash2 className="w-3 h-3 mr-1" /> Delete selected ({selectedIds.length})
+                        </Button>
+                      )
+                    )}
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                       <tr>
+                        {isFinExec && (
+                          <th className="px-4 py-2.5 w-8">
+                            <input type="checkbox" className="w-4 h-4 accent-purple-700"
+                              checked={filteredStudents.length > 0 && filteredStudents.every(s => selectedIds.includes(s.id))}
+                              onChange={e => setSelectedIds(e.target.checked ? filteredStudents.map(s => s.id) : [])} />
+                          </th>
+                        )}
                         <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Name</th>
                         <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Reg No</th>
                         <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Level</th>
@@ -401,6 +449,12 @@ export default function ExecutiveDashboard() {
                         const hasDues = payments.some(p => p.student_id === s.id && p.type === 'dues' && p.status === 'verified');
                         return (
                           <tr key={s.id} className="hover:bg-gray-50">
+                            {isFinExec && (
+                              <td className="px-4 py-3">
+                                <input type="checkbox" className="w-4 h-4 accent-purple-700"
+                                  checked={selectedIds.includes(s.id)} onChange={() => toggleSelect(s.id)} />
+                              </td>
+                            )}
                             <td className="px-4 py-3 font-medium text-gray-900">{s.full_name}</td>
                             <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.reg_no}</td>
                             <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{s.level}L</Badge></td>

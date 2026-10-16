@@ -82,7 +82,7 @@ export default function SignIn() {
                 required
                 value={regNo}
                 onChange={(e) => setRegNo(e.target.value)}
-                placeholder="e.g. 2401890"
+                placeholder="e.g. 2201860"
                 className="mt-1 rounded-xl h-12 border-gray-200 text-base"
               />
             </div>

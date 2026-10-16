@@ -114,7 +114,7 @@ export default function Register() {
                   required
                   value={form.reg_no}
                   onChange={(e) => setForm({ ...form, reg_no: e.target.value })}
-                  placeholder="e.g. 2401890"
+                  placeholder="e.g. 2201860"
                   className="mt-1 rounded-xl h-11 border-gray-200"
                 />
               </div>
