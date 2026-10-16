@@ -76,6 +76,10 @@ export default function RegisterExecutive() {
     const { secret_code, ...execData } = form;
     await base44.entities.Executive.create({
       ...execData,
+      full_name: form.full_name.trim(),
+      reg_no: form.reg_no.trim(),
+      matric_no: form.matric_no.trim().toUpperCase(),
+      email: form.email.trim(),
       student_id: studentId,
       is_active: true,
       is_approved: codeMatches,

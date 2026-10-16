@@ -29,7 +29,7 @@ export default function ExecutiveSignIn() {
     setLoading(true);
 
     const executives = await base44.entities.Executive.filter({
-      matric_no: { $regex: `^${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' },
+      matric_no: { $regex: `^\\s*${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, $options: 'i' },
       is_active: true
     });
 
