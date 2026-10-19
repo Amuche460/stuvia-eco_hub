@@ -513,11 +513,12 @@ export default function ExecutiveDashboard() {
                       <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Level</th>
                       <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Amount</th>
                       <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Type</th>
-                    </tr>
+                      {isFinExec && <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-xs">Proof</th>}
+                      </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {filteredPayments.length === 0 ? (
-                      <tr><td colSpan={5} className="text-center py-8 text-gray-400 text-sm">No records found</td></tr>
+                      <tr><td colSpan={isFinExec ? 6 : 5} className="text-center py-8 text-gray-400 text-sm">No records found</td></tr>
                     ) : filteredPayments.map(p => (
                       <tr key={p.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-900">{p.student_name}</td>
@@ -528,17 +529,26 @@ export default function ExecutiveDashboard() {
                           <Badge className={p.type === 'dues' ? 'bg-emerald-100 text-emerald-700 border-0 text-xs' : 'bg-rose-100 text-rose-700 border-0 text-xs'}>
                             {p.type === 'dues' ? 'Dues' : 'Donation'}
                           </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </TabsContent>
-          )}
+                          </td>
+                          {isFinExec && (
+                          <td className="px-4 py-3">
+                            {p.proof_url ? (
+                              <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
+                                View <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : '—'}
+                          </td>
+                          )}
+                          </tr>
+                          ))}
+                          </tbody>
+                          </table>
+                          </div>
+                          </div>
+                          </TabsContent>
+                          )}
 
-          {/* Announcements */}
+                          {/* Announcements */}
           <TabsContent value="announcements" className="mt-4 space-y-4">
             {canPostAnnouncement && (
               <Button onClick={() => setShowAnnouncementForm(true)} className="bg-purple-700 hover:bg-purple-800 rounded-xl text-sm">

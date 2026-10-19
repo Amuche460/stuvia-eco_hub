@@ -81,7 +81,7 @@ export default function Home() {
             <span className="text-emerald-700">Made Simple.</span>
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
-            Pay your NESA dues, donate to the Love Foundation, and share feedback — all in one secure portal.
+            Download your NESA receipts, donate to the Love Foundation, and share feedback — all in one secure portal.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <Link to={createPageUrl('Register')}>
