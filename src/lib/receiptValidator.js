@@ -83,20 +83,23 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   }
 
   // 4. Addressed to NESA account: Covenant Microfinance Bank, 0520003964
-  //    Skipped for Financial Secretary-approved cash papers (no bank transfer)
-  if (!isFSApproved) {
-    const bank = (data.bank_name || '').toLowerCase();
-    const acct = (data.account_number || '').replace(/\s/g, '');
-    if (!bank.includes(NESA_BANK_KEYWORD)) {
-      errors.push(
-        `Payment must be to Covenant Microfinance Bank. Detected bank: "${data.bank_name || 'not found'}".`
-      );
-    }
-    if (acct !== NESA_ACCOUNT_NUMBER) {
-      errors.push(
-        `Account number must be ${NESA_ACCOUNT_NUMBER}. Detected: "${data.account_number || 'not found'}".`
-      );
-    }
+  //    Paper receipts approved by the Financial Secretary are no longer accepted
+  if (isFSApproved) {
+    errors.push(
+      'Paper receipts stamped or signed by the Financial Secretary are no longer accepted. Please pay by bank transfer to the NESA account and upload that receipt.'
+    );
+  }
+  const bank = (data.bank_name || '').toLowerCase();
+  const acct = (data.account_number || '').replace(/\s/g, '');
+  if (!bank.includes(NESA_BANK_KEYWORD)) {
+    errors.push(
+      `Payment must be to Covenant Microfinance Bank. Detected bank: "${data.bank_name || 'not found'}".`
+    );
+  }
+  if (acct !== NESA_ACCOUNT_NUMBER) {
+    errors.push(
+      `Account number must be ${NESA_ACCOUNT_NUMBER}. Detected: "${data.account_number || 'not found'}".`
+    );
   }
 
   // 5. Sender name matches student profile name

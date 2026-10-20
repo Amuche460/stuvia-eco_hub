@@ -117,7 +117,7 @@ export default function PayDues() {
         status: 'verified',
         receipt_number: receiptNumber,
         verified_at: new Date().toISOString(),
-        verified_by: data.has_fs_approval ? 'Financial Secretary' : 'AI Receipt Validator',
+        verified_by: 'AI Receipt Validator',
         receipt_data: data,
         validation_errors: [],
       });
