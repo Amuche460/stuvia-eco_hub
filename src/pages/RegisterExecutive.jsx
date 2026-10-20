@@ -6,7 +6,7 @@ import NesaLogo from '../components/NesaLogo';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSelect from '@/components/MobileSelect';
 import { ArrowLeft, Shield, Loader2, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -22,6 +22,15 @@ const POSTS = [
   "Editor in Chief","Assistant Editor in Chief",
   "Community Development Officer","Assistant Community Development Officer",
   "100 Level Rep","200 Level Rep","Chaplain"
+];
+
+const POST_OPTIONS = POSTS.map(p => ({ value: p, label: p }));
+
+const LEVEL_OPTIONS = [
+  { value: '100', label: '100L' },
+  { value: '200', label: '200L' },
+  { value: '300', label: '300L' },
+  { value: '400', label: '400L' },
 ];
 
 export default function RegisterExecutive() {
@@ -165,12 +174,13 @@ export default function RegisterExecutive() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-gray-700">Level *</Label>
-                <Select value={form.level} onValueChange={v => setForm(f => ({ ...f, level: v }))}>
-                  <SelectTrigger className="mt-1 rounded-xl h-11"><SelectValue placeholder="Level" /></SelectTrigger>
-                  <SelectContent>
-                    {['100','200','300','400'].map(l => <SelectItem key={l} value={l}>{l}L</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <MobileSelect
+                  value={form.level}
+                  onValueChange={v => setForm(f => ({ ...f, level: v }))}
+                  placeholder="Level"
+                  options={LEVEL_OPTIONS}
+                  triggerClassName="mt-1 rounded-xl h-11"
+                />
               </div>
               <div>
                 <Label className="text-gray-700">Graduation Year *</Label>
@@ -181,12 +191,13 @@ export default function RegisterExecutive() {
 
             <div>
               <Label className="text-gray-700">Executive Post *</Label>
-              <Select value={form.post} onValueChange={v => setForm(f => ({ ...f, post: v }))}>
-                <SelectTrigger className="mt-1 rounded-xl h-11"><SelectValue placeholder="Select your post" /></SelectTrigger>
-                <SelectContent>
-                  {POSTS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={form.post}
+                onValueChange={v => setForm(f => ({ ...f, post: v }))}
+                placeholder="Select your post"
+                options={POST_OPTIONS}
+                triggerClassName="mt-1 rounded-xl h-11"
+              />
             </div>
 
             <div>

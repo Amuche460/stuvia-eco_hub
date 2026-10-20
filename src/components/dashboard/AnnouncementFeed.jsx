@@ -42,8 +42,8 @@ export default function AnnouncementFeed({ studentLevel }) {
                 <Badge className={`text-xs ${typeInfo.color} border-0`}>{typeInfo.label}</Badge>
                 <span className="text-xs text-gray-400 ml-auto">{format(new Date(a.created_date), 'MMM d')}</span>
               </div>
-              <h4 className="font-semibold text-gray-900 text-sm">{a.title}</h4>
-              <p className="text-xs text-gray-500 mt-1">{a.content}</p>
+              <h4 className="font-semibold text-gray-900 text-sm select-text">{a.title}</h4>
+              <p className="text-xs text-gray-500 mt-1 select-text">{a.content}</p>
               {a.form_url && (
                 <a href={a.form_url} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-2">

@@ -196,7 +196,7 @@ export default function PaymentHistory() {
               return (
                 <motion.div key={p.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                   onClick={() => p.status === 'verified' ? setSelectedReceipt(p) : null}
-                  className={`bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between gap-3 ${p.status === 'verified' ? 'cursor-pointer hover:shadow-sm' : ''} transition-all`}>
+                  className={`select-text bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between gap-3 ${p.status === 'verified' ? 'cursor-pointer hover:shadow-sm' : ''} transition-all`}>
                   <div className="flex items-center gap-3">
                     <div className={`rounded-xl p-2.5 ${p.type === 'dues' ? 'bg-emerald-50' : 'bg-rose-50'}`}>
                       {p.type === 'dues'

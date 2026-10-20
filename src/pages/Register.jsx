@@ -6,9 +6,16 @@ import NesaLogo from '../components/NesaLogo';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSelect from '@/components/MobileSelect';
 import { UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const LEVEL_OPTIONS = [
+  { value: '100', label: '100 Level' },
+  { value: '200', label: '200 Level' },
+  { value: '300', label: '300 Level' },
+  { value: '400', label: '400 Level' },
+];
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -131,17 +138,13 @@ export default function Register() {
 
             <div>
               <Label className="text-gray-700">Level *</Label>
-              <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
-                <SelectTrigger className="mt-1 rounded-xl h-11 border-gray-200">
-                  <SelectValue placeholder="Select your level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="100">100 Level</SelectItem>
-                  <SelectItem value="200">200 Level</SelectItem>
-                  <SelectItem value="300">300 Level</SelectItem>
-                  <SelectItem value="400">400 Level</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={form.level}
+                onValueChange={(v) => setForm({ ...form, level: v })}
+                placeholder="Select your level"
+                options={LEVEL_OPTIONS}
+                triggerClassName="mt-1 rounded-xl h-11 border-gray-200"
+              />
             </div>
 
             <div>

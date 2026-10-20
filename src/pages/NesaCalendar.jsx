@@ -500,8 +500,8 @@ function EventCard({ event, isAdmin, onDelete, isRegistered, onRsvp, rsvpLoading
     <div className={`rounded-xl border p-3 ${color.light}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm">{event.title}</p>
-          {event.description && <p className="text-xs opacity-70 mt-0.5">{event.description}</p>}
+          <p className="font-semibold text-sm select-text">{event.title}</p>
+          {event.description && <p className="text-xs opacity-70 mt-0.5 select-text">{event.description}</p>}
           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
             {event.event_time && (
               <span className="flex items-center gap-1 text-xs opacity-60"><Clock className="w-3 h-3" />{event.event_time}</span>

@@ -74,7 +74,7 @@ export default function ReceiptCard({ payment }) {
         </div>
         <p className="text-emerald-200 text-[10px] tracking-widest uppercase font-semibold">{T.orgName}</p>
         <p className="text-emerald-300 text-[9px] mt-0.5">{T.orgSubtitle}</p>
-        <p className="mt-2 font-mono text-sm bg-white/10 rounded-lg py-1 px-3 inline-block border border-white/20">
+        <p className="mt-2 font-mono text-sm bg-white/10 rounded-lg py-1 px-3 inline-block border border-white/20 select-text">
           {payment.receipt_number}
         </p>
       </div>
@@ -98,7 +98,7 @@ export default function ReceiptCard({ payment }) {
             return (
               <div key={f.key} className="flex justify-between py-2 border-b border-gray-50">
                 <span className="text-gray-500">{f.label}</span>
-                <span className="font-medium text-gray-800">{val}</span>
+                <span className="font-medium text-gray-800 select-text">{val}</span>
               </div>
             );
           })}
