@@ -95,7 +95,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link to={createPageUrl('RegisterStaff')}>
-              <Button size="lg" variant="outline" className="rounded-xl px-6 text-base border-blue-200 text-blue-700 hover:bg-blue-50">
+              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white rounded-xl px-6 text-base shadow-lg shadow-blue-200">
                 <BookOpen className="w-5 h-5 mr-2" /> Register as Staff
               </Button>
             </Link>
