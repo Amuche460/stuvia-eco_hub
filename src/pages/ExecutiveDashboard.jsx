@@ -13,6 +13,8 @@ import {
   LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard, Trash2
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
+import CashReceiptPanel from '../components/executive/CashReceiptPanel';
+import ProofDialog from '../components/executive/ProofDialog';
 import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { checkAllBirthdays } from '@/lib/birthdayNotifier';
@@ -55,6 +57,7 @@ export default function ExecutiveDashboard() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [proofUrl, setProofUrl] = useState('');
 
   useEffect(() => {
     const eid = localStorage.getItem('nesa_executive_id');
@@ -531,13 +534,13 @@ export default function ExecutiveDashboard() {
                           </Badge>
                           </td>
                           {isFinExec && (
-                          <td className="px-4 py-3">
-                            {p.proof_url ? (
-                              <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
-                                View <ExternalLink className="w-3 h-3" />
-                              </a>
-                            ) : '—'}
-                          </td>
+                            <td className="px-4 py-3">
+                              {p.proof_url ? (
+                                <button type="button" onClick={() => setProofUrl(p.proof_url)} className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
+                                  View <ExternalLink className="w-3 h-3" />
+                                </button>
+                              ) : '—'}
+                            </td>
                           )}
                           </tr>
                           ))}
@@ -664,11 +667,18 @@ export default function ExecutiveDashboard() {
           {/* Dues & Payments — Financial Secretary & Assistant Financial Secretary */}
           {isFinExec && (
             <TabsContent value="payments" className="mt-4 space-y-4">
-              {canDownloadDuesPayers && (
-                <Button onClick={handleDownloadDuesPDF} className="bg-emerald-700 hover:bg-emerald-800 rounded-xl text-sm">
-                  <FileText className="w-4 h-4 mr-1" /> Download Dues Payers (PDF)
-                </Button>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {canDownloadDuesPayers && (
+                  <Button onClick={handleDownloadDuesPDF} className="bg-emerald-700 hover:bg-emerald-800 rounded-xl text-sm">
+                    <FileText className="w-4 h-4 mr-1" /> Download Dues Payers (PDF)
+                  </Button>
+                )}
+                <CashReceiptPanel
+                  students={students}
+                  exec={exec}
+                  onIssued={(p) => setPayments(prev => [p, ...prev])}
+                />
+              </div>
               <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden">
                 <div className="px-4 py-3 bg-emerald-50 border-b border-emerald-100">
                   <p className="text-xs font-semibold text-emerald-700">Verified Dues Payments ({filteredPayments.filter(p => p.type === 'dues').length})</p>
@@ -701,9 +711,9 @@ export default function ExecutiveDashboard() {
                           <td className="px-4 py-3 text-xs text-gray-500">{p.verified_at ? format(new Date(p.verified_at), 'MMM d, yyyy') : '—'}</td>
                           <td className="px-4 py-3">
                             {p.proof_url ? (
-                              <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
+                              <button type="button" onClick={() => setProofUrl(p.proof_url)} className="text-xs text-emerald-700 font-medium hover:underline inline-flex items-center gap-1">
                                 View <ExternalLink className="w-3 h-3" />
-                              </a>
+                              </button>
                             ) : '—'}
                           </td>
                         </tr>
@@ -748,6 +758,8 @@ export default function ExecutiveDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ProofDialog url={proofUrl} onClose={() => setProofUrl('')} />
     </div>
   );
 }

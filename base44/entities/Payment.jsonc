@@ -37,7 +37,8 @@
     "payment_method": {
       "type": "string",
       "enum": [
-        "bank_transfer"
+        "bank_transfer",
+        "cash"
       ],
       "description": "Payment method"
     },
