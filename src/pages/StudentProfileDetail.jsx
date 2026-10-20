@@ -191,7 +191,7 @@ export default function StudentProfileDetail() {
                 { label: 'Reg Number', val: student.reg_no },
                 { label: 'Matric Number', val: student.matric_no || '—' },
                 { label: 'Email', val: student.email },
-                { label: 'Phone', val: student.phone },
+                { label: 'Phone', val: student.phone || '—' },
                 { label: 'Course of Study', val: student.course_of_study || '—' },
                 { label: 'Year of Entry', val: student.year_of_entry || '—' },
               ].map(({ label, val }) => (

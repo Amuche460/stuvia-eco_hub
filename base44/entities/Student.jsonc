@@ -52,7 +52,7 @@
     },
     "phone": {
       "type": "string",
-      "description": "Phone number"
+      "description": "Phone number (optional \u2014 added later from the student's profile)"
     },
     "profile_picture_url": {
       "type": "string",
@@ -91,7 +91,6 @@
     "reg_no",
     "level",
     "email",
-    "phone",
     "date_of_birth",
     "graduation_year"
   ],

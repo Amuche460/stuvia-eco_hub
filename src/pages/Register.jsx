@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 
 export default function Register() {
   const [form, setForm] = useState({
-    full_name: '', reg_no: '', matric_no: '', level: '', email: '', phone: '', date_of_birth: '', graduation_year: ''
+    full_name: '', reg_no: '', matric_no: '', level: '', email: '', date_of_birth: '', graduation_year: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -152,17 +152,6 @@ export default function Register() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="your@email.com"
-                className="mt-1 rounded-xl h-11 border-gray-200"
-              />
-            </div>
-
-            <div>
-              <Label className="text-gray-700">Phone Number *</Label>
-              <Input
-                required
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="08012345678"
                 className="mt-1 rounded-xl h-11 border-gray-200"
               />
             </div>
