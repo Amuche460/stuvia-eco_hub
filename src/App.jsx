@@ -18,6 +18,10 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+// The four student tabs share one stable transition key, so the mounted tab shell
+// survives switching between them.
+const STUDENT_TAB_PATHS = ['StudentDashboard', 'PaymentHistory', 'NesaCalendar', 'UpdateProfile'];
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const location = useLocation();
@@ -46,7 +50,7 @@ const AuthenticatedApp = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={location.pathname}
+        key={STUDENT_TAB_PATHS.includes(location.pathname.slice(1)) ? 'student-tabs' : location.pathname}
         initial={{ x: 24, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -24, opacity: 0 }}

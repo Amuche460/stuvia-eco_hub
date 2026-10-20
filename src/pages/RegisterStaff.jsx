@@ -54,7 +54,7 @@ export default function RegisterStaff() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-white">
-      <header className="p-4 flex items-center gap-3">
+      <header className="p-4 pt-safe flex items-center gap-3">
         <Link to={createPageUrl('Home')} className="text-gray-400 hover:text-gray-600">
           <ArrowLeft className="w-5 h-5" />
         </Link>

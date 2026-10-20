@@ -114,7 +114,7 @@ export default function StudentDashboard() {
     <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 transition-colors duration-200">
       {/* Header */}
-      <header className="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-emerald-100 dark:border-gray-800 z-50">
+      <header className="sticky top-0 pt-safe bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-emerald-100 dark:border-gray-800 z-50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <NesaLogo size="sm" />
           <div className="flex items-center gap-1">

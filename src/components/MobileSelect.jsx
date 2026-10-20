@@ -53,7 +53,10 @@ export default function MobileSelect({ value, onValueChange, placeholder, option
           <DrawerHeader>
             <DrawerTitle className="text-base">{placeholder || 'Select an option'}</DrawerTitle>
           </DrawerHeader>
-          <div className="pb-safe px-4 pb-6 space-y-1 max-h-[60vh] overflow-y-auto">
+          <div
+            className="px-4 space-y-1 max-h-[60vh] overflow-y-auto"
+            style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+          >
             {options.map(o => (
               <button
                 key={o.value}

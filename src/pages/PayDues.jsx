@@ -164,7 +164,7 @@ export default function PayDues() {
   if (payment) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white">
-        <header className="p-4">
+        <header className="p-4 pt-safe">
           <Link to={createPageUrl('StudentDashboard')} className="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-800 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
@@ -185,7 +185,7 @@ export default function PayDues() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
-      <header className="p-4">
+      <header className="p-4 pt-safe">
         <Link to={createPageUrl('StudentDashboard')} className="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-800 text-sm font-medium">
           <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>

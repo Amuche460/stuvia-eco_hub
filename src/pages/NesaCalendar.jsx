@@ -153,7 +153,7 @@ export default function NesaCalendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-white">
-      <header className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-gray-100 z-50">
+      <header className="sticky top-0 pt-safe bg-white/90 backdrop-blur-xl border-b border-gray-100 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to={createPageUrl('StudentDashboard')} className="text-gray-400 hover:text-gray-600">

@@ -166,7 +166,7 @@ export default function Donate() {
   if (payment) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-        <header className="p-4">
+        <header className="p-4 pt-safe">
           <Link to={createPageUrl('StudentDashboard')} className="inline-flex items-center gap-2 text-rose-700 hover:text-rose-800 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
@@ -187,7 +187,7 @@ export default function Donate() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-white">
-      <header className="p-4">
+      <header className="p-4 pt-safe">
         <Link to={createPageUrl('StudentDashboard')} className="inline-flex items-center gap-2 text-rose-700 hover:text-rose-800 text-sm font-medium">
           <ArrowLeft className="w-4 h-4" /> Dashboard
         </Link>

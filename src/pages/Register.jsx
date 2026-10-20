@@ -75,7 +75,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white flex flex-col">
-      <header className="p-4">
+      <header className="p-4 pt-safe">
         <Link to={createPageUrl('Home')} className="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-800 text-sm font-medium">
           <ArrowLeft className="w-4 h-4" />
           Back
