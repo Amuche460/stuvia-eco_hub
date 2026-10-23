@@ -62,22 +62,20 @@ export default function ExecutiveDashboard() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [levelSearch, setLevelSearch] = useState('');
   const [deletingStudentId, setDeletingStudentId] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [proofUrl, setProofUrl] = useState('');
   const canReadFinance = DUES_VIEWER_POSTS.includes(exec?.post);
-  const searchFilters = dashboardSearch(searchQuery, levelSearch, filterLevel);
+  const searchFilters = dashboardSearch(searchQuery, filterLevel);
   const studentRecords = useDashboardStudents(searchFilters.level, searchFilters.search, canReadFinance);
   const records = useFinancialRecords(session, { status: 'verified', type: filterType, ...searchFilters, sort: 'student_name' }, canReadFinance);
   const duesRecords = useFinancialRecords(session, { status: 'verified', type: 'dues', ...searchFilters, sort: 'student_name' }, canReadFinance && filterType !== 'donation');
   const searchFields = {
-    search: searchQuery, levelSearch, level: filterLevel,
-    onSearch: value => { setSearchQuery(value); if (levelFromSearch(value)) { setLevelSearch(''); setFilterLevel('all'); } },
-    onLevelSearch: value => { setLevelSearch(value); setFilterLevel('all'); if (levelFromSearch(searchQuery)) setSearchQuery(''); },
-    onLevel: value => { setFilterLevel(value); setLevelSearch(''); if (levelFromSearch(searchQuery)) setSearchQuery(''); },
+    search: searchQuery, level: filterLevel,
+    onSearch: value => { setSearchQuery(value); if (levelFromSearch(value)) setFilterLevel('all'); },
+    onLevel: value => { setFilterLevel(value); if (levelFromSearch(searchQuery)) setSearchQuery(''); },
   };
   const payments = records.payments;
   const duesPayments = filterType === 'donation' ? [] : duesRecords.payments;
