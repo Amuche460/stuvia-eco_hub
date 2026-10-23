@@ -102,27 +102,7 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
     );
   }
 
-  // 5. Sender name matches student profile name
-  const sender = (data.sender_name || '').toLowerCase().trim();
-  const studentName = (student.full_name || '').toLowerCase().trim();
-  if (!sender) {
-    errors.push('Could not find the sender name on the receipt.');
-  } else if (studentName) {
-    const senderParts = sender.split(/\s+/);
-    const studentParts = studentName.split(/\s+/);
-    const senderLast = senderParts[senderParts.length - 1];
-    const studentLast = studentParts[studentParts.length - 1];
-    const matches =
-      senderLast === studentLast ||
-      sender.includes(studentLast) ||
-      studentName.includes(senderLast) ||
-      sender === studentName;
-    if (!matches) {
-      errors.push(
-        `Name on receipt ("${data.sender_name}") does not match your profile name ("${student.full_name}").`
-      );
-    }
-  }
-
+  // Sender names are retained for review, not compared with student profiles.
+  // A parent or another person may pay on the student's behalf.
   return { data, errors, valid: errors.length === 0 };
 }

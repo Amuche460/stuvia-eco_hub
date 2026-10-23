@@ -235,7 +235,7 @@ export default function Donate() {
               <li>• Date is within the last 2 months</li>
               <li>• Beneficiary is "NIGERIAN ECONOMIC STUDENT ASSOSIATI"</li>
               <li>• Bank transfer: paid to Covenant MFB, account {NESA_ACCOUNT}</li>
-              <li>• Sender name matches your profile name</li>
+              <li>• Payments from parents or other senders are accepted</li>
             </ul>
           </div>
 
