@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard, Trash2
+  LogOut, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, ExternalLink, CreditCard, Trash2
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import CashReceiptPanel from '../components/executive/CashReceiptPanel';
@@ -27,6 +27,9 @@ import { sessionPaymentQuery, paymentFilters, allPaymentPages } from '@/lib/sess
 import useFinancialRecords from '@/hooks/useFinancialRecords';
 import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
 import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
+import DashboardSearchFields from '@/components/executive/DashboardSearchFields';
+import useDashboardStudents from '@/hooks/useDashboardStudents';
+import { dashboardSearch, levelFromSearch } from '@/lib/dashboardSearch';
 
 // Only the General Secretary can post announcements
 const ANNOUNCEMENT_POSTS = ["General Secretary"];
@@ -59,14 +62,23 @@ export default function ExecutiveDashboard() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [levelSearch, setLevelSearch] = useState('');
   const [deletingStudentId, setDeletingStudentId] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [proofUrl, setProofUrl] = useState('');
   const canReadFinance = DUES_VIEWER_POSTS.includes(exec?.post);
-  const records = useFinancialRecords(session, { status: 'verified', type: filterType, level: filterLevel, search: searchQuery }, canReadFinance);
-  const duesRecords = useFinancialRecords(session, { status: 'verified', type: 'dues', level: filterLevel, search: searchQuery }, canReadFinance && filterType !== 'donation');
+  const searchFilters = dashboardSearch(searchQuery, levelSearch, filterLevel);
+  const studentRecords = useDashboardStudents(searchFilters.level, searchFilters.search, canReadFinance);
+  const records = useFinancialRecords(session, { status: 'verified', type: filterType, ...searchFilters, sort: 'student_name' }, canReadFinance);
+  const duesRecords = useFinancialRecords(session, { status: 'verified', type: 'dues', ...searchFilters, sort: 'student_name' }, canReadFinance && filterType !== 'donation');
+  const searchFields = {
+    search: searchQuery, levelSearch, level: filterLevel,
+    onSearch: value => { setSearchQuery(value); if (levelFromSearch(value)) { setLevelSearch(''); setFilterLevel('all'); } },
+    onLevelSearch: value => { setLevelSearch(value); setFilterLevel('all'); if (levelFromSearch(searchQuery)) setSearchQuery(''); },
+    onLevel: value => { setFilterLevel(value); setLevelSearch(''); if (levelFromSearch(searchQuery)) setSearchQuery(''); },
+  };
   const payments = records.payments;
   const duesPayments = filterType === 'donation' ? [] : duesRecords.payments;
 
@@ -127,8 +139,8 @@ export default function ExecutiveDashboard() {
     if (studs.length > 0) checkAllBirthdays(studs);
   };
 
-  const studentUpdated = (updated) => setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
-  const studentDeleted = (id) => { setStudents(prev => prev.filter(s => s.id !== id)); setSelectedIds(prev => prev.filter(x => x !== id)); };
+  const studentUpdated = (updated) => { setStudents(prev => prev.map(s => s.id === updated.id ? updated : s)); studentRecords.refresh(); };
+  const studentDeleted = (id) => { setStudents(prev => prev.filter(s => s.id !== id)); setSelectedIds(prev => prev.filter(x => x !== id)); studentRecords.refresh(); };
 
   const handleLogout = () => {
     localStorage.removeItem('nesa_executive_id');
@@ -146,6 +158,7 @@ export default function ExecutiveDashboard() {
     const results = await Promise.allSettled(ids.map(id => base44.entities.Student.delete(id)));
     const deletedIds = ids.filter((_, i) => results[i].status === 'fulfilled');
     setStudents(prev => prev.filter(s => !deletedIds.includes(s.id)));
+    await studentRecords.refresh();
     setSelectedIds([]);
     setBulkConfirm(false);
     setBulkDeleting(false);
@@ -159,6 +172,7 @@ export default function ExecutiveDashboard() {
     try {
       await base44.entities.Student.delete(studentId);
       setStudents(prev => prev.filter(s => s.id !== studentId));
+      await studentRecords.refresh();
       setDeletingStudentId('');
       setSaved('Student record deleted.');
       setTimeout(() => setSaved(''), 3000);
@@ -216,20 +230,7 @@ export default function ExecutiveDashboard() {
     loadAll(exec.id);
   };
 
-  const filteredStudents = students.filter(s => {
-    if (filterLevel !== 'all' && s.level !== filterLevel) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        (s.full_name || '').toLowerCase().includes(q) ||
-        (s.reg_no || '').toLowerCase().includes(q) ||
-        (s.matric_no || '').toLowerCase().includes(q) ||
-        (s.email || '').toLowerCase().includes(q) ||
-        (s.course_of_study || '').toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filteredStudents = studentRecords.students;
   const filteredPayments = payments;
 
   // Stats per level
@@ -250,7 +251,7 @@ export default function ExecutiveDashboard() {
   const canDownloadDuesPayers = DUES_DOWNLOADER_POSTS.includes(exec?.post);
 
   const handleDownloadDuesPDF = async () => {
-    const duesPayers = filterType === 'donation' ? [] : await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: 'verified', type: 'dues', level: filterLevel, search: searchQuery })), { sort: '-created_date' });
+    const duesPayers = filterType === 'donation' ? [] : await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: 'verified', type: 'dues', ...searchFilters })), { sort: 'student_name' });
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text(`NESA — Dues Payers ${session}`, 14, 20);
@@ -377,22 +378,7 @@ export default function ExecutiveDashboard() {
           {canViewDuesPayers && (
           <TabsContent value="database" className="mt-4 space-y-4">
             <div className="flex flex-wrap gap-2 items-center">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by name, reg no, email..."
-                  className="pl-9 rounded-xl border-gray-200 text-sm h-10"
-                />
-              </div>
-              <Select value={filterLevel} onValueChange={setFilterLevel}>
-                <SelectTrigger className="w-28 rounded-xl border-gray-200 text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  {['100','200','300','400'].map(l => <SelectItem key={l} value={l}>{l}L</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <DashboardSearchFields {...searchFields} />
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="w-32 rounded-xl border-gray-200 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -405,11 +391,15 @@ export default function ExecutiveDashboard() {
 
             <FinancialRecordStatus records={records} />
             {/* Student Profiles Matching Search */}
+            {studentRecords.loading && <p className="text-sm text-muted-foreground">Loading students...</p>}
+            {studentRecords.error && <p role="alert" className="text-sm text-destructive">Could not load students. <button className="underline" onClick={studentRecords.refresh}>Retry</button></p>}
+            {!studentRecords.loading && !studentRecords.error && filteredStudents.length === 0 && <p className="text-sm text-muted-foreground">No students match this search or level.</p>}
+            {studentRecords.hasMore && <Button variant="outline" disabled={studentRecords.loadingMore} onClick={studentRecords.loadMore}>{studentRecords.loadingMore ? 'Loading...' : 'Load more students'}</Button>}
             {filteredStudents.length > 0 && (
               <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
                 <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <p className="text-xs font-semibold text-purple-700">Students ({filteredStudents.length})</p>
+                    <p className="text-xs font-semibold text-purple-700">Students ({studentRecords.total})</p>
                     {isFinExec && selectedIds.length > 0 && (
                       bulkConfirm ? (
                         <div className="flex items-center gap-2">
@@ -669,6 +659,7 @@ export default function ExecutiveDashboard() {
           {/* Dues & Payments — Financial Secretary & Assistant Financial Secretary */}
           {isFinExec && (
             <TabsContent value="payments" className="mt-4 space-y-4">
+              <div className="flex flex-wrap gap-2 items-center"><DashboardSearchFields {...searchFields} /></div>
               <FinancialRecordStatus records={duesRecords} />
               <div className="flex flex-wrap gap-2">
                 {canDownloadDuesPayers && (

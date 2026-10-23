@@ -10,7 +10,7 @@ export default function useFinancialRecords(session, filters = {}, enabled = tru
   const list = useInfiniteQuery({
     queryKey: ['session-payments', session, filters], enabled,
     initialPageParam: null,
-    queryFn: ({ pageParam }) => base44.entities.Payment.filter(query, { sort: '-created_date', limit: 50, ...(pageParam ? { cursor: pageParam } : {}) }),
+    queryFn: ({ pageParam }) => base44.entities.Payment.filter(query, { sort: filters.sort || '-created_date', limit: 50, ...(pageParam ? { cursor: pageParam } : {}) }),
     getNextPageParam: page => page.has_more ? page.next_cursor : undefined,
   });
   const count = useQuery({ queryKey: ['session-payment-count', query], enabled, queryFn: () => base44.entities.Payment.count(query) });
