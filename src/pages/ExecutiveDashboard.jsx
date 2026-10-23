@@ -15,6 +15,7 @@ import {
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import CashReceiptPanel from '../components/executive/CashReceiptPanel';
 import ProofDialog from '../components/executive/ProofDialog';
+import FinanceStudentMenu from '@/components/executive/FinanceStudentMenu';
 import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
 import { checkAllBirthdays } from '@/lib/birthdayNotifier';
@@ -116,6 +117,9 @@ export default function ExecutiveDashboard() {
     checkAllExecutiveTenures();
     if (studs.length > 0) checkAllBirthdays(studs);
   };
+
+  const studentUpdated = (updated) => setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
+  const studentDeleted = (id) => { setStudents(prev => prev.filter(s => s.id !== id)); setSelectedIds(prev => prev.filter(x => x !== id)); };
 
   const handleLogout = () => {
     localStorage.removeItem('nesa_executive_id');
@@ -403,7 +407,7 @@ export default function ExecutiveDashboard() {
             </div>
 
             {/* Student Profiles Matching Search */}
-            {searchQuery && filteredStudents.length > 0 && (
+            {filteredStudents.length > 0 && (
               <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
                 <div className="px-4 py-3 bg-purple-50 border-b border-purple-100">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -458,7 +462,7 @@ export default function ExecutiveDashboard() {
                                   checked={selectedIds.includes(s.id)} onChange={() => toggleSelect(s.id)} />
                               </td>
                             )}
-                            <td className="px-4 py-3 font-medium text-gray-900">{s.full_name}</td>
+                            <td className="px-4 py-3 font-medium text-gray-900">{isFinExec ? <FinanceStudentMenu studentId={s.id} name={s.full_name} onUpdated={studentUpdated} onDeleted={studentDeleted} /> : s.full_name}</td>
                             <td className="px-4 py-3 text-gray-500 font-mono text-xs">{s.reg_no}</td>
                             <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{s.level}L</Badge></td>
                             <td className="px-4 py-3 text-xs text-gray-500">{s.course_of_study || '—'}</td>
@@ -524,7 +528,7 @@ export default function ExecutiveDashboard() {
                       <tr><td colSpan={isFinExec ? 6 : 5} className="text-center py-8 text-gray-400 text-sm">No records found</td></tr>
                     ) : filteredPayments.map(p => (
                       <tr key={p.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{p.student_name}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{isFinExec ? <FinanceStudentMenu studentId={p.student_id} name={students.find(s => s.id === p.student_id)?.full_name || p.student_name} onUpdated={studentUpdated} onDeleted={studentDeleted} /> : p.student_name}</td>
                         <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no}</td>
                         <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{p.student_level}L</Badge></td>
                         <td className="px-4 py-3 font-semibold text-emerald-700">₦{p.amount?.toLocaleString()}</td>
@@ -702,7 +706,7 @@ export default function ExecutiveDashboard() {
                         <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-sm">No dues payments yet</td></tr>
                       ) : filteredPayments.filter(p => p.type === 'dues').map(p => (
                         <tr key={p.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-gray-900">{p.student_name}</td>
+                          <td className="px-4 py-3 font-medium text-gray-900">{isFinExec ? <FinanceStudentMenu studentId={p.student_id} name={students.find(s => s.id === p.student_id)?.full_name || p.student_name} onUpdated={studentUpdated} onDeleted={studentDeleted} /> : p.student_name}</td>
                           <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no || '—'}</td>
                           <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_matric_no || '—'}</td>
                           <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{p.student_level}L</Badge></td>

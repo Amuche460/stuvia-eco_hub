@@ -22,6 +22,10 @@
       "type": "string",
       "description": "Student matric number"
     },
+    "academic_session": {
+      "type": "string",
+      "description": "September-to-August dues cycle, e.g. 2026/2027"
+    },
     "type": {
       "type": "string",
       "enum": [

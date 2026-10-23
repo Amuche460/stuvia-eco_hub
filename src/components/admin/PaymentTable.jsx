@@ -12,6 +12,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import verifyDuesPayment from '@/lib/verifyDuesPayment';
 import {
   CheckCircle, XCircle, Clock, Eye, Search, ExternalLink, ImageIcon
 } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function PaymentTable({ payments, onRefresh }) {
   const [rejectDialog, setRejectDialog] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [processing, setProcessing] = useState(null);
+  const [verificationError, setVerificationError] = useState('');
 
   const filtered = payments.filter(p =>
     p.student_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -39,12 +41,19 @@ export default function PaymentTable({ payments, onRefresh }) {
   const handleVerify = async (payment) => {
     setProcessing(payment.id);
     const receiptNumber = payment.receipt_number || `NESA-ADMIN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    await base44.entities.Payment.update(payment.id, {
-      status: 'verified',
-      verified_at: new Date().toISOString(),
-      verified_by: 'admin',
-      receipt_number: receiptNumber,
-    });
+    setVerificationError('');
+    try {
+      await verifyDuesPayment(payment, {
+        status: 'verified',
+        verified_at: new Date().toISOString(),
+        verified_by: 'admin',
+        receipt_number: receiptNumber,
+      });
+    } catch (e) {
+      setVerificationError(e.message || 'Could not verify the payment.');
+      setProcessing(null);
+      return;
+    }
 
     if (payment.type === 'dues') {
       await base44.entities.Student.update(payment.student_id, { dues_paid: true });
@@ -104,6 +113,7 @@ export default function PaymentTable({ payments, onRefresh }) {
 
   return (
     <div>
+      {verificationError && <p role="alert" className="text-destructive text-sm mb-3">{verificationError}</p>}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

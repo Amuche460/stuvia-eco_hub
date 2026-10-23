@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Zap, Loader2, AlertCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import verifyDuesPayment from '@/lib/verifyDuesPayment';
 
 export default function AutoVerifyPanel({ payments, onRefresh }) {
   const [bankLines, setBankLines] = useState('');
@@ -48,15 +49,24 @@ export default function AutoVerifyPanel({ payments, onRefresh }) {
       }
     }
 
-    // Auto-verify matched payments
-    for (const { payment } of matched) {
+    // Each receipt must claim its student's academic session before issuing.
+    const issuedMatches = [];
+    for (const entry of matched) {
+      const { payment } = entry;
       const receiptNumber = payment.receipt_number || `NESA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      await base44.entities.Payment.update(payment.id, {
-        status: 'verified',
-        verified_at: new Date().toISOString(),
-        verified_by: 'auto-system',
-        receipt_number: receiptNumber,
-      });
+      try {
+        await verifyDuesPayment(payment, {
+          status: 'verified',
+          verified_at: new Date().toISOString(),
+          verified_by: 'auto-system',
+          receipt_number: receiptNumber,
+        });
+      } catch (e) {
+        unmatched.push(payment);
+        toast.error(e.message || 'Could not verify the payment.');
+        continue;
+      }
+      issuedMatches.push(entry);
       await base44.entities.Student.update(payment.student_id, { dues_paid: true });
 
       // Create notification — personal to the student
@@ -88,10 +98,10 @@ export default function AutoVerifyPanel({ payments, onRefresh }) {
       }
     }
 
-    setResults({ matched, unmatched });
+    setResults({ matched: issuedMatches, unmatched });
     setProcessing(false);
-    if (matched.length > 0) {
-      toast.success(`Auto-verified ${matched.length} payment(s)!`);
+    if (issuedMatches.length > 0) {
+      toast.success(`Auto-verified ${issuedMatches.length} payment(s)!`);
       onRefresh();
     } else {
       toast.error('No matches found in bank records');

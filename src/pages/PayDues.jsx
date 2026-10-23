@@ -11,6 +11,7 @@ import { validateReceipt } from '../lib/receiptValidator';
 import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 import ReceiptCard from '../components/receipt/ReceiptCard';
 import { checkStudentLevel } from '../lib/studentLevel';
+import { academicSession, findDuesReceipt, reserveDuesReceipt, releaseDuesReceipt, duplicateDuesMessage } from '@/lib/duesCycle';
 
 const NESA_ACCOUNT = '0520003964';
 const NESA_BANK = 'Covenant Microfinance Bank (CMFB)';
@@ -38,7 +39,8 @@ export default function PayDues() {
           studentData.dues_paid = false;
         }
         setStudent(studentData);
-        if (studentData.dues_paid) setAlreadyPaid(true);
+        const existing = await findDuesReceipt(studentData);
+        setAlreadyPaid(Boolean(existing) || (studentData.dues_receipt_sessions || []).includes(academicSession()));
       }
     });
   }, []);
@@ -67,9 +69,14 @@ export default function PayDues() {
       toast({ title: 'Student profile is still loading. Please try again in a moment.', variant: 'destructive' });
       return;
     }
+    if (loading) return;
     setLoading(true);
     setErrors([]);
+    let claim;
+    let recorded = false;
     try {
+      // Reserve this student's session before uploading or analyzing anything.
+      claim = await reserveDuesReceipt(student);
       // 1. Upload the receipt
       let file_url;
       try {
@@ -111,6 +118,7 @@ export default function PayDues() {
         student_reg_no: student.reg_no,
         student_matric_no: student.matric_no || '',
         type: 'dues',
+        academic_session: claim.session,
         amount: data.amount,
         payment_method: 'bank_transfer',
         proof_url: file_url,
@@ -122,6 +130,8 @@ export default function PayDues() {
         validation_errors: [],
       });
 
+      recorded = true;
+      setAlreadyPaid(true);
       // 4. Mark dues as paid (non-blocking — payment is already recorded)
       try { await base44.entities.Student.update(student.id, { dues_paid: true }); } catch (e) { /* non-blocking */ }
 
@@ -154,10 +164,14 @@ export default function PayDues() {
       setPayment(created);
       toast({ title: 'Receipt verified! 🎉', description: 'Your NESA receipt has been generated.' });
     } catch (e) {
-      setErrors(['An error occurred while processing your receipt. Please try again.']);
-      toast({ title: 'Something went wrong. Please try again.', variant: 'destructive' });
+      const message = e.message?.startsWith('Receipt already') ? e.message : 'An error occurred while processing your receipt. Please try again.';
+      setErrors([message]);
+      toast({ title: message, variant: 'destructive' });
+      if (e.message?.startsWith('Receipt already')) setAlreadyPaid(true);
+    } finally {
+      try { if (!recorded) await releaseDuesReceipt(claim); }
+      finally { setLoading(false); }
     }
-    setLoading(false);
   };
 
   // ── Success screen with NESA receipt ──
@@ -204,7 +218,7 @@ export default function PayDues() {
           {alreadyPaid && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4 flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-              <p className="text-emerald-800 text-sm font-medium">Your dues are already paid for this session.</p>
+              <p className="text-emerald-800 text-sm font-medium">{duplicateDuesMessage()}</p>
             </div>
           )}
 
@@ -256,7 +270,7 @@ export default function PayDues() {
           <div className="bg-white rounded-2xl border border-emerald-100 shadow-lg p-6 space-y-5">
             {!file ? (
               <label className="block border-2 border-dashed border-emerald-200 rounded-2xl p-8 text-center cursor-pointer hover:bg-emerald-50 transition-colors">
-                <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} className="hidden" />
+                <input type="file" accept="image/*,application/pdf" onChange={handleFileChange} disabled={alreadyPaid || loading} className="hidden" />
                 <FileImage className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
                 <p className="text-sm font-medium text-gray-700">Tap to upload your receipt</p>
                 <p className="text-xs text-gray-400 mt-1">Screenshot or photo of payment confirmation (JPG, PNG, PDF)</p>

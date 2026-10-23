@@ -80,6 +80,13 @@
       "default": false,
       "description": "Whether dues are paid for current session"
     },
+    "dues_receipt_sessions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Academic sessions reserved or issued, used for atomic duplicate receipt prevention"
+    },
     "total_donated": {
       "type": "number",
       "default": 0,

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Receipt, Loader2 } from 'lucide-react';
 import ReceiptCard from '@/components/receipt/ReceiptCard';
 import { sendReceiptEmail } from '@/lib/sendReceiptEmail';
+import { academicSession, reserveDuesReceipt, releaseDuesReceipt } from '@/lib/duesCycle';
 
 const LEVELS = ['100', '200', '300', '400'];
 
@@ -66,18 +67,29 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
     const amount = Number(form.amount);
     if (!amount || amount <= 0) return setError('Please enter the amount received.');
 
+    if (saving) return;
     setSaving(true);
+    let claim;
+    let recorded = false;
     try {
       const receiptNumber = `NESA-${Date.now().toString().slice(-8)}`;
-      const linkedStudent = students.find(s => s.id === form.student_id);
+      let linkedStudent = students.find(s => s.id === form.student_id);
+      if (form.type === 'dues') {
+        if (!linkedStudent && form.reg_no.trim()) {
+          const page = await base44.entities.Student.filter({ reg_no: form.reg_no.trim() }, { limit: 1 });
+          linkedStudent = page.items[0];
+        }
+        claim = await reserveDuesReceipt(linkedStudent);
+      }
 
       const created = await base44.entities.Payment.create({
-        student_id: form.student_id || '',
+        student_id: linkedStudent?.id || '',
         student_name: form.full_name.trim(),
         student_level: form.level,
-        student_reg_no: form.reg_no.trim(),
+        student_reg_no: linkedStudent?.reg_no || form.reg_no.trim(),
         student_matric_no: form.matric_no.trim(),
         type: form.type,
+        ...(claim ? { academic_session: claim.session } : {}),
         amount,
         payment_method: 'cash',
         status: 'verified',
@@ -88,6 +100,7 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
         validation_errors: [],
       });
 
+      recorded = true;
       if (linkedStudent) {
         // Keep the student's record in step with the payment (non-blocking)
         try {
@@ -127,9 +140,11 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
       setIssued(created);
       onIssued?.(created);
     } catch (e) {
-      setError('Could not issue the receipt. Please try again.');
+      setError(e.message?.startsWith('Receipt already') || e.message?.startsWith('Select a registered') ? e.message : 'Could not issue the receipt. Please try again.');
+    } finally {
+      try { if (!recorded) await releaseDuesReceipt(claim); }
+      finally { setSaving(false); }
     }
-    setSaving(false);
   };
 
   return (
@@ -162,7 +177,7 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
               )}
 
               <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                <Label className="text-gray-700 text-xs">Link to a registered student (optional)</Label>
+                <Label className="text-gray-700 text-xs">Link to a registered student (required for dues)</Label>
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -268,7 +283,7 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
               </div>
 
               <p className="text-xs text-gray-400">
-                Payment method will be recorded as cash.
+                Payment method will be recorded as cash. Dues session: {academicSession()} (September–August). One dues receipt per student per session.
               </p>
 
               <Button
