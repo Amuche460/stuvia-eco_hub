@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
 import PullToRefresh from '../components/PullToRefresh';
 import NesaLogo from '../components/NesaLogo';
 import ReceiptCard from '../components/receipt/ReceiptCard';
@@ -10,6 +9,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, CreditCard, Heart, Clock, CheckCircle, XCircle, Receipt, ChevronRight, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { academicSession } from '@/lib/duesCycle';
+import useFinancialRecords from '@/hooks/useFinancialRecords';
+import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
+import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
 
 const STATUS_STYLES = {
   pending:  { color: 'bg-amber-100 text-amber-700', Icon: Clock },
@@ -57,6 +60,7 @@ const downloadReceiptPDF = async (p) => {
     doc.setTextColor(0, 0, 0);
     const lines = [
       ['Receipt No.', p.receipt_number || p.id?.slice(0, 8).toUpperCase()],
+      ['Academic Session', p.academic_session || academicSession(p.created_date)],
       ['Date', format(new Date(p.created_date), 'MMM d, yyyy • h:mm a')],
       ['Student Name', p.student_name || '—'],
       ['Reg No.', p.student_reg_no || '—'],
@@ -90,33 +94,26 @@ const downloadReceiptPDF = async (p) => {
 };
 
 export default function PaymentHistory() {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(academicSession);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [filter, setFilter] = useState('all');
+  const sid = localStorage.getItem('nesa_student_id');
+  const records = useFinancialRecords(session, {
+    studentId: sid,
+    type: ['dues', 'donation'].includes(filter) ? filter : 'all',
+    status: ['pending', 'verified', 'rejected'].includes(filter) ? filter : 'all',
+  }, Boolean(sid));
+  const loading = records.loading;
 
   useEffect(() => {
-    const sid = localStorage.getItem('nesa_student_id');
-    if (!sid) { window.location.href = createPageUrl('SignIn'); return; }
-    base44.entities.Payment.filter({ student_id: sid }, '-created_date').then(p => {
-      setPayments(p);
-      setLoading(false);
-    });
-  }, []);
+    if (!sid) window.location.href = createPageUrl('SignIn');
+  }, [sid]);
 
-  const handleRefresh = useCallback(async () => {
-    const sid = localStorage.getItem('nesa_student_id');
-    if (!sid) return;
-    const p = await base44.entities.Payment.filter({ student_id: sid }, '-created_date');
-    setPayments(p);
-  }, []);
-
-  const filtered = filter === 'all' ? payments : payments.filter(p =>
-    filter === 'dues' ? p.type === 'dues' : filter === 'donation' ? p.type === 'donation' : p.status === filter
-  );
-
-  const totalPaid = payments.filter(p => p.status === 'verified').reduce((s, p) => s + (p.amount || 0), 0);
-  const duesVerified = payments.find(p => p.type === 'dues' && p.status === 'verified');
+  const handleRefresh = () => records.refresh();
+  const filtered = records.payments;
+  const verifiedRows = records.summary.rows.filter(row => row.status === 'verified');
+  const totalPaid = verifiedRows.reduce((sum, row) => sum + (row.sum_amount || 0), 0);
+  const duesVerified = verifiedRows.some(row => row.type === 'dues' && row.count > 0);
 
   if (selectedReceipt) {
     return (
@@ -145,6 +142,7 @@ export default function PaymentHistory() {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         <h1 className="text-2xl font-bold text-gray-900">Payment History</h1>
+        <AcademicSessionFilter value={session} onChange={setSession} />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3">
@@ -179,6 +177,7 @@ export default function PaymentHistory() {
           ))}
         </div>
 
+        <FinancialRecordStatus records={records} />
         {/* Payment List */}
         {loading ? (
           <div className="space-y-3">
@@ -205,7 +204,7 @@ export default function PaymentHistory() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm text-gray-900">{p.type === 'dues' ? 'Dues Payment' : 'Donation'}</p>
-                      <p className="text-xs text-gray-400">{format(new Date(p.created_date), 'MMM d, yyyy • h:mm a')}</p>
+                      <p className="text-xs text-gray-400">{p.academic_session || academicSession(p.created_date)} · {format(new Date(p.created_date), 'MMM d, yyyy • h:mm a')}</p>
                       {p.rejection_reason && (
                         <p className="text-xs text-red-500 mt-0.5">Reason: {p.rejection_reason}</p>
                       )}

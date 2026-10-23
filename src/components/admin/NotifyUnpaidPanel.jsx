@@ -4,15 +4,13 @@ import { Bell, Mail, Users, CheckCircle, Loader2, AlertTriangle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function NotifyUnpaidPanel({ students, payments }) {
+export default function NotifyUnpaidPanel({ students, paidIds = [], session, loading }) {
   const [level, setLevel] = useState('all');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
 
   // Determine unpaid students
-  const paidStudentIds = new Set(
-    payments.filter(p => p.type === 'dues' && p.status === 'verified').map(p => p.student_id)
-  );
+  const paidStudentIds = new Set(paidIds);
 
   const unpaidStudents = students.filter(s => {
     const unpaid = !paidStudentIds.has(s.id);
@@ -21,7 +19,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
   });
 
   const handleNotify = async (method) => {
-    if (unpaidStudents.length === 0) return;
+    if (loading || unpaidStudents.length === 0) return;
     setSending(true);
     setResult(null);
 
@@ -31,7 +29,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
         // In-app notification
         await base44.entities.NesaNotification.create({
           title: '⚠️ Dues Payment Reminder',
-          message: `Hi ${student.full_name}, your NESA dues for this session are still outstanding. Please log in to the portal and complete your payment to retain full access to NESA benefits.`,
+          message: `Hi ${student.full_name}, your NESA dues for ${session} are still outstanding. Please log in to the portal and complete your payment to retain full access to NESA benefits.`,
           type: 'payment',
           student_id: student.id,
           is_read_by: [],
@@ -42,7 +40,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
           await base44.integrations.Core.SendEmail({
             to: student.email,
             subject: 'NESA Dues Payment Reminder',
-            body: `Dear ${student.full_name},\n\nThis is a reminder that your NESA dues for the current session are yet to be paid.\n\nPlease log in to the NESA portal and pay ₦3,000 at your earliest convenience to enjoy full NESA benefits.\n\nRegards,\nNESA Financial Secretary`,
+            body: `Dear ${student.full_name},\n\nThis is a reminder that your NESA dues for ${session} are yet to be paid.\n\nPlease log in to the NESA portal and pay ₦3,000 at your earliest convenience to enjoy full NESA benefits.\n\nRegards,\nNESA Financial Secretary`,
           });
         }
 
@@ -63,7 +61,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
         <h3 className="font-bold text-gray-900">Notify Unpaid Students</h3>
       </div>
       <p className="text-sm text-gray-500">
-        Send payment reminders to students who haven't paid their dues yet.
+        Send payment reminders to students who haven't paid their dues for {session}.
       </p>
 
       {/* Level filter */}
@@ -118,7 +116,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
       <div className="flex flex-wrap gap-3">
         <Button
           onClick={() => handleNotify('both')}
-          disabled={sending || unpaidStudents.length === 0}
+          disabled={loading || sending || unpaidStudents.length === 0}
           className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl"
         >
           {sending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Bell className="w-4 h-4 mr-2" />}
@@ -127,7 +125,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
         <Button
           variant="outline"
           onClick={() => handleNotify('app')}
-          disabled={sending || unpaidStudents.length === 0}
+          disabled={loading || sending || unpaidStudents.length === 0}
           className="rounded-xl border-amber-200 text-amber-700 hover:bg-amber-50"
         >
           <Users className="w-4 h-4 mr-2" />
@@ -136,7 +134,7 @@ export default function NotifyUnpaidPanel({ students, payments }) {
         <Button
           variant="outline"
           onClick={() => handleNotify('email')}
-          disabled={sending || unpaidStudents.length === 0}
+          disabled={loading || sending || unpaidStudents.length === 0}
           className="rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50"
         >
           <Mail className="w-4 h-4 mr-2" />

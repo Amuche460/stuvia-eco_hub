@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { Download, CheckCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RECEIPT_TEMPLATE as T } from '@/lib/receiptTemplate';
+import { academicSession } from '@/lib/duesCycle';
 
 export default function ReceiptCard({ payment }) {
   const receiptRef = useRef(null);
@@ -11,6 +12,7 @@ export default function ReceiptCard({ payment }) {
     const value = payment[field.key];
     if (field.optional && !value) return null;
     switch (field.format) {
+      case 'session': return value || academicSession(payment.created_date);
       case 'level': return `${value}L`;
       case 'type': return value === 'dues' ? T.duesLabel : T.donationLabel;
       case 'date': return format(new Date(value), 'PPP');

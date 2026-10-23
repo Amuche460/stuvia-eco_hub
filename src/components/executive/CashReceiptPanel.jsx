@@ -89,7 +89,7 @@ export default function CashReceiptPanel({ students = [], exec, onIssued }) {
         student_reg_no: linkedStudent?.reg_no || form.reg_no.trim(),
         student_matric_no: form.matric_no.trim(),
         type: form.type,
-        ...(claim ? { academic_session: claim.session } : {}),
+        academic_session: claim?.session || academicSession(),
         amount,
         payment_method: 'cash',
         status: 'verified',

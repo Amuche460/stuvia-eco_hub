@@ -31,6 +31,7 @@ export const RECEIPT_TEMPLATE = {
   // Edit labels here. Values come from the payment record.
   // Remove or reorder entries to change what shows on the receipt.
   fields: [
+    { key: 'academic_session', label: 'Academic Session', format: 'session' },
     { key: 'student_name',     label: 'Student Name' },
     { key: 'student_reg_no',   label: 'Reg Number' },
     { key: 'student_matric_no', label: 'Matric Number' },

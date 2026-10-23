@@ -27,20 +27,22 @@ export default function StaffVerifyOtp() {
   const handleVerify = async (e) => {
     e.preventDefault();
     setError('');
+    if (loading) return;
     setLoading(true);
-
-    const staffList = await base44.entities.Staff.filter({ id: staffId });
-    if (!staffList.length) { setError('Staff record not found.'); setLoading(false); return; }
-
-    const staff = staffList[0];
-    if (staff.otp_code !== otp) { setError('Invalid code.'); setLoading(false); return; }
-    if (new Date(staff.otp_expiry) < new Date()) { setError('Code expired. Please sign in again.'); setLoading(false); return; }
-
-    await base44.entities.Staff.update(staffId, { is_verified: true });
-    localStorage.setItem('nesa_staff_id', staffId);
-    localStorage.removeItem('nesa_staff_pending_id');
-    window.location.href = createPageUrl('StaffDashboard');
-    setLoading(false);
+    try {
+      const staffList = await base44.entities.Staff.filter({ id: staffId });
+      if (!staffList.length) { setError('Staff record not found. Please sign in again.'); return; }
+      const staff = staffList[0];
+      if (!staff.otp_code || staff.otp_code !== otp) { setError('Invalid code.'); return; }
+      const expiry = new Date(staff.otp_expiry).getTime();
+      if (!Number.isFinite(expiry) || expiry <= Date.now()) { setError('Code expired. Please sign in to receive a new code.'); return; }
+      await base44.entities.Staff.update(staffId, { is_verified: true, otp_code: '', otp_expiry: '' });
+      localStorage.setItem('nesa_staff_id', staffId);
+      localStorage.removeItem('nesa_staff_pending_id');
+      localStorage.removeItem('nesa_staff_pending_email');
+      window.location.href = createPageUrl('StaffDashboard');
+    } catch (e) { setError('Could not complete sign-in. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   return (

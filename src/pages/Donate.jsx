@@ -11,6 +11,7 @@ import { validateReceipt } from '../lib/receiptValidator';
 import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 import ReceiptCard from '../components/receipt/ReceiptCard';
 import { checkStudentLevel } from '../lib/studentLevel';
+import { academicSession } from '@/lib/duesCycle';
 
 const NESA_ACCOUNT = '0520003964';
 const NESA_BANK = 'Covenant Microfinance Bank (CMFB)';
@@ -109,6 +110,7 @@ export default function Donate() {
         student_reg_no: student.reg_no,
         student_matric_no: student.matric_no || '',
         type: 'donation',
+        academic_session: academicSession(),
         amount: data.amount,
         payment_method: 'bank_transfer',
         proof_url: file_url,

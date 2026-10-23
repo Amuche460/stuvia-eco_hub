@@ -6,7 +6,7 @@ import NesaLogo from '../components/NesaLogo';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, BookOpen, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function RegisterStaff() {
@@ -19,37 +19,33 @@ export default function RegisterStaff() {
     e.preventDefault();
     setError('');
 
+    if (loading) return;
     setLoading(true);
-
-    const existing = await base44.entities.Staff.filter({ email: form.email });
-    if (existing.length > 0) {
-      setError('This email is already registered.');
-      setLoading(false);
-      return;
-    }
-
-    // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    const staff = await base44.entities.Staff.create({
-      ...form,
-      otp_code: otp,
-      otp_expiry: expiry,
-      is_verified: false,
-    });
-
-    await base44.integrations.Core.SendEmail({
-      to: form.email,
-      subject: 'NESA Staff Portal - Verification Code',
-      body: `Hello ${form.full_name},\n\nYour NESA Staff Portal verification code is: ${otp}\n\nThis code expires in 10 minutes.`,
-    });
-
-    localStorage.setItem('nesa_staff_pending_id', staff.id);
-    localStorage.setItem('nesa_staff_pending_email', form.email);
-
-    window.location.href = createPageUrl('StaffVerifyOtp');
-    setLoading(false);
+    let accountCreated = false;
+    try {
+      const email = form.email.trim().toLowerCase();
+      const pattern = email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const existing = await base44.entities.Staff.filter({ email: { $regex: `(?i)^${pattern}$` } });
+      if (existing.length) { setError('This email is already registered. Sign in to receive a new code; no admin approval is needed.'); return; }
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      const staff = await base44.entities.Staff.create({
+        ...form, full_name: form.full_name.trim(), email,
+        department: form.department.trim(), phone: form.phone.trim(),
+        otp_code: otp, otp_expiry: expiry, is_verified: false,
+      });
+      accountCreated = true;
+      localStorage.setItem('nesa_staff_pending_id', staff.id);
+      localStorage.setItem('nesa_staff_pending_email', email);
+      await base44.integrations.Core.SendEmail({
+        to: email,
+        subject: 'NESA Staff Portal - Verification Code',
+        body: `Hello ${form.full_name.trim()},\n\nYour NESA Staff Portal verification code is: ${otp}\n\nThis code expires in 10 minutes. Confirm your email to enter your portal immediately; no administrator approval is required.`,
+      });
+      window.location.href = createPageUrl('StaffVerifyOtp');
+    } catch (e) {
+      setError(accountCreated ? 'Your account was created, but the email code could not be sent. Use Sign In to request another code.' : 'Could not register your staff account. Please try again.');
+    } finally { setLoading(false); }
   };
 
   return (
@@ -68,7 +64,7 @@ export default function RegisterStaff() {
               <BookOpen className="w-6 h-6 text-blue-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Staff Registration</h1>
-            <p className="text-gray-500 text-sm mt-1">For CU Economics department staff</p>
+            <p className="text-gray-500 text-sm mt-1">For CU Economics department staff. Verify your email and access your portal immediately, no admin approval required.</p>
           </div>
 
           {error && (

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Shield, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard, Trash2
+  LogOut, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, Search, ExternalLink, CreditCard, Trash2
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import CashReceiptPanel from '../components/executive/CashReceiptPanel';

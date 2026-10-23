@@ -18,28 +18,29 @@ export default function StaffSignIn() {
     e.preventDefault();
     setError('');
 
+    if (loading) return;
     setLoading(true);
-    const staffList = await base44.entities.Staff.filter({ email, is_verified: true });
-    if (!staffList.length) {
-      setError('No verified staff account found. Please register first.');
-      setLoading(false);
-      return;
-    }
-
-    const staff = staffList[0];
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await base44.entities.Staff.update(staff.id, { otp_code: otp, otp_expiry: expiry });
-    await base44.integrations.Core.SendEmail({
-      to: email,
-      subject: 'NESA Staff Portal - Sign In Code',
-      body: `Hello ${staff.full_name},\n\nYour NESA Staff Portal sign-in code is: ${otp}\n\nExpires in 10 minutes.`,
-    });
-
-    localStorage.setItem('nesa_staff_pending_id', staff.id);
-    window.location.href = createPageUrl('StaffVerifyOtp');
-    setLoading(false);
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const pattern = normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Email confirmation is self-service, never an administrator approval gate.
+      const staffList = await base44.entities.Staff.filter({ email: { $regex: `(?i)^${pattern}$` } });
+      if (!staffList.length) { setError('No staff account found. Please register first.'); return; }
+      const staff = staffList[0];
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      await base44.entities.Staff.update(staff.id, { otp_code: otp, otp_expiry: expiry });
+      localStorage.setItem('nesa_staff_pending_id', staff.id);
+      localStorage.setItem('nesa_staff_pending_email', normalizedEmail);
+      await base44.integrations.Core.SendEmail({
+        to: staff.email.trim(),
+        subject: 'NESA Staff Portal - Sign In Code',
+        body: `Hello ${staff.full_name},\n\nYour NESA Staff Portal sign-in code is: ${otp}\n\nExpires in 10 minutes. No administrator approval is required.`,
+      });
+      window.location.href = createPageUrl('StaffVerifyOtp');
+    } catch (e) {
+      setError('Could not send your sign-in code. Please try again.');
+    } finally { setLoading(false); }
   };
 
   return (
@@ -51,7 +52,7 @@ export default function StaffSignIn() {
             <BookOpen className="w-6 h-6 text-blue-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Staff Sign In</h1>
-          <p className="text-gray-500 text-sm mt-1">For CU Economics staff only</p>
+          <p className="text-gray-500 text-sm mt-1">For CU Economics staff only. Confirm your email to sign in, no admin approval needed.</p>
         </div>
 
         {error && (
