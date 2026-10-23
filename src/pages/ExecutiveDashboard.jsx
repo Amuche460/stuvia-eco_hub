@@ -22,6 +22,11 @@ import { checkAllBirthdays } from '@/lib/birthdayNotifier';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { jsPDF } from 'jspdf';
+import { academicSession } from '@/lib/duesCycle';
+import { sessionPaymentQuery, paymentFilters, allPaymentPages } from '@/lib/sessionRecords';
+import useFinancialRecords from '@/hooks/useFinancialRecords';
+import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
+import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
 
 // Only the General Secretary can post announcements
 const ANNOUNCEMENT_POSTS = ["General Secretary"];
@@ -41,7 +46,7 @@ const DUES_DOWNLOADER_POSTS = ['Financial Secretary', 'Assistant Financial Secre
 export default function ExecutiveDashboard() {
   const [exec, setExec] = useState(null);
   const [students, setStudents] = useState([]);
-  const [payments, setPayments] = useState([]);
+  const [session, setSession] = useState(academicSession);
   const [announcements, setAnnouncements] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +64,11 @@ export default function ExecutiveDashboard() {
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [proofUrl, setProofUrl] = useState('');
+  const canReadFinance = DUES_VIEWER_POSTS.includes(exec?.post);
+  const records = useFinancialRecords(session, { status: 'verified', type: filterType, level: filterLevel, search: searchQuery }, canReadFinance);
+  const duesRecords = useFinancialRecords(session, { status: 'verified', type: 'dues', level: filterLevel, search: searchQuery }, canReadFinance && filterType !== 'donation');
+  const payments = records.payments;
+  const duesPayments = filterType === 'donation' ? [] : duesRecords.payments;
 
   useEffect(() => {
     const eid = localStorage.getItem('nesa_executive_id');
@@ -99,16 +109,15 @@ export default function ExecutiveDashboard() {
 
     const canViewDues = DUES_VIEWER_POSTS.includes(execData.post);
 
-    const [anns, suggs, studs, pays] = await Promise.all([
+    const [anns, suggs, studs] = await Promise.all([
       base44.entities.NesaAnnouncement.list('-created_date'),
       base44.entities.Suggestion.list('-created_date'),
       canViewDues ? base44.entities.Student.filter({}, { sort: 'full_name', limit: 1000 }).then(p => p.items) : Promise.resolve([]),
-      canViewDues ? base44.entities.Payment.filter({ status: 'verified' }, { sort: '-created_date', limit: 1000 }).then(p => p.items) : Promise.resolve([]),
+
     ]);
 
     setExec(execData);
     setStudents(studs);
-    setPayments(pays);
     setAnnouncements(anns);
     setSuggestions(suggs);
     setLoading(false);
@@ -221,26 +230,13 @@ export default function ExecutiveDashboard() {
     }
     return true;
   });
-  const filteredPayments = payments.filter(p => {
-    if (filterLevel !== 'all' && p.student_level !== filterLevel) return false;
-    if (filterType !== 'all' && p.type !== filterType) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        (p.student_name || '').toLowerCase().includes(q) ||
-        (p.student_reg_no || '').toLowerCase().includes(q) ||
-        (p.receipt_number || '').toLowerCase().includes(q) ||
-        (p.student_matric_no || '').toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filteredPayments = payments;
 
   // Stats per level
   const levelStats = ['100','200','300','400'].map(lvl => ({
     level: lvl,
-    dues: payments.filter(p => p.type === 'dues' && p.student_level === lvl).length,
-    donations: payments.filter(p => p.type === 'donation' && p.student_level === lvl).length,
+    dues: records.summary.rows.find(r => r.status === 'verified' && r.type === 'dues' && r.student_level === lvl)?.count || 0,
+    donations: records.summary.rows.find(r => r.status === 'verified' && r.type === 'donation' && r.student_level === lvl)?.count || 0,
     students: students.filter(s => s.level === lvl).length,
   }));
 
@@ -253,11 +249,11 @@ export default function ExecutiveDashboard() {
   const canViewDuesPayers = DUES_VIEWER_POSTS.includes(exec?.post);
   const canDownloadDuesPayers = DUES_DOWNLOADER_POSTS.includes(exec?.post);
 
-  const handleDownloadDuesPDF = () => {
-    const duesPayers = filteredPayments.filter(p => p.type === 'dues');
+  const handleDownloadDuesPDF = async () => {
+    const duesPayers = filterType === 'donation' ? [] : await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: 'verified', type: 'dues', level: filterLevel, search: searchQuery })), { sort: '-created_date' });
     const doc = new jsPDF();
     doc.setFontSize(16);
-    doc.text('NESA — Students Who Paid Dues', 14, 20);
+    doc.text(`NESA — Dues Payers ${session}`, 14, 20);
     doc.setFontSize(10);
     doc.setTextColor(120);
     doc.text(`Generated ${format(new Date(), 'MMM d, yyyy')} • ${duesPayers.length} payer(s)`, 14, 27);
@@ -282,7 +278,7 @@ export default function ExecutiveDashboard() {
       row.forEach((cell, i) => doc.text(String(cell), 14 + i * 27, y));
       y += 6;
     });
-    doc.save('NESA_Dues_Payers.pdf');
+    doc.save(`NESA_Dues_Payers_${session.replace('/', '-')}.pdf`);
   };
 
   if (loading) {
@@ -320,6 +316,7 @@ export default function ExecutiveDashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        {canViewDuesPayers && <AcademicSessionFilter value={session} onChange={setSession} />}
         {/* Exec Card */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-purple-700 to-purple-800 rounded-2xl p-6 text-white">
@@ -406,6 +403,7 @@ export default function ExecutiveDashboard() {
               </Select>
             </div>
 
+            <FinancialRecordStatus records={records} />
             {/* Student Profiles Matching Search */}
             {filteredStudents.length > 0 && (
               <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
@@ -453,7 +451,7 @@ export default function ExecutiveDashboard() {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {filteredStudents.map(s => {
-                        const hasDues = payments.some(p => p.student_id === s.id && p.type === 'dues' && p.status === 'verified');
+                        const hasDues = records.summary.paidIds.includes(s.id);
                         return (
                           <tr key={s.id} className="hover:bg-gray-50">
                             {isFinExec && (
@@ -509,7 +507,7 @@ export default function ExecutiveDashboard() {
 
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                <p className="text-xs font-semibold text-gray-600">Payments ({filteredPayments.length})</p>
+                <p className="text-xs font-semibold text-gray-600">Payments ({records.total})</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -671,6 +669,7 @@ export default function ExecutiveDashboard() {
           {/* Dues & Payments — Financial Secretary & Assistant Financial Secretary */}
           {isFinExec && (
             <TabsContent value="payments" className="mt-4 space-y-4">
+              <FinancialRecordStatus records={duesRecords} />
               <div className="flex flex-wrap gap-2">
                 {canDownloadDuesPayers && (
                   <Button onClick={handleDownloadDuesPDF} className="bg-emerald-700 hover:bg-emerald-800 rounded-xl text-sm">
@@ -680,12 +679,12 @@ export default function ExecutiveDashboard() {
                 <CashReceiptPanel
                   students={students}
                   exec={exec}
-                  onIssued={(p) => setPayments(prev => [p, ...prev])}
+                  onIssued={() => records.refresh()}
                 />
               </div>
               <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden">
                 <div className="px-4 py-3 bg-emerald-50 border-b border-emerald-100">
-                  <p className="text-xs font-semibold text-emerald-700">Verified Dues Payments ({filteredPayments.filter(p => p.type === 'dues').length})</p>
+                  <p className="text-xs font-semibold text-emerald-700">Verified Dues Payments ({filterType === 'donation' ? 0 : duesRecords.total}) · {session}</p>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -702,9 +701,9 @@ export default function ExecutiveDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {filteredPayments.filter(p => p.type === 'dues').length === 0 ? (
+                      {duesPayments.length === 0 ? (
                         <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-sm">No dues payments yet</td></tr>
-                      ) : filteredPayments.filter(p => p.type === 'dues').map(p => (
+                      ) : duesPayments.map(p => (
                         <tr key={p.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 font-medium text-gray-900">{isFinExec ? <FinanceStudentMenu studentId={p.student_id} name={students.find(s => s.id === p.student_id)?.full_name || p.student_name} onUpdated={studentUpdated} onDeleted={studentDeleted} /> : p.student_name}</td>
                           <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.student_reg_no || '—'}</td>

@@ -3,7 +3,12 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import NesaLogo from '../components/NesaLogo';
 import StatCard from '../components/dashboard/StatCard';
-import AutoVerifyPanel from '../components/admin/AutoVerifyPanel';
+import AutoVerifyPanel from '@/components/admin/SessionAutoVerifyPanel';
+import { academicSession } from '@/lib/duesCycle';
+import { sessionPaymentQuery, paymentFilters, allPaymentPages } from '@/lib/sessionRecords';
+import useFinancialRecords from '@/hooks/useFinancialRecords';
+import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
+import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
 import AnnouncementBoard from '../components/admin/AnnouncementBoard';
 import PaymentTable from '../components/admin/PaymentTable';
 import SuggestionsList from '../components/admin/SuggestionsList';
@@ -32,26 +37,27 @@ const LEVEL_COLORS = {
 
 export default function AdminDashboard() {
   const { user, isLoadingAuth } = useAuth();
-  const [payments, setPayments] = useState([]);
+  const [session, setSession] = useState(academicSession);
   const [students, setStudents] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterLevel, setFilterLevel] = useState('all');
+  const records = useFinancialRecords(session, { status: filterStatus, type: filterType, level: filterLevel }, user?.role === 'admin');
+  const payments = records.payments;
 
   const loadData = async () => {
-    const [p, s, sug] = await Promise.all([
-      base44.entities.Payment.list('-created_date'),
+    const [s, sug] = await Promise.all([
       base44.entities.Student.list(),
       base44.entities.Suggestion.list('-created_date'),
     ]);
-    setPayments(p);
     setStudents(s);
     setSuggestions(sug);
     setLoading(false);
     sendBirthdayEmails(s);
-    sendDuesReminders(s, p);
+    const paidDues = await allPaymentPages(sessionPaymentQuery(academicSession(), { status: 'verified', type: 'dues' }), { fields: ['student_id', 'type', 'status'] });
+    sendDuesReminders(s, paidDues);
   };
 
   const sendBirthdayEmails = async (allStudents) => {
@@ -94,19 +100,19 @@ export default function AdminDashboard() {
 
   useEffect(() => { loadData(); }, []);
 
-  const verifiedPayments = payments.filter(p => p.status === 'verified');
-  const totalDues = verifiedPayments.filter(p => p.type === 'dues').reduce((s, p) => s + (p.amount || 0), 0);
-  const totalDonations = verifiedPayments.filter(p => p.type === 'donation').reduce((s, p) => s + (p.amount || 0), 0);
-  const pendingCount = payments.filter(p => p.status === 'pending').length;
+  const verifiedSummary = records.summary.rows.filter(r => r.status === 'verified');
+  const totalDues = verifiedSummary.filter(r => r.type === 'dues').reduce((sum, row) => sum + (row.sum_amount || 0), 0);
+  const totalDonations = verifiedSummary.filter(r => r.type === 'donation').reduce((sum, row) => sum + (row.sum_amount || 0), 0);
+  const pendingCount = records.summary.rows.filter(r => r.status === 'pending').reduce((sum, row) => sum + row.count, 0);
 
   // Level breakdown
   const levelBreakdown = ['100', '200', '300', '400'].map(level => {
-    const levelPayments = verifiedPayments.filter(p => p.student_level === level);
+    const levelPayments = verifiedSummary.filter(p => p.student_level === level);
     return {
       level: `${level}L`,
-      dues: levelPayments.filter(p => p.type === 'dues').reduce((s, p) => s + (p.amount || 0), 0),
-      donations: levelPayments.filter(p => p.type === 'donation').reduce((s, p) => s + (p.amount || 0), 0),
-      count: levelPayments.length,
+      dues: levelPayments.filter(p => p.type === 'dues').reduce((s, p) => s + (p.sum_amount || 0), 0),
+      donations: levelPayments.filter(p => p.type === 'donation').reduce((s, p) => s + (p.sum_amount || 0), 0),
+      count: levelPayments.reduce((s, p) => s + p.count, 0),
     };
   });
 
@@ -122,32 +128,14 @@ export default function AdminDashboard() {
   ].filter(d => d.value > 0);
 
   // Donation trends over time (monthly, last 6 months)
-  const donationTrends = (() => {
-    const verifiedDonations = payments.filter(p => p.type === 'donation' && p.status === 'verified');
-    const byMonth = {};
-    verifiedDonations.forEach(p => {
-      if (!p.created_date) return;
-      const d = new Date(p.created_date);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      byMonth[key] = (byMonth[key] || 0) + (p.amount || 0);
-    });
-    return Object.entries(byMonth)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-6)
-      .map(([key, amount]) => {
-        const [year, month] = key.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-        return { month: date.toLocaleString('default', { month: 'short' }), amount };
-      });
-  })();
+  const donationTrends = records.summary.months.slice().sort((a, b) => a.created_date.localeCompare(b.created_date)).slice(-6).map(row => ({
+    month: new Date(row.created_date).toLocaleString('en', { month: 'short', year: 'numeric', timeZone: 'Africa/Lagos' }),
+    amount: row.sum_amount || 0,
+  }));
 
   // Filter payments
-  const filteredPayments = payments.filter(p => {
-    if (filterType !== 'all' && p.type !== filterType) return false;
-    if (filterStatus !== 'all' && p.status !== filterStatus) return false;
-    if (filterLevel !== 'all' && p.student_level !== filterLevel) return false;
-    return true;
-  });
+  const filteredPayments = payments;
+  const refreshFinance = async () => { await records.refresh(); await loadData(); };
 
   // Redirect non-admins to home
   if (!isLoadingAuth && (!user || user.role !== 'admin')) {
@@ -196,6 +184,8 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        <AcademicSessionFilter value={session} onChange={setSession} />
+        <FinancialRecordStatus records={records} />
         {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -390,9 +380,10 @@ export default function AdminDashboard() {
               </Select>
 
               <button
-                onClick={() => {
-                  const headers = ['Student Name', 'Reg No', 'Matric No', 'Level', 'Type', 'Amount (₦)', 'Status', 'Receipt No', 'Date'];
-                  const rows = payments.map(p => [
+                onClick={async () => {
+                  const exportPayments = await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: filterStatus, type: filterType, level: filterLevel })), { sort: '-created_date' });
+                  const headers = ['Student Name', 'Reg No', 'Matric No', 'Level', 'Type', 'Amount (₦)', 'Status', 'Receipt No', 'Academic Session', 'Date'];
+                  const rows = exportPayments.map(p => [
                     p.student_name || '',
                     p.student_reg_no || '',
                     p.student_matric_no || '',
@@ -401,6 +392,7 @@ export default function AdminDashboard() {
                     p.amount || 0,
                     p.status || '',
                     p.receipt_number || '',
+                    session,
                     p.created_date ? new Date(p.created_date).toLocaleDateString() : '',
                   ]);
                   const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -408,7 +400,7 @@ export default function AdminDashboard() {
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `nesa-payments-${new Date().toISOString().slice(0, 10)}.csv`;
+                  a.download = `nesa-payments-${session.replace('/', '-')}.csv`;
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
@@ -419,7 +411,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <PaymentTable payments={filteredPayments} onRefresh={loadData} />
+            <PaymentTable payments={filteredPayments} onRefresh={refreshFinance} />
           </TabsContent>
 
           <TabsContent value="suggestions" className="mt-4">
@@ -428,7 +420,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="autoverify" className="mt-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <AutoVerifyPanel payments={payments} onRefresh={loadData} />
+              <AutoVerifyPanel key={session} session={session} onRefresh={refreshFinance} />
             </div>
           </TabsContent>
 
@@ -440,7 +432,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="notify" className="mt-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <NotifyUnpaidPanel students={students} payments={payments} />
+              <NotifyUnpaidPanel key={session} students={students} paidIds={records.summary.paidIds} session={session} loading={records.loading} />
             </div>
           </TabsContent>
         </Tabs>

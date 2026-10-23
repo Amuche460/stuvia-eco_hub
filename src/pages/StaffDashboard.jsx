@@ -10,16 +10,21 @@ import { Badge } from '@/components/ui/badge';
 import { LogOut, BookOpen, Users, Calendar, Bell, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { academicSession } from '@/lib/duesCycle';
+import useFinancialRecords from '@/hooks/useFinancialRecords';
+import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
+import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
 
 export default function StaffDashboard() {
   const [staff, setStaff] = useState(null);
   const [students, setStudents] = useState([]);
-  const [payments, setPayments] = useState([]);
+  const [session, setSession] = useState(academicSession);
   const [notifications, setNotifications] = useState([]);
   const [events, setEvents] = useState([]);
   const [filterLevel, setFilterLevel] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [loading, setLoading] = useState(true);
+  const records = useFinancialRecords(session, { status: 'verified', level: filterLevel, type: filterType }, Boolean(staff));
 
   useEffect(() => {
     const sid = localStorage.getItem('nesa_staff_id');
@@ -28,17 +33,16 @@ export default function StaffDashboard() {
   }, []);
 
   const loadAll = async (sid) => {
-    const [staffList, studs, pays, notifs, evts] = await Promise.all([
+    const [staffList, studs, notifs, evts] = await Promise.all([
       base44.entities.Staff.filter({ id: sid }),
       base44.entities.Student.list('full_name'),
-      base44.entities.Payment.filter({ status: 'verified' }, '-created_date'),
+
       base44.entities.NesaNotification.list('-created_date', 20),
       base44.entities.NesaEvent.list('event_date'),
     ]);
     if (!staffList.length) { window.location.href = createPageUrl('StaffSignIn'); return; }
     setStaff(staffList[0]);
     setStudents(studs);
-    setPayments(pays);
     setNotifications(notifs);
     setEvents(evts.filter(e => new Date(e.event_date) >= new Date()));
     setLoading(false);
@@ -52,15 +56,11 @@ export default function StaffDashboard() {
   const levelStats = ['100','200','300','400'].map(lvl => ({
     level: lvl,
     total: students.filter(s => s.level === lvl).length,
-    dues: payments.filter(p => p.type === 'dues' && p.student_level === lvl).length,
-    donations: payments.filter(p => p.type === 'donation' && p.student_level === lvl).length,
+    dues: records.summary.rows.find(r => r.status === 'verified' && r.type === 'dues' && r.student_level === lvl)?.count || 0,
+    donations: records.summary.rows.find(r => r.status === 'verified' && r.type === 'donation' && r.student_level === lvl)?.count || 0,
   }));
 
-  const filteredPayments = payments.filter(p => {
-    if (filterLevel !== 'all' && p.student_level !== filterLevel) return false;
-    if (filterType !== 'all' && p.type !== filterType) return false;
-    return true;
-  });
+  const filteredPayments = records.payments;
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-blue-50">
@@ -83,6 +83,7 @@ export default function StaffDashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <AcademicSessionFilter value={session} onChange={setSession} />
         {/* Staff Card */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-blue-700 to-blue-800 rounded-2xl p-6 text-white">
@@ -115,6 +116,7 @@ export default function StaffDashboard() {
 
           {/* Student Database */}
           <TabsContent value="database" className="mt-4 space-y-4">
+            <FinancialRecordStatus records={records} />
             <div className="flex gap-2">
               <Select value={filterLevel} onValueChange={setFilterLevel}>
                 <SelectTrigger className="w-28 rounded-xl border-gray-200 text-sm"><SelectValue /></SelectTrigger>
