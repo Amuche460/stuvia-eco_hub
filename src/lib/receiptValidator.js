@@ -1,7 +1,11 @@
 import { base44 } from '@/api/base44Client';
 
 const NESA_ACCOUNT_NUMBER = '0520003964';
-const NESA_BANK_KEYWORD = 'covenant';
+// Accepted short forms of the destination bank. Matching is done on a
+// normalized string (letters and digits only) so that "Covenant Microfinance
+// Bank", "Covenant MFB", "CMFB" and a truncated "Coven Microfinance Bank"
+// all resolve to the same bank instead of failing a valid receipt.
+const NESA_BANK_ALIASES = ['coven', 'cmfb'];
 const MIN_DUES = 6000;
 const MIN_DONATION = 100;
 const DATE_WINDOW_DAYS = 60;
@@ -18,7 +22,7 @@ const DATE_WINDOW_DAYS = 60;
 export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
   const response = await base44.integrations.Core.InvokeLLM({
     model: 'gpt_5_mini',
-    prompt: `Extract these fields from this payment document as JSON: amount (number, Naira), date (YYYY-MM-DD), description, bank_name (destination bank — null if this is a hand-written cash paper), account_number (destination account — null if hand-written cash paper), account_name (beneficiary name), sender_name (person who paid). Also detect has_fs_approval (boolean — true if the document contains "approved by the Financial Secretary" or similar wording approving this payment by a financial secretary). Use null for any unreadable field. Return only JSON.`,
+    prompt: `Extract these fields from this payment document as JSON: amount (number, Naira), date (YYYY-MM-DD), description, bank_name (destination bank — copy the bank's name in full, exactly as printed, never abbreviate, shorten or truncate it; null if this is a hand-written cash paper), account_number (destination account — null if hand-written cash paper), account_name (beneficiary name), sender_name (person who paid). Also detect has_fs_approval (boolean — true if the document contains "approved by the Financial Secretary" or similar wording approving this payment by a financial secretary). Use null for any unreadable field. Return only JSON.`,
     file_urls: [fileUrl],
     response_json_schema: {
       type: 'object',
@@ -89,11 +93,16 @@ export async function validateReceipt(fileUrl, student, paymentType = 'dues') {
       'Paper receipts stamped or signed by the Financial Secretary are no longer accepted. Please pay by bank transfer to the NESA account and upload that receipt.'
     );
   }
-  const bank = (data.bank_name || '').toLowerCase();
-  const acct = (data.account_number || '').replace(/\s/g, '');
-  if (!bank.includes(NESA_BANK_KEYWORD)) {
+  const bank = (data.bank_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const acct = (data.account_number || '').replace(/\D/g, '');
+  const isNesaBank = NESA_BANK_ALIASES.some(alias => bank.includes(alias));
+  // The destination account is the definitive proof of payment, so a receipt
+  // that credits the NESA account is accepted even when the printed bank name
+  // was read incompletely.
+  const isNesaAccount = acct === NESA_ACCOUNT_NUMBER;
+  if (!isNesaBank && !isNesaAccount) {
     errors.push(
-      `Payment must be to Covenant Microfinance Bank. Detected bank: "${data.bank_name || 'not found'}".`
+      `Payment must be to Covenant Microfinance Bank (account ${NESA_ACCOUNT_NUMBER}). The receipt shows: "${data.bank_name || 'not found'}".`
     );
   }
   if (acct !== NESA_ACCOUNT_NUMBER) {
