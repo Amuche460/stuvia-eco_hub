@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
-  LogOut, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, ExternalLink, CreditCard, Trash2
+  LogOut, Users, Calendar, Megaphone, FileText, Bell, Loader2, Plus, X, CheckCircle, UserCheck, ExternalLink, CreditCard, Trash2, Heart
 } from 'lucide-react';
 import ApproveExecutivesPanel from '../components/executive/ApproveExecutivesPanel';
 import CashReceiptPanel from '../components/executive/CashReceiptPanel';
 import ProofDialog from '../components/executive/ProofDialog';
+import LoveFoundationDonationsPanel from '../components/executive/LoveFoundationDonationsPanel';
 import FinanceStudentMenu from '@/components/executive/FinanceStudentMenu';
 import { execSeesSuggestion } from '@/lib/suggestionTeams';
 import { checkAllExecutiveTenures } from '@/lib/tenureNotifier';
@@ -46,6 +47,9 @@ const DUES_VIEWER_POSTS = [
 // Executives who can download the dues-payer list as PDF
 const DUES_DOWNLOADER_POSTS = ['Financial Secretary', 'Assistant Financial Secretary'];
 
+// Welfare executives who can view Love Foundation donation records & receipts
+const WELFARE_POSTS = ['Welfare Director', 'Assistant Welfare Director'];
+
 export default function ExecutiveDashboard() {
   const [exec, setExec] = useState(null);
   const [students, setStudents] = useState([]);
@@ -68,10 +72,13 @@ export default function ExecutiveDashboard() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [proofUrl, setProofUrl] = useState('');
   const canReadFinance = DUES_VIEWER_POSTS.includes(exec?.post);
+  const isWelfareExec = WELFARE_POSTS.includes(exec?.post);
+  const canReadDonations = isWelfareExec || exec?.post === 'Financial Secretary' || exec?.post === 'Assistant Financial Secretary';
   const searchFilters = dashboardSearch(searchQuery, filterLevel);
   const studentRecords = useDashboardStudents(searchFilters.level, searchFilters.search, canReadFinance);
   const records = useFinancialRecords(session, { status: 'verified', type: filterType, ...searchFilters, sort: 'student_name' }, canReadFinance);
   const duesRecords = useFinancialRecords(session, { status: 'verified', type: 'dues', ...searchFilters, sort: 'student_name' }, canReadFinance && filterType !== 'donation');
+  const donationRecords = useFinancialRecords(session, { status: 'verified', type: 'donation', ...searchFilters, sort: 'student_name' }, canReadDonations);
   const searchFields = {
     search: searchQuery, level: filterLevel,
     onSearch: value => { setSearchQuery(value); if (levelFromSearch(value)) setFilterLevel('all'); },
@@ -247,6 +254,7 @@ export default function ExecutiveDashboard() {
 
   const canViewDuesPayers = DUES_VIEWER_POSTS.includes(exec?.post);
   const canDownloadDuesPayers = DUES_DOWNLOADER_POSTS.includes(exec?.post);
+  const canViewDonations = isWelfareExec || isFinExec;
 
   const handleDownloadDuesPDF = async () => {
     const duesPayers = filterType === 'donation' ? [] : await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: 'verified', type: 'dues', ...searchFilters })), { sort: 'student_name' });
@@ -315,7 +323,7 @@ export default function ExecutiveDashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {canViewDuesPayers && <AcademicSessionFilter value={session} onChange={setSession} />}
+        {(canViewDuesPayers || canViewDonations) && <AcademicSessionFilter value={session} onChange={setSession} />}
         {/* Exec Card */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-purple-700 to-purple-800 rounded-2xl p-6 text-white">
@@ -350,7 +358,7 @@ export default function ExecutiveDashboard() {
           </div>
         )}
 
-        <Tabs defaultValue={canViewDuesPayers ? 'database' : 'announcements'}>
+        <Tabs defaultValue={canViewDuesPayers ? 'database' : isWelfareExec ? 'donations' : 'announcements'}>
           <TabsList className="bg-gray-100 rounded-xl p-1 flex-wrap gap-1">
             {canViewDuesPayers && (
               <TabsTrigger value="database" className="rounded-lg text-xs"><Users className="w-3.5 h-3.5 mr-1" /> Student DB</TabsTrigger>
@@ -363,6 +371,11 @@ export default function ExecutiveDashboard() {
             {isFinExec && (
               <TabsTrigger value="payments" className="rounded-lg text-xs bg-emerald-50 data-[state=active]:bg-emerald-100 text-emerald-700">
                 <CreditCard className="w-3.5 h-3.5 mr-1" /> Dues & Payments
+              </TabsTrigger>
+            )}
+            {canViewDonations && (
+              <TabsTrigger value="donations" className="rounded-lg text-xs bg-rose-50 data-[state=active]:bg-rose-100 text-rose-700">
+                <Heart className="w-3.5 h-3.5 mr-1" /> Love Foundation
               </TabsTrigger>
             )}
             {isSuperExec && (
@@ -714,6 +727,18 @@ export default function ExecutiveDashboard() {
                   </table>
                 </div>
               </div>
+            </TabsContent>
+          )}
+
+          {/* Love Foundation Donations — Welfare Director, Assistant Welfare Director, Financial Secretary & Assistant Financial Secretary */}
+          {canViewDonations && (
+            <TabsContent value="donations" className="mt-4">
+              <LoveFoundationDonationsPanel
+                session={session}
+                donationRecords={donationRecords}
+                searchFields={searchFields}
+                onViewReceipt={setProofUrl}
+              />
             </TabsContent>
           )}
 
