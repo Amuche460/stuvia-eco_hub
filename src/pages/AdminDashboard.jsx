@@ -5,7 +5,7 @@ import NesaLogo from '../components/NesaLogo';
 import StatCard from '../components/dashboard/StatCard';
 import AutoVerifyPanel from '@/components/admin/SessionAutoVerifyPanel';
 import { academicSession } from '@/lib/duesCycle';
-import { sessionPaymentQuery, paymentFilters, allPaymentPages } from '@/lib/sessionRecords';
+import { sessionPaymentQuery, allPaymentPages } from '@/lib/sessionRecords';
 import useFinancialRecords from '@/hooks/useFinancialRecords';
 import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
 import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
@@ -13,6 +13,7 @@ import AnnouncementBoard from '../components/admin/AnnouncementBoard';
 import PaymentTable from '../components/admin/PaymentTable';
 import SuggestionsList from '../components/admin/SuggestionsList';
 import NotifyUnpaidPanel from '../components/admin/NotifyUnpaidPanel';
+import ExportPaymentsButton from '../components/admin/ExportPaymentsButton';
 import { sendDuesReminders } from '@/lib/duesReminderNotifier';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -184,7 +185,10 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <AcademicSessionFilter value={session} onChange={setSession} />
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <AcademicSessionFilter value={session} onChange={setSession} />
+          <ExportPaymentsButton session={session} />
+        </div>
         <FinancialRecordStatus records={records} />
         {/* Stats */}
         <motion.div
@@ -379,36 +383,12 @@ export default function AdminDashboard() {
                 </SelectContent>
               </Select>
 
-              <button
-                onClick={async () => {
-                  const exportPayments = await allPaymentPages(sessionPaymentQuery(session, paymentFilters({ status: filterStatus, type: filterType, level: filterLevel })), { sort: '-created_date' });
-                  const headers = ['Student Name', 'Reg No', 'Matric No', 'Level', 'Type', 'Amount (₦)', 'Status', 'Receipt No', 'Academic Session', 'Date'];
-                  const rows = exportPayments.map(p => [
-                    p.student_name || '',
-                    p.student_reg_no || '',
-                    p.student_matric_no || '',
-                    p.student_level ? `${p.student_level}L` : '',
-                    p.type || '',
-                    p.amount || 0,
-                    p.status || '',
-                    p.receipt_number || '',
-                    session,
-                    p.created_date ? new Date(p.created_date).toLocaleDateString() : '',
-                  ]);
-                  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-                  const blob = new Blob([csv], { type: 'text/csv' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `nesa-payments-${session.replace('/', '-')}.csv`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                className="ml-auto flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                Download CSV
-              </button>
+              <div className="ml-auto">
+                <ExportPaymentsButton
+                  session={session}
+                  filters={{ status: filterStatus, type: filterType, level: filterLevel }}
+                />
+              </div>
             </div>
 
             <PaymentTable payments={filteredPayments} onRefresh={refreshFinance} />
