@@ -1,0 +1,73 @@
+{
+  "name": "InstitutionRequest",
+  "type": "object",
+  "properties": {
+    "institution_name": {
+      "type": "string",
+      "description": "Name of the requested university or institution"
+    },
+    "website": {
+      "type": "string",
+      "description": "Institution website URL"
+    },
+    "requester_role": {
+      "type": "string",
+      "description": "Role of the person requesting (e.g. Student, Faculty, Staff, Executive)"
+    },
+    "requester_email": {
+      "type": "string",
+      "description": "Email of the person who submitted the request"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Name of the person who submitted the request"
+    },
+    "additional_notes": {
+      "type": "string",
+      "description": "Additional information provided with the request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "added"
+      ],
+      "enumColors": [
+        "yellow",
+        "blue",
+        "green"
+      ],
+      "default": "pending",
+      "description": "Review status of the institution request"
+    }
+  },
+  "required": [
+    "institution_name"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

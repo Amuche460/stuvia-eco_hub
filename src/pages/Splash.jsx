@@ -46,8 +46,8 @@ export default function Splash() {
           <h1 className="text-4xl font-bold tracking-tight" style={{ color: '#f0c040' }}>
             STUVIA
           </h1>
-          <p className="text-lg mt-2 font-medium italic" style={{ color: '#a8d5ce' }}>
-            eco_hub
+          <p className="text-sm mt-2 font-medium tracking-wide uppercase" style={{ color: '#a8d5ce' }}>
+            Campus & Departmental Portal
           </p>
         </motion.div>
       </motion.div>
