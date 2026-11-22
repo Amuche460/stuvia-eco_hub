@@ -452,7 +452,7 @@ export default function ExecutiveDashboard() {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {filteredStudents.map(s => {
-                        const hasDues = records.summary.paidIds.includes(s.id);
+                        const hasDues = records.hasPaidDues(s);
                         return (
                           <tr key={s.id} className="hover:bg-gray-50">
                             {isFinExec && (

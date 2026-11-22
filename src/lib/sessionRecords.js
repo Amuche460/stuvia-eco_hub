@@ -12,12 +12,20 @@ export function sessionPaymentQuery(session, extra = {}) {
   ] }] };
 }
 
-export function paymentFilters({ status, type, level, search, studentId } = {}) {
+// A student's payments: matched by record id, or by reg number so receipts survive
+// a deleted and re-created student record.
+export function studentScope(studentId, regNo) {
+  if (!studentId) return {};
+  const reg = regNo?.trim();
+  return reg ? { $or: [{ student_id: studentId }, { student_reg_no: reg }] } : { student_id: studentId };
+}
+
+export function paymentFilters({ status, type, level, search, studentId, regNo } = {}) {
   const query = {};
   if (status && status !== 'all') query.status = status;
   if (type && type !== 'all') query.type = type;
   if (level && level !== 'all') query.student_level = level;
-  if (studentId) query.student_id = studentId;
+  if (studentId) query.$and = [studentScope(studentId, regNo)];
   if (search?.trim()) {
     const pattern = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     query.$or = ['student_name', 'student_reg_no', 'student_matric_no', 'receipt_number'].map(field => ({ [field]: { $regex: `(?i)${pattern}` } }));

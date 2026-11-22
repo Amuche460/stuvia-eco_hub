@@ -4,16 +4,13 @@ import { Bell, Mail, Users, CheckCircle, Loader2, AlertTriangle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function NotifyUnpaidPanel({ students, paidIds = [], session, loading }) {
+export default function NotifyUnpaidPanel({ students, isPaid, session, loading }) {
   const [level, setLevel] = useState('all');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
 
-  // Determine unpaid students
-  const paidStudentIds = new Set(paidIds);
-
   const unpaidStudents = students.filter(s => {
-    const unpaid = !paidStudentIds.has(s.id);
+    const unpaid = !isPaid(s);
     const matchLevel = level === 'all' || s.level === level;
     return unpaid && matchLevel;
   });

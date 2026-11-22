@@ -1,11 +1,11 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { sessionPaymentQuery, paymentFilters, allPaymentPages } from '@/lib/sessionRecords';
+import { sessionPaymentQuery, paymentFilters, allPaymentPages, studentScope } from '@/lib/sessionRecords';
 
 export default function useFinancialRecords(session, filters = {}, enabled = true) {
   const client = useQueryClient();
   const query = sessionPaymentQuery(session, paymentFilters(filters));
-  const scope = filters.studentId ? { student_id: filters.studentId } : {};
+  const scope = studentScope(filters.studentId, filters.regNo);
   const base = sessionPaymentQuery(session, scope);
   const list = useInfiniteQuery({
     queryKey: ['session-payments', session, filters], enabled,
@@ -18,18 +18,20 @@ export default function useFinancialRecords(session, filters = {}, enabled = tru
     queryKey: ['session-payment-summary', session, scope], enabled,
     queryFn: async () => {
       const verifiedDues = sessionPaymentQuery(session, { ...scope, status: 'verified', type: 'dues' });
-      const [totals, months, paidIds] = await Promise.all([
+      const [totals, months, paidIds, paidRegs] = await Promise.all([
         base44.entities.Payment.aggregate({ query: base, groupBy: ['status', 'type', 'student_level'], sum: ['amount'] }),
         base44.entities.Payment.aggregate({ query: sessionPaymentQuery(session, { ...scope, status: 'verified', type: 'donation' }), dateBucket: { field: 'created_date', unit: 'month' }, sum: ['amount'] }),
         allPaymentPages(verifiedDues, { distinct: 'student_id' }),
+        allPaymentPages(verifiedDues, { distinct: 'student_reg_no' }),
       ]);
-      return { rows: totals.rows, months: months.rows, paidIds };
+      return { rows: totals.rows, months: months.rows, paidIds, paidRegs: paidRegs.map(r => (r || '').trim()).filter(Boolean) };
     },
   });
   return {
     payments: list.data?.pages.flatMap(page => page.items) || [],
     total: count.data || 0,
-    summary: summary.data || { rows: [], months: [], paidIds: [] },
+    summary: summary.data || { rows: [], months: [], paidIds: [], paidRegs: [] },
+    hasPaidDues: (student) => Boolean(student) && ((summary.data?.paidIds || []).includes(student.id) || (summary.data?.paidRegs || []).includes((student.reg_no || '').trim())),
     loading: enabled && (list.isPending || count.isPending || summary.isPending),
     error: list.error || count.error || summary.error,
     hasMore: list.hasNextPage, loadingMore: list.isFetchingNextPage,

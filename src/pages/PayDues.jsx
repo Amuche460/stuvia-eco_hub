@@ -11,7 +11,7 @@ import { validateReceipt } from '../lib/receiptValidator';
 import { sendReceiptEmail } from '../lib/sendReceiptEmail';
 import ReceiptCard from '../components/receipt/ReceiptCard';
 import { checkStudentLevel } from '../lib/studentLevel';
-import { academicSession, findDuesReceipt, reserveDuesReceipt, releaseDuesReceipt, duplicateDuesMessage } from '@/lib/duesCycle';
+import { findDuesReceipt, reserveDuesReceipt, releaseDuesReceipt, duplicateDuesMessage } from '@/lib/duesCycle';
 
 const NESA_ACCOUNT = '0520003964';
 const NESA_BANK = 'Covenant Microfinance Bank (CMFB)';
@@ -39,8 +39,8 @@ export default function PayDues() {
           studentData.dues_paid = false;
         }
         setStudent(studentData);
-        const existing = await findDuesReceipt(studentData);
-        setAlreadyPaid(Boolean(existing) || (studentData.dues_receipt_sessions || []).includes(academicSession()));
+        // Only a real saved receipt blocks a new upload; leftover reservations do not.
+        setAlreadyPaid(Boolean(await findDuesReceipt(studentData)));
       }
     });
   }, []);
@@ -75,8 +75,8 @@ export default function PayDues() {
     let claim;
     let recorded = false;
     try {
-      // Reserve this student's session before uploading or analyzing anything.
-      claim = await reserveDuesReceipt(student);
+      // Fail fast if a receipt is already saved for this session.
+      if (await findDuesReceipt(student)) throw new Error(duplicateDuesMessage());
       // 1. Upload the receipt
       let file_url;
       try {
@@ -109,7 +109,9 @@ export default function PayDues() {
         return;
       }
 
-      // 3. Create verified payment record
+      // 3. Reserve the session only now (just before saving) so a dropped upload or
+      // analysis never leaves the student locked out, then create the verified record.
+      claim = await reserveDuesReceipt(student);
       const receiptNumber = `NESA-${Date.now().toString().slice(-8)}`;
       const created = await base44.entities.Payment.create({
         student_id: student.id,

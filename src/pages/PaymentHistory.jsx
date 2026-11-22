@@ -10,6 +10,8 @@ import { ArrowLeft, CreditCard, Heart, Clock, CheckCircle, XCircle, Receipt, Che
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { academicSession } from '@/lib/duesCycle';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import useFinancialRecords from '@/hooks/useFinancialRecords';
 import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
 import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
@@ -98,12 +100,14 @@ export default function PaymentHistory() {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [filter, setFilter] = useState('all');
   const sid = localStorage.getItem('nesa_student_id');
+  const studentQuery = useQuery({ queryKey: ['history-student', sid], enabled: Boolean(sid), queryFn: () => base44.entities.Student.get(sid) });
   const records = useFinancialRecords(session, {
     studentId: sid,
+    regNo: studentQuery.data?.reg_no,
     type: ['dues', 'donation'].includes(filter) ? filter : 'all',
     status: ['pending', 'verified', 'rejected'].includes(filter) ? filter : 'all',
-  }, Boolean(sid));
-  const loading = records.loading;
+  }, Boolean(sid) && studentQuery.isFetched);
+  const loading = records.loading || studentQuery.isPending;
 
   useEffect(() => {
     if (!sid) window.location.href = createPageUrl('SignIn');

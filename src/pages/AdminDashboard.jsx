@@ -412,7 +412,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="notify" className="mt-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <NotifyUnpaidPanel key={session} students={students} paidIds={records.summary.paidIds} session={session} loading={records.loading} />
+              <NotifyUnpaidPanel key={session} students={students} isPaid={records.hasPaidDues} session={session} loading={records.loading} />
             </div>
           </TabsContent>
         </Tabs>

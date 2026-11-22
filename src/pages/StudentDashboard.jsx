@@ -18,6 +18,8 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { checkStudentLevel } from '../lib/studentLevel';
 import { checkStudentBirthday } from '../lib/birthdayNotifier';
+import { studentScope } from '@/lib/sessionRecords';
+import { academicSession } from '@/lib/duesCycle';
 
 export default function StudentDashboard() {
   const [student, setStudent] = useState(null);
@@ -51,7 +53,7 @@ export default function StudentDashboard() {
     setStudent(s);
     checkStudentBirthday(s);
 
-    const allPayments = await base44.entities.Payment.filter({ student_id: sid }, '-created_date');
+    const allPayments = await base44.entities.Payment.filter(studentScope(s.id, s.reg_no), '-created_date');
     setPayments(allPayments);
     setLoading(false);
   };
@@ -59,11 +61,10 @@ export default function StudentDashboard() {
   const handleRefresh = useCallback(async () => {
     const sid = localStorage.getItem('nesa_student_id');
     if (!sid) return;
-    const [students, allPayments] = await Promise.all([
-      base44.entities.Student.filter({ id: sid }),
-      base44.entities.Payment.filter({ student_id: sid }, '-created_date'),
-    ]);
-    if (students.length > 0) setStudent(students[0]);
+    const students = await base44.entities.Student.filter({ id: sid });
+    if (!students.length) return;
+    const allPayments = await base44.entities.Payment.filter(studentScope(sid, students[0].reg_no), '-created_date');
+    setStudent(students[0]);
     setPayments(allPayments);
   }, []);
 
@@ -80,8 +81,10 @@ export default function StudentDashboard() {
     );
   }
 
-  const duesPayment = payments.find(p => p.type === 'dues' && p.status === 'verified');
-  const pendingDues = payments.find(p => p.type === 'dues' && p.status === 'pending');
+  const currentSession = academicSession();
+  const isCurrentSession = p => (p.academic_session || academicSession(p.created_date)) === currentSession;
+  const duesPayment = payments.find(p => p.type === 'dues' && p.status === 'verified' && isCurrentSession(p));
+  const pendingDues = payments.find(p => p.type === 'dues' && p.status === 'pending' && isCurrentSession(p));
   const totalDonated = payments
     .filter(p => p.type === 'donation' && p.status === 'verified')
     .reduce((sum, p) => sum + (p.amount || 0), 0);
