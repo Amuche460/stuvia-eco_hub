@@ -13,8 +13,9 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import verifyDuesPayment from '@/lib/verifyDuesPayment';
+import ProofDialog from '@/components/executive/ProofDialog';
 import {
-  CheckCircle, XCircle, Clock, Eye, Search, ExternalLink, ImageIcon
+  CheckCircle, XCircle, Clock, Search, ImageIcon
 } from 'lucide-react';
 
 const statusColors = {
@@ -216,21 +217,7 @@ export default function PaymentTable({ payments, onRefresh }) {
       </div>
 
       {/* Proof Viewer */}
-      <Dialog open={!!viewProof} onOpenChange={() => setViewProof(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Proof of Payment</DialogTitle>
-          </DialogHeader>
-          {viewProof && (
-            <div className="space-y-3">
-              <img src={viewProof} alt="Proof" className="w-full rounded-xl border" />
-              <a href={viewProof} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-emerald-600 hover:underline">
-                <ExternalLink className="w-3 h-3" /> Open in new tab
-              </a>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ProofDialog url={viewProof} onClose={() => setViewProof(null)} />
 
       {/* Reject Dialog */}
       <Dialog open={!!rejectDialog} onOpenChange={() => setRejectDialog(null)}>

@@ -13,6 +13,7 @@ import { academicSession } from '@/lib/duesCycle';
 import useFinancialRecords from '@/hooks/useFinancialRecords';
 import AcademicSessionFilter from '@/components/payments/AcademicSessionFilter';
 import FinancialRecordStatus from '@/components/payments/FinancialRecordStatus';
+import ProofDialog from '@/components/executive/ProofDialog';
 
 export default function StaffDashboard() {
   const [staff, setStaff] = useState(null);
@@ -23,6 +24,7 @@ export default function StaffDashboard() {
   const [filterLevel, setFilterLevel] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [proofUrl, setProofUrl] = useState('');
   const records = useFinancialRecords(session, { status: 'verified', level: filterLevel, type: filterType }, Boolean(staff));
 
   useEffect(() => {
@@ -167,9 +169,9 @@ export default function StaffDashboard() {
                         <td className="px-4 py-3 font-mono text-xs text-gray-600">{p.receipt_number || '—'}</td>
                         <td className="px-4 py-3">
                           {p.proof_url ? (
-                            <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-700 font-medium hover:underline inline-flex items-center gap-1">
+                            <button type="button" onClick={() => setProofUrl(p.proof_url)} className="text-xs text-blue-700 font-medium hover:underline inline-flex items-center gap-1">
                               View <ExternalLink className="w-3 h-3" />
-                            </a>
+                            </button>
                           ) : '—'}
                         </td>
                       </tr>
@@ -221,6 +223,7 @@ export default function StaffDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+      <ProofDialog url={proofUrl} onClose={() => setProofUrl('')} />
     </div>
   );
 }

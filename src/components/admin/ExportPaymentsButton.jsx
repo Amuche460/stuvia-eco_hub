@@ -29,7 +29,7 @@ export default function ExportPaymentsButton({ session, filters = {} }) {
         'Verified Date',
         'Academic Session',
         'Payment Date',
-        'Receipt URL',
+        'Receipt Image',
       ];
       const rows = exportPayments.map(p => [
         p.student_name || '',
@@ -45,7 +45,7 @@ export default function ExportPaymentsButton({ session, filters = {} }) {
         p.verified_at ? new Date(p.verified_at).toISOString().split('T')[0] : '',
         p.academic_session || session,
         p.created_date ? new Date(p.created_date).toISOString().split('T')[0] : '',
-        p.proof_url || '',
+        p.proof_url ? 'Attached (view in portal)' : '',
       ]);
       const csv = '\uFEFF' + [headers, ...rows]
         .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))

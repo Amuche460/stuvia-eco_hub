@@ -72,8 +72,8 @@ export default function Donate() {
       // 1. Upload the receipt
       let file_url;
       try {
-        const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
-        file_url = uploadRes.file_url;
+        const uploadRes = await base44.integrations.Core.UploadPrivateFile({ file });
+        file_url = uploadRes.file_uri;
       } catch (uploadErr) {
         setErrors(['Could not upload the receipt image. Please check your connection and try again.']);
         toast({ title: 'Upload failed. Please try again.', variant: 'destructive' });
