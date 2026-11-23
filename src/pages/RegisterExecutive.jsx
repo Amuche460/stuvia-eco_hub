@@ -53,13 +53,18 @@ export default function RegisterExecutive() {
       setError('Please set your term end date.');
       return;
     }
+    const today = new Date().toISOString().slice(0, 10);
+    if (form.term_end_date <= today) {
+      setError('Your term end date must be a future date (check the year).');
+      return;
+    }
 
     setLoading(true);
 
-    // Check if post is already taken
-    const existing = await base44.entities.Executive.filter({ post: form.post, is_active: true, is_approved: true });
+    // Check if post is already taken by someone whose term is still running
+    const existing = await base44.entities.Executive.filter({ post: form.post, is_active: true, is_approved: true, term_end_date: { $gt: today } });
     if (existing.length > 0) {
-      setError(`The post of "${form.post}" is already occupied by an active executive.`);
+      setError(`The post of "${form.post}" is already held by ${existing[0].full_name}. If this is wrong, contact the admin.`);
       setLoading(false);
       return;
     }
